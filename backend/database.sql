@@ -1,30 +1,30 @@
-DROP DATABASE IF EXISTS sweetlog;
+# DROP DATABASE IF EXISTS sweetlog;
 CREATE DATABASE sweetlog;
 USE sweetlog;
 
 CREATE TABLE tbl_funcionarios (
     numero_matricula INT PRIMARY KEY,
-    senha_funcionario VARCHAR(20) NOT NULL,
-    nome_funcionario VARCHAR(100) NOT NULL,
-    telefone_funcionario VARCHAR(15),
+    senha VARCHAR(20) NOT NULL,
+    nome VARCHAR(100) NOT NULL,
+    telefone VARCHAR(15),
     cargo VARCHAR(50) NOT NULL
 );
 
 CREATE TABLE tbl_produtos (
     id_produto INT PRIMARY KEY,
-    nome_produto VARCHAR(100) NOT NULL,
+    nome VARCHAR(100) NOT NULL,
     marca VARCHAR(100) NOT NULL,
     necessidade_refrigeramento BOOLEAN NOT NULL,
     cnpj_fabricante VARCHAR(14) NOT NULL,
     tamanho VARCHAR(20),
     descricao VARCHAR(200),
-    imagem_produto BLOB
+    imagem BLOB
 );
 
 CREATE TABLE tbl_estoques (
     id_estoque INT AUTO_INCREMENT PRIMARY KEY,
     lote_producao VARCHAR(100) NOT NULL,
-    quantidade_estoque INT NOT NULL,
+    quantidade INT NOT NULL,
     inspecionado BOOLEAN NOT NULL,
     data_validade DATE NOT NULL,
     nota_fiscal VARCHAR(50) NOT NULL,
@@ -54,7 +54,7 @@ CREATE TABLE tbl_vendas_itens (
 
 CREATE TABLE tbl_alertas (
     id_alerta INT AUTO_INCREMENT PRIMARY KEY,
-    tipo_alerta VARCHAR(50) NOT NULL,
+    tipo VARCHAR(50) NOT NULL,
     data_alerta DATE NOT NULL,
     id_produto INT NOT NULL,
     id_estoque INT,
@@ -67,7 +67,7 @@ CREATE TABLE tbl_alertas (
 CREATE TABLE tbl_log_movimentacoes (
     id_log_movimentacao INT AUTO_INCREMENT PRIMARY KEY,
     data_movimentacao DATE NOT NULL,
-    tipo_movimentacao VARCHAR(50),
+    tipo VARCHAR(50),
     numero_matricula INT NOT NULL,
     id_estoque INT,
     id_venda INT,
@@ -87,7 +87,7 @@ FOR EACH ROW
 BEGIN
     INSERT INTO tbl_log_movimentacoes (
         data_movimentacao,
-        tipo_movimentacao,
+        tipo,
         id_estoque
     )
     VALUES (NOW(), 'Entrada', NEW.id_estoque);
@@ -110,3 +110,18 @@ BEGIN
 END$$
 
 DELIMITER ;
+
+INSERT INTO tbl_funcionarios (
+    numero_matricula,
+    senha,
+    nome,
+    telefone,
+    cargo
+)
+VALUES (
+    1001,
+    'senha123',
+    'Joao da Silva',
+    '11953898096',
+    'Estoquista'
+);
