@@ -11,14 +11,14 @@ CREATE TABLE tbl_funcionarios (
 );
 
 CREATE TABLE tbl_produtos (
-    id_produto INT PRIMARY KEY,
+    id_produto INT AUTO_INCREMENT PRIMARY KEY,
     nome VARCHAR(100) NOT NULL,
-    marca VARCHAR(100) NOT NULL,
-    necessidade_refrigeramento BOOLEAN NOT NULL,
+    necessidade_refrigeracao BOOLEAN NOT NULL,
     cnpj_fabricante VARCHAR(14) NOT NULL,
+    marca VARCHAR(100),
     tamanho VARCHAR(20),
     descricao VARCHAR(200),
-    imagem BLOB
+    imagem VARCHAR(255) DEFAULT NULL
 );
 
 CREATE TABLE tbl_estoques (

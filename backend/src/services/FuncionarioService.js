@@ -42,8 +42,9 @@ class FuncionarioService {
             throw { status: 400, mensagem: "Senha deve ter no mínimo 8 caracteres" }
         }
 
+        let numeros_telefone = null
         if (telefone) {
-            const numeros_telefone = telefone.replace(/\D/g, '')
+            numeros_telefone = telefone.replace(/\D/g, '')
             if (!/^\d{11}$/.test(numeros_telefone)) {
                 throw { status: 400, mensagem: 'Telefone inválido' }
             }
@@ -53,7 +54,7 @@ class FuncionarioService {
             numero_matricula: Number(numero_matricula),
             senha: senha.trim(),
             nome: nome.trim(),
-            telefone: telefone ? numeros_telefone.replace( /^(\d{2})(\d{5})(\d{4})$/,'($1) $2-$3') : null,
+            telefone: numeros_telefone,
             cargo
         }
 
@@ -79,8 +80,16 @@ class FuncionarioService {
         const atualizado = {}
         const { senha, nome, telefone, cargo } = funcionarioData
 
-        if (nome !== undefined) atualizado.nome = nome.trim()
+        if (nome !== undefined) {
+            if (nome === null || nome.trim() === '') {
+                throw { status: 400, mensagem: "Nome não pode ser vazio" }
+            }
+            atualizado.nome = nome.trim()
+        }
         if (senha !== undefined) {
+            if (senha === null || senha.trim() === '') {
+                throw { status: 400, mensagem: "Senha não pode ser vazia" }
+            }
             if (senha.trim().length < 8) {
                 throw { status: 400, mensagem: "Senha deve ter no mínimo 8 caracteres" }
             } atualizado.senha = senha.trim()
@@ -93,10 +102,15 @@ class FuncionarioService {
                 const numeros_telefone = telefone.replace(/\D/g, '')
                 if (!/^\d{11}$/.test(numeros_telefone)) {
                     throw { status: 400, mensagem: 'Telefone inválido' }
-                } atualizado.telefone = numeros_telefone.replace( /^(\d{2})(\d{5})(\d{4})$/,'($1) $2-$3')
+                } atualizado.telefone = numeros_telefone
             }
         }
-        if (cargo !== undefined) atualizado.cargo = cargo
+        if (cargo !== undefined) {
+            if (cargo === null || cargo.trim() === '') {
+                throw { status: 400, mensagem: "Cargo não pode ser vazio" }
+            }
+            atualizado.cargo = cargo
+        }
 
         if (Object.keys(atualizado).length == 0) {
             throw { status: 400, mensagem: "Nenhum dado a atualizar" }

@@ -1,7 +1,8 @@
 const express = require('express')
 const router = express.Router()
 
-const funcionarioService = require('./funcionarioRoutes')
+const funcionarioRoutes = require('./funcionarioRoutes')
+const produtoRoutes = require('./produtoRoutes')
 
 router.get('/', (req, res) => {
     res.json({
@@ -10,6 +11,7 @@ router.get('/', (req, res) => {
     })
 })
 
-router.use('/funcionarios', funcionarioService)
+router.use('/funcionarios', funcionarioRoutes)
+router.use('/produtos', produtoRoutes)
 
 module.exports = router
