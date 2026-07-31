@@ -30,9 +30,7 @@ class ProdutoService {
     }
 
     async cadastrar(produtoData) {
-        let { nome, necessidade_refrigeracao, cnpj_fabricante, marca, tamanho, descricao, imagem } = produtoData
-        console.log(imagem.filename)
-
+        let { nome, necessidade_refrigeracao, cnpj_fabricante, marca, tamanho, descricao, file } = produtoData
         if (!nome || necessidade_refrigeracao === undefined || necessidade_refrigeracao === null || !cnpj_fabricante) {
             throw { status: 400, mensagem: "Nome, necessidade de refrigeração e CNPJ do fabricante são obrigatórios" }
         }
@@ -48,8 +46,6 @@ class ProdutoService {
             throw { status: 400, mensagem: "CNPJ do fabricante inválido" }
         }
 
-// ======================== TO DO: arrumar imagem aparecendo null ================================================================
-
         const produto = {
             nome: nome.trim(),
             necessidade_refrigeracao: necessidade_refrigeracao,
@@ -57,7 +53,7 @@ class ProdutoService {
             marca: marca ? marca.trim() : null,
             tamanho: tamanho ? tamanho.trim() : null,
             descricao: descricao ? descricao.trim() : null,
-            imagem: imagem ? `uploads/produtos/${imagem.filename}` : null,
+            imagem: file ? `backend/public/uploads/produtos/${file.filename}` : null,
         }
 
         const id = await ProdutoRepository.insert(produto)
@@ -81,7 +77,7 @@ class ProdutoService {
         }
 
         const atualizado = {}
-        let { nome, necessidade_refrigeracao, cnpj_fabricante, marca, tamanho, descricao, imagem } = produtoData
+        let { nome, necessidade_refrigeracao, cnpj_fabricante, marca, tamanho, descricao, file } = produtoData
 
         if (nome !== undefined) {
             if (nome === null || nome.trim() === '') {
@@ -117,9 +113,9 @@ class ProdutoService {
         if (descricao !== undefined) atualizado.descricao = descricao.trim()
 
         if (file) {
-            atualizado.imagem = `uploads/produtos/${file.filename}`;
+            atualizado.imagem = `backend/public/uploads/produtos/${file.filename}`;
             if (existe.imagem) {
-                const caminhoAntigo = path.join(__dirname, '..', '..', 'public', existe.imagem);
+                const caminhoAntigo = path.join(__dirname, '..', '..', '..', existe.imagem);
                 try {
                     await fs.unlink(caminhoAntigo);
                 } catch (err) {
@@ -149,6 +145,14 @@ class ProdutoService {
         const produto = await ProdutoRepository.selectById(id)
         if (!produto) {
             throw { status: 404, mensagem: "Produto não encontrado" }
+        }
+
+        if (produto.imagem) {
+            try {
+                await fs.unlink(produto.imagem);
+            } catch (err) {
+                console.error("Erro ao apagar imagem antiga:", err);
+            }
         }
 
         await ProdutoRepository.delete(id)

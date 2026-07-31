@@ -29,6 +29,7 @@ class FuncionarioController {
 
     async cadastrar(req, res) {
         try {
+            console.log(req.body)
             const resultado = await FuncionarioService.cadastrar(req.body)
             res.json(resultado)
         } catch (error) {
