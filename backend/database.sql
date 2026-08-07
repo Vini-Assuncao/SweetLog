@@ -27,7 +27,7 @@ CREATE TABLE tbl_estoques (
     quantidade INT NOT NULL,
     inspecionado BOOLEAN NOT NULL,
     data_validade DATE NOT NULL,
-    nota_fiscal VARCHAR(50) NOT NULL,
+    nota_fiscal VARCHAR(200) NOT NULL,
     id_produto INT NOT NULL,
     CONSTRAINT FK_id_produto_estoques
         FOREIGN KEY (id_produto) REFERENCES tbl_produtos(id_produto)
