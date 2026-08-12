@@ -32,20 +32,20 @@ class ProdutoService {
     async cadastrar(produtoData) {
         let { nome, necessidade_refrigeracao, cnpj_fabricante, marca, tamanho, descricao, file } = produtoData
         if (!nome || necessidade_refrigeracao === undefined || necessidade_refrigeracao === null || !cnpj_fabricante) {
-            await this.deletarImagemQuandoErro(produtoData, "Nome, necessidade de refrigeração e CNPJ do fabricante são obrigatórios")
+            await this.deletarImagem(produtoData, "Nome, necessidade de refrigeração e CNPJ do fabricante são obrigatórios")
             throw { status: 400, mensagem: "Nome, necessidade de refrigeração e CNPJ do fabricante são obrigatórios" }
         }
 
         if (necessidade_refrigeracao == true || necessidade_refrigeracao == 'true') necessidade_refrigeracao = true
         else if (necessidade_refrigeracao == false || necessidade_refrigeracao == 'false') necessidade_refrigeracao = false
         else{
-            await this.deletarImagemQuandoErro(produtoData, "Necessidade de refrigeração inválida")
+            await this.deletarImagem(produtoData, "Necessidade de refrigeração inválida")
             throw { status: 400, mensagem: "Necessidade de refrigeração inválida" }
         }
 
         let numeros_cnpj = cnpj_fabricante.replace(/\D/g, '')
         if (!/^\d{14}$/.test(numeros_cnpj)) {
-            await this.deletarImagemQuandoErro(produtoData, "CNPJ do fabricante inválido")
+            await this.deletarImagem(produtoData, "CNPJ do fabricante inválido")
             throw { status: 400, mensagem: "CNPJ do fabricante inválido" }
         }
 
@@ -71,13 +71,13 @@ class ProdutoService {
 
     async atualizar(id, produtoData) {
         if (!id || isNaN(id) || id <= 0) {
-            await this.deletarImagemQuandoErro(produtoData, "ID inválido")
+            await this.deletarImagem(produtoData, "ID inválido")
             throw { status: 400, mensagem: "ID inválido" };
         }
 
         const existe = await ProdutoRepository.selectById(id);
         if (!existe) {
-            await this.deletarImagemQuandoErro(produtoData, "Produto não encontrado")
+            await this.deletarImagem(produtoData, "Produto não encontrado")
             throw { status: 404, mensagem: "Produto não encontrado" };
         }
 
@@ -86,7 +86,7 @@ class ProdutoService {
 
         if (nome !== undefined) {
             if (nome === null || nome.trim() === '') {
-                await this.deletarImagemQuandoErro(produtoData, "Nome não pode ser vazio")
+                await this.deletarImagem(produtoData, "Nome não pode ser vazio")
                 throw { status: 400, mensagem: "Nome não pode ser vazio" }
             }
             atualizado.nome = nome.trim()
@@ -98,7 +98,7 @@ class ProdutoService {
             } else if (necessidade_refrigeracao === false || necessidade_refrigeracao === 'false') {
                 necessidade_refrigeracao = false
             } else {
-                await this.deletarImagemQuandoErro(produtoData, "Necessidade de refrigeração inválida")
+                await this.deletarImagem(produtoData, "Necessidade de refrigeração inválida")
                 throw { status: 400, mensagem: "Necessidade de refrigeração inválida" }
             }
             atualizado.necessidade_refrigeracao = necessidade_refrigeracao
@@ -106,12 +106,12 @@ class ProdutoService {
 
         if (cnpj_fabricante !== undefined) {
             if (cnpj_fabricante === null || cnpj_fabricante.trim() === '') {
-                await this.deletarImagemQuandoErro(produtoData, "CNPJ do fabricante é obrigatório")
+                await this.deletarImagem(produtoData, "CNPJ do fabricante é obrigatório")
                 throw { status: 400, mensagem: "CNPJ do fabricante é obrigatório" }
             }
             let numeros_cnpj = cnpj_fabricante.replace(/\D/g, '')
             if (!/^\d{14}$/.test(numeros_cnpj)) {
-                await this.deletarImagemQuandoErro(produtoData, "CNPJ do fabricante inválido")
+                await this.deletarImagem(produtoData, "CNPJ do fabricante inválido")
                 throw { status: 400, mensagem: "CNPJ do fabricante inválido" }
             }
             atualizado.cnpj_fabricante = numeros_cnpj
@@ -128,7 +128,7 @@ class ProdutoService {
                 try {
                     await fs.unlink(caminhoAntigo);
                 } catch (err) {
-                    await this.deletarImagemQuandoErro(produtoData, "Erro ao apagar imagem antiga")
+                    await this.deletarImagem(produtoData, "Erro ao apagar imagem antiga")
                     console.error("Erro ao apagar imagem antiga", err);
                 }
             }
@@ -174,7 +174,7 @@ class ProdutoService {
         }
     }
 
-    async deletarImagemQuandoErro(dados, mensagem) {
+    async deletarImagem(dados, mensagem) {
         if (dados.file) {
             try {
                 await fs.unlink(dados.file.path);

@@ -3,6 +3,7 @@ const router = express.Router()
 
 const funcionarioRoutes = require('./funcionarioRoutes')
 const produtoRoutes = require('./produtoRoutes')
+const estoqueRoutes = require('./estoqueRoutes')
 
 router.get('/', (req, res) => {
     res.json({
