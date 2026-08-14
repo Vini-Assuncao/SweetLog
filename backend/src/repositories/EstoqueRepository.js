@@ -12,10 +12,10 @@ class EstoqueRepository {
     }
 
     async insert(estoqueData) {
-        const { lote_producao, quantidade, inspecionado, data_validade, id_produto } = estoqueData
+        const { lote_producao, quantidade, inspecionado, data_validade, id_produto, nota_fiscal } = estoqueData
         const [result] = await pool.query(
-            'INSERT INTO tbl_estoques (lote_producao, quantidade, inspecionado, data_validade, id_produto) VALUES (?, ?, ?, ?, ?)',
-            [lote_producao, quantidade, inspecionado, data_validade, id_produto]
+            'INSERT INTO tbl_estoques (lote_producao, quantidade, inspecionado, data_validade, id_produto, nota_fiscal) VALUES (?, ?, ?, ?, ?, ?)',
+            [lote_producao, quantidade, inspecionado, data_validade, id_produto, nota_fiscal]
         )
         return result.insertId
     }

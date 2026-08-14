@@ -3,15 +3,29 @@ const path = require('path');
 const fs = require('fs');
 
 // Garante que a pasta de uploads exista
-let uploadDir = path.join(__dirname, '..', '..', 'public', 'uploads');
+const uploadDir = path.join(__dirname, '..', '..', 'public', 'uploads');
+
 if (!fs.existsSync(uploadDir)) {
     fs.mkdirSync(uploadDir, { recursive: true });
 }
 
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
-        cb(null, uploadDir);
+        let destino;
+
+        if (file.mimetype === 'application/pdf') {
+            destino = path.join(uploadDir, 'notas_fiscais');
+        } else {
+            destino = path.join(uploadDir, 'produtos');
+        }
+
+        if (!fs.existsSync(destino)) {
+            fs.mkdirSync(destino, { recursive: true });
+        }
+
+        cb(null, destino);
     },
+
     filename: function (req, file, cb) {
         // Renomeia o arquivo para evitar colisões
         const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
@@ -21,7 +35,7 @@ const storage = multer.diskStorage({
 
 const fileFilterProdutos = (req, file, cb) => {
     const allowedMimeTypes = ['image/jpeg', 'image/png', 'image/jpg'];
-    uploadDir = path.join(uploadDir, 'produtos');
+
     if (allowedMimeTypes.includes(file.mimetype)) {
         cb(null, true);
     } else {
@@ -29,7 +43,7 @@ const fileFilterProdutos = (req, file, cb) => {
     }
 };
 
-const uploadProduto = multer({ 
+const uploadProduto = multer({
     storage: storage,
     fileFilter: fileFilterProdutos,
     limits: {
@@ -39,7 +53,7 @@ const uploadProduto = multer({
 
 const fileFilterEstoque = (req, file, cb) => {
     const allowedMimeTypes = ['application/pdf'];
-    uploadDir = path.join(uploadDir, 'notas_fiscais');
+
     if (allowedMimeTypes.includes(file.mimetype)) {
         cb(null, true);
     } else {
@@ -47,7 +61,7 @@ const fileFilterEstoque = (req, file, cb) => {
     }
 };
 
-const uploadEstoque = multer({ 
+const uploadEstoque = multer({
     storage: storage,
     fileFilter: fileFilterEstoque,
     limits: {
@@ -55,4 +69,4 @@ const uploadEstoque = multer({
     }
 });
 
-module.exports = uploadProduto, uploadEstoque;
+module.exports = { uploadProduto, uploadEstoque };
