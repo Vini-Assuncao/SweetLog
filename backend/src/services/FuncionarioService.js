@@ -72,19 +72,19 @@ class FuncionarioService {
             throw { status: 400, mensagem: "Número de matrícula inválido" };
         }
 
-        const existe = await FuncionarioRepository.selectById(numero_matricula);
-        if (!existe) {
+        const funcionarioExistente = await FuncionarioRepository.selectById(numero_matricula);
+        if (!funcionarioExistente) {
             throw { status: 404, mensagem: "Funcionário não encontrado" };
         }
 
-        const atualizado = {}
+        const funcionarioAtualizado = {}
         const { senha, nome, telefone, cargo } = funcionarioData
 
         if (nome !== undefined) {
             if (nome === null || nome.trim() === '') {
                 throw { status: 400, mensagem: "Nome não pode ser vazio" }
             }
-            atualizado.nome = nome.trim()
+            funcionarioAtualizado.nome = nome.trim()
         }
         if (senha !== undefined) {
             if (senha === null || senha.trim() === '') {
@@ -92,31 +92,31 @@ class FuncionarioService {
             }
             if (senha.trim().length < 8) {
                 throw { status: 400, mensagem: "Senha deve ter no mínimo 8 caracteres" }
-            } atualizado.senha = senha.trim()
+            } funcionarioAtualizado.senha = senha.trim()
         }
         if (telefone !== undefined ) {
             if (telefone === null || telefone === '') {
-                atualizado.telefone = null
+                funcionarioAtualizado.telefone = null
             }
             else {
                 const numeros_telefone = telefone.replace(/\D/g, '')
                 if (!/^\d{11}$/.test(numeros_telefone)) {
                     throw { status: 400, mensagem: 'Telefone inválido' }
-                } atualizado.telefone = numeros_telefone
+                } funcionarioAtualizado.telefone = numeros_telefone
             }
         }
         if (cargo !== undefined) {
             if (cargo === null || cargo.trim() === '') {
                 throw { status: 400, mensagem: "Cargo não pode ser vazio" }
             }
-            atualizado.cargo = cargo
+            funcionarioAtualizado.cargo = cargo
         }
 
-        if (Object.keys(atualizado).length == 0) {
+        if (Object.keys(funcionarioAtualizado).length == 0) {
             throw { status: 400, mensagem: "Nenhum dado a atualizar" }
         }
 
-        await FuncionarioRepository.set(numero_matricula, atualizado)
+        await FuncionarioRepository.set(numero_matricula, funcionarioAtualizado)
 
         return {
             sucesso: true,
@@ -130,8 +130,8 @@ class FuncionarioService {
             throw { status: 400, mensagem: "Número de matrícula inválido" };
         }
 
-        const funcionario = await FuncionarioRepository.selectById(numero_matricula)
-        if (!funcionario) {
+        const funcionarioExistente = await FuncionarioRepository.selectById(numero_matricula)
+        if (!funcionarioExistente) {
             throw { status: 404, mensagem: "Funcionário não encontrado" }
         }
 
@@ -140,7 +140,7 @@ class FuncionarioService {
         return {
             sucesso: true,
             mensagem: "Funcionário deletado com sucesso",
-            funcionarioDeletado: funcionario
+            funcionarioDeletado: funcionarioExistente
         }
     }
 }

@@ -75,13 +75,13 @@ class ProdutoService {
             throw { status: 400, mensagem: "ID inválido" };
         }
 
-        const existe = await ProdutoRepository.selectById(id);
-        if (!existe) {
+        const produtoExistente = await ProdutoRepository.selectById(id);
+        if (!produtoExistente) {
             await this.deletarImagem(produtoData, "Produto não encontrado")
             throw { status: 404, mensagem: "Produto não encontrado" };
         }
 
-        const atualizado = {}
+        const produtoAtualizado = {}
         let { nome, necessidade_refrigeracao, cnpj_fabricante, marca, tamanho, descricao, file } = produtoData
 
         if (nome !== undefined) {
@@ -89,7 +89,7 @@ class ProdutoService {
                 await this.deletarImagem(produtoData, "Nome não pode ser vazio")
                 throw { status: 400, mensagem: "Nome não pode ser vazio" }
             }
-            atualizado.nome = nome.trim()
+            produtoAtualizado.nome = nome.trim()
         }
 
         if (necessidade_refrigeracao !== undefined) {
@@ -101,7 +101,7 @@ class ProdutoService {
                 await this.deletarImagem(produtoData, "Necessidade de refrigeração inválida")
                 throw { status: 400, mensagem: "Necessidade de refrigeração inválida" }
             }
-            atualizado.necessidade_refrigeracao = necessidade_refrigeracao
+            produtoAtualizado.necessidade_refrigeracao = necessidade_refrigeracao
         }
 
         if (cnpj_fabricante !== undefined) {
@@ -114,17 +114,17 @@ class ProdutoService {
                 await this.deletarImagem(produtoData, "CNPJ do fabricante inválido")
                 throw { status: 400, mensagem: "CNPJ do fabricante inválido" }
             }
-            atualizado.cnpj_fabricante = numeros_cnpj
+            produtoAtualizado.cnpj_fabricante = numeros_cnpj
         }
 
-        if (marca !== undefined) atualizado.marca = marca.trim()
-        if (tamanho !== undefined) atualizado.tamanho = tamanho.trim()
-        if (descricao !== undefined) atualizado.descricao = descricao.trim()
+        if (marca !== undefined) produtoAtualizado.marca = marca.trim()
+        if (tamanho !== undefined) produtoAtualizado.tamanho = tamanho.trim()
+        if (descricao !== undefined) produtoAtualizado.descricao = descricao.trim()
 
         if (file) {
-            atualizado.imagem = `backend/public/uploads/produtos/${file.filename}`;
-            if (existe.imagem) {
-                const caminhoAntigo = path.join(__dirname, '..', '..', '..', existe.imagem);
+            produtoAtualizado.imagem = `backend/public/uploads/produtos/${file.filename}`;
+            if (produtoExistente.imagem) {
+                const caminhoAntigo = path.join(__dirname, '..', '..', '..', produtoExistente.imagem);
                 try {
                     await fs.unlink(caminhoAntigo);
                 } catch (err) {
@@ -134,11 +134,11 @@ class ProdutoService {
             }
         }
 
-        if (Object.keys(atualizado).length == 0) {
+        if (Object.keys(produtoAtualizado).length == 0) {
             throw { status: 400, mensagem: "Nenhum dado a atualizar" }
         }
 
-        await ProdutoRepository.set(id, atualizado)
+        await ProdutoRepository.set(id, produtoAtualizado)
 
         return {
             sucesso: true,
