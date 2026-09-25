@@ -6,6 +6,7 @@ router.get('/', FuncionarioController.listar)
 router.get('/:id', FuncionarioController.buscarPorId)
 router.post('/', FuncionarioController.cadastrar)
 router.put('/:id', FuncionarioController.atualizar)
+router.post('/login', FuncionarioController.login)
 router.delete('/:id', FuncionarioController.deletar)
 
 module.exports = router

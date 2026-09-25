@@ -2,12 +2,17 @@ const pool = require('../config/database')
 
 class FuncionarioRepository {
     async selectAll() {
-        const [rows] = await pool.query('SELECT * FROM tbl_funcionarios')
+        const [rows] = await pool.query('SELECT numero_matricula, nome, telefone, cargo FROM tbl_funcionarios')
         return rows
     }
     
     async selectById(numero_matricula) {
-        const [rows] = await pool.query('SELECT * FROM tbl_funcionarios WHERE numero_matricula = ?', [numero_matricula])
+        const [rows] = await pool.query('SELECT numero_matricula, nome, telefone, cargo FROM tbl_funcionarios WHERE numero_matricula = ?', [numero_matricula])
+        return rows[0]
+    }
+
+    async selectSenha(numero_matricula) {
+        const [rows] = await pool.query('SELECT senha FROM tbl_funcionarios WHERE numero_matricula = ?', [numero_matricula])
         return rows[0]
     }
     

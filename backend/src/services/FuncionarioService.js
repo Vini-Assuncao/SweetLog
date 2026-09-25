@@ -1,4 +1,5 @@
 const FuncionarioRepository = require('../repositories/FuncionarioRepository')
+const bcrypt = require('bcryptjs');
 
 class FuncionarioService {
     async listar() {
@@ -42,6 +43,9 @@ class FuncionarioService {
             throw { status: 400, mensagem: "Senha deve ter no mínimo 8 caracteres" }
         }
 
+        const salt = await bcrypt.genSalt(10);
+        const senhaHash = await bcrypt.hash(senha.trim(), salt);
+
         let numeros_telefone = null
         if (telefone) {
             numeros_telefone = telefone.replace(/\D/g, '')
@@ -52,7 +56,7 @@ class FuncionarioService {
 
         const funcionario = {
             numero_matricula: Number(numero_matricula),
-            senha: senha.trim(),
+            senha: senhaHash,
             nome: nome.trim(),
             telefone: numeros_telefone,
             cargo
@@ -63,7 +67,12 @@ class FuncionarioService {
         return {
             sucesso: true,
             mensagem: "Funcionário cadastrado com sucesso",
-            funcionario: funcionario
+            funcionario: {
+                numero_matricula: funcionario.numero_matricula,
+                nome: funcionario.nome,
+                telefone: funcionario.telefone,
+                cargo: funcionario.cargo
+            }
         }
     }
 
@@ -92,7 +101,11 @@ class FuncionarioService {
             }
             if (senha.trim().length < 8) {
                 throw { status: 400, mensagem: "Senha deve ter no mínimo 8 caracteres" }
-            } funcionarioAtualizado.senha = senha.trim()
+            }
+            
+            const salt = await bcrypt.genSalt(10);
+            const senhaHash = await bcrypt.hash(senha.trim(), salt);
+            funcionarioAtualizado.senha = senhaHash
         }
         if (telefone !== undefined ) {
             if (telefone === null || telefone === '') {
@@ -102,7 +115,8 @@ class FuncionarioService {
                 const numeros_telefone = telefone.replace(/\D/g, '')
                 if (!/^\d{11}$/.test(numeros_telefone)) {
                     throw { status: 400, mensagem: 'Telefone inválido' }
-                } funcionarioAtualizado.telefone = numeros_telefone
+                }
+                funcionarioAtualizado.telefone = numeros_telefone
             }
         }
         if (cargo !== undefined) {
@@ -122,6 +136,29 @@ class FuncionarioService {
             sucesso: true,
             mensagem: "Funcionário atualizado com sucesso",
             novoFuncionario: await FuncionarioRepository.selectById(numero_matricula)
+        }
+    }
+
+    async login(funcionarioData) {
+        const { numero_matricula, senha } = funcionarioData;
+        if (!numero_matricula || isNaN(numero_matricula) || numero_matricula <= 0) {
+            throw { status: 400, mensagem: "Número de matrícula inválido" };
+        }
+
+        const funcionario = await FuncionarioRepository.selectSenha(numero_matricula)
+        if (!funcionario) {
+            throw { status: 404, mensagem: "Funcionário não encontrado" }
+        }
+
+        const senhaValida = await bcrypt.compare(senha, funcionario.senha)
+        if (!senhaValida) {
+            throw { status: 401, mensagem: "Senha incorreta" }
+        }
+
+        return {
+            sucesso: true,
+            mensagem: "Login realizado com sucesso",
+            numero_matricula: numero_matricula
         }
     }
 
