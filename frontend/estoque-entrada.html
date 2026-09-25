@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SweetLog — Entrada de Produtos</title>
+<link rel="stylesheet" href="css/base.css">
+<link rel="stylesheet" href="css/estoque-form.css">
+</head>
+<body class="app">
+
+<header class="topbar">
+  <button class="menu-btn" data-open-menu aria-label="Abrir menu">☰</button>
+  <div class="topbar__brand"><span class="logo-dot">🥐</span> SweetLog</div>
+  <div class="topbar__spacer"></div>
+  <div class="topbar__actions">
+    <button class="icon-btn" aria-label="Notificações">🔔</button>
+    <button class="icon-btn" aria-label="Configurações">⚙️</button>
+    <button class="avatar" data-open-profile>VA</button>
+  </div>
+</header>
+
+<div class="profile-pop" data-profile-pop>
+  <div class="profile-pop__label">Perfil</div>
+  <div class="profile-pop__row">
+    <div class="profile-pop__avatar">VA</div>
+    <div class="profile-pop__info">
+      <strong>Vinícius Assunção</strong>
+      <p>Matrícula: 10425<br>Setor: Logística<br>Telefone: (11) 90234-5678</p>
+    </div>
+  </div>
+  <button class="profile-pop__logout">↩ Sair da conta</button>
+</div>
+
+<div class="drawer-overlay" data-drawer-overlay></div>
+<aside class="drawer" data-drawer>
+  <div class="drawer__head">
+    <div class="topbar__brand"><span class="logo-dot">🥐</span> SweetLog</div>
+    <button class="drawer__close" data-close-menu aria-label="Fechar menu">✕</button>
+  </div>
+  <div class="drawer__label">Menu</div>
+  <nav class="drawer__nav">
+    <a class="drawer__link" href="dashboard.html"><span class="ico">🏠</span> Início</a>
+    <a class="drawer__link" href="produtos-lista.html"><span class="ico">🥐</span> Produtos</a>
+    <a class="drawer__link is-active" href="estoque.html"><span class="ico">📦</span> Controle de estoque</a>
+    <a class="drawer__link" href="pedidos.html"><span class="ico">🧺</span> Pedidos</a>
+    <a class="drawer__link" href="saldo-diario.html"><span class="ico">💰</span> Saldo diário</a>
+    <a class="drawer__link" href="lotes.html"><span class="ico">📅</span> Lotes e validade</a>
+  </nav>
+  <div class="drawer__footer">
+    <button class="drawer__logout">↩ Sair da Conta</button>
+  </div>
+</aside>
+
+<main class="page">
+  <a class="back-link" href="estoque.html">← Voltar</a>
+  <div class="page-head">
+    <h1>Entrada de Produtos</h1>
+    <p>Registre o recebimento de novos produtos no estoque.</p>
+  </div>
+
+  <form class="card form-card" data-entrada-form>
+    <div class="form-grid">
+      <div class="field">
+        <label for="produto">Produto *</label>
+        <select class="input" id="produto">
+          <option>Selecione um produto...</option>
+          <option>Farinha de Trigo Premium</option>
+          <option>Ovos Brancos Grandes</option>
+          <option>Leite Integral</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label for="qtd">Quantidade *</label>
+        <div class="stepper" data-stepper>
+          <button type="button" class="stepper__btn" aria-label="Diminuir" data-stepper-minus>−</button>
+          <input class="stepper__value" id="qtd" type="text" value="1" data-stepper-value>
+          <button type="button" class="stepper__btn" aria-label="Aumentar" data-stepper-plus>+</button>
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="lote">Lote de Produção *</label>
+        <input class="input" id="lote" type="text" placeholder="Ex: L-202310">
+      </div>
+
+      <div class="field">
+        <label for="validade">Data de Validade *</label>
+        <input class="input" id="validade" type="date">
+      </div>
+    </div>
+
+    <div class="form-grid" style="margin-top:18px;">
+      <div class="field">
+        <label>Nota Fiscal (PDF) *</label>
+        <label class="upload-box upload-box--sm" for="nf" data-upload-box>
+          <span class="upload-box__icon">📄</span>
+          <span class="upload-box__text" data-upload-text>Anexar arquivo ou arraste e solte</span>
+          <span class="upload-box__hint" data-upload-hint>PDF até 10MB</span>
+          <input id="nf" type="file" class="visually-hidden" accept="application/pdf" data-upload-input>
+        </label>
+      </div>
+
+      <div class="field">
+        <label>Inspeção de Qualidade *</label>
+        <p class="hint" style="margin-bottom:8px;">O produto foi inspecionado visualmente e atende aos padrões de qualidade para recebimento?</p>
+        <div class="radio-choice">
+          <label><input type="radio" name="inspecao" checked> Sim, aprovado</label>
+          <label><input type="radio" name="inspecao"> Não, reprovado</label>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <button type="button" class="btn btn--outline" data-cancel-btn data-cancel-href="estoque.html">Cancelar</button>
+      <button type="submit" class="btn btn--primary">📥 Registrar Entrada</button>
+    </div>
+  </form>
+</main>
+
+<script src="js/app.js"></script>
+</body>
+</html>

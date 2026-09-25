@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SweetLog — Índice do Protótipo</title>
+<link rel="stylesheet" href="css/base.css">
+<style>
+  .idx-wrap{ max-width: 760px; margin: 0 auto; padding: 56px 24px; }
+  .idx-wrap h1{ font-size: 1.6rem; margin-bottom: 6px; }
+  .idx-wrap p{ color: var(--text-muted); margin-bottom: 28px; }
+  .idx-list{ display:grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  @media (max-width:600px){ .idx-list{ grid-template-columns: 1fr; } }
+  .idx-item{
+    display:flex; align-items:center; gap:12px;
+    background:var(--card); border:1px solid var(--border); border-radius: var(--radius);
+    padding: 14px 16px; color: var(--text); font-weight:600; font-size:0.9rem;
+  }
+  .idx-item:hover{ border-color: var(--primary-light); color: var(--primary); }
+  .idx-item span{ font-size:1.1rem; }
+  .idx-section{ margin-top: 26px; font-size:0.78rem; text-transform:uppercase; letter-spacing:.06em; color:var(--text-faint); font-weight:700; }
+</style>
+</head>
+<body>
+<div class="idx-wrap">
+  <h1>🥐 SweetLog — Protótipo</h1>
+  <p>Índice de todas as telas do sistema de gestão de padaria.</p>
+
+  <div class="idx-section">Autenticação</div>
+  <div class="idx-list" style="margin-top:10px;">
+    <a class="idx-item" href="login.html"><span>🔑</span> Entrar</a>
+    <a class="idx-item" href="recuperar-senha.html"><span>📞</span> Recuperar senha — telefone</a>
+    <a class="idx-item" href="verificar-codigo.html"><span>✉️</span> Verificar código</a>
+    <a class="idx-item" href="nova-senha.html"><span>🔒</span> Nova senha</a>
+  </div>
+
+  <div class="idx-section">Aplicativo</div>
+  <div class="idx-list" style="margin-top:10px;">
+    <a class="idx-item" href="dashboard.html"><span>🏠</span> Início</a>
+    <a class="idx-item" href="produtos-lista.html"><span>🥐</span> Lista de produtos</a>
+    <a class="idx-item" href="produto-detalhe.html"><span>📄</span> Detalhe do produto</a>
+    <a class="idx-item" href="produto-cadastrar.html"><span>➕</span> Cadastrar produto</a>
+    <a class="idx-item" href="estoque.html"><span>📦</span> Controle de estoque</a>
+    <a class="idx-item" href="estoque-entrada.html"><span>📥</span> Entrada de produtos</a>
+    <a class="idx-item" href="estoque-saida.html"><span>📤</span> Saída de produtos</a>
+    <a class="idx-item" href="pedidos.html"><span>🧺</span> Pedidos em andamento</a>
+    <a class="idx-item" href="saldo-diario.html"><span>💰</span> Saldo diário</a>
+    <a class="idx-item" href="lotes.html"><span>📅</span> Controle de lotes e validade</a>
+  </div>
+</div>
+</body>
+</html>

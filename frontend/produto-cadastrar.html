@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SweetLog — Cadastrar Produto</title>
+<link rel="stylesheet" href="css/base.css">
+<link rel="stylesheet" href="css/produto-cadastrar.css">
+</head>
+<body class="app">
+
+<header class="topbar">
+  <button class="menu-btn" data-open-menu aria-label="Abrir menu">☰</button>
+  <div class="topbar__brand"><span class="logo-dot">🥐</span> SweetLog</div>
+  <div class="topbar__spacer"></div>
+  <div class="topbar__actions">
+    <button class="icon-btn" aria-label="Notificações">🔔</button>
+    <button class="icon-btn" aria-label="Configurações">⚙️</button>
+    <button class="avatar" data-open-profile>VA</button>
+  </div>
+</header>
+
+<div class="profile-pop" data-profile-pop>
+  <div class="profile-pop__label">Perfil</div>
+  <div class="profile-pop__row">
+    <div class="profile-pop__avatar">VA</div>
+    <div class="profile-pop__info">
+      <strong>Vinícius Assunção</strong>
+      <p>Matrícula: 10425<br>Setor: Logística<br>Telefone: (11) 90234-5678</p>
+    </div>
+  </div>
+  <button class="profile-pop__logout">↩ Sair da conta</button>
+</div>
+
+<div class="drawer-overlay" data-drawer-overlay></div>
+<aside class="drawer" data-drawer>
+  <div class="drawer__head">
+    <div class="topbar__brand"><span class="logo-dot">🥐</span> SweetLog</div>
+    <button class="drawer__close" data-close-menu aria-label="Fechar menu">✕</button>
+  </div>
+  <div class="drawer__label">Menu</div>
+  <nav class="drawer__nav">
+    <a class="drawer__link" href="dashboard.html"><span class="ico">🏠</span> Início</a>
+    <a class="drawer__link is-active" href="produtos-lista.html"><span class="ico">🥐</span> Produtos</a>
+    <a class="drawer__link" href="estoque.html"><span class="ico">📦</span> Controle de estoque</a>
+    <a class="drawer__link" href="pedidos.html"><span class="ico">🧺</span> Pedidos</a>
+    <a class="drawer__link" href="saldo-diario.html"><span class="ico">💰</span> Saldo diário</a>
+    <a class="drawer__link" href="lotes.html"><span class="ico">📅</span> Lotes e validade</a>
+  </nav>
+  <div class="drawer__footer">
+    <button class="drawer__logout">↩ Sair da Conta</button>
+  </div>
+</aside>
+
+<main class="page">
+  <a class="back-link" href="produtos-lista.html">← Voltar para Lista de Produtos</a>
+  <div class="page-head">
+    <h1>Cadastrar Novo Produto</h1>
+    <p>Preencha os detalhes abaixo para adicionar um novo item ao catálogo da padaria.</p>
+  </div>
+
+  <form class="card form-card" data-produto-form>
+    <div class="form-grid form-grid--photo">
+      <div class="field">
+        <label>Foto do produto</label>
+        <label class="upload-box" for="foto" data-upload-box>
+          <img data-upload-preview hidden alt="Pré-visualização do produto">
+          <span class="upload-box__icon" data-upload-icon>📷</span>
+          <span class="upload-box__text" data-upload-text>Clique para enviar</span>
+          <span class="upload-box__hint" data-upload-hint>JPG, PNG ou WEBP. Máx. 5MB.</span>
+          <input id="foto" type="file" class="visually-hidden" accept="image/*" data-upload-input>
+        </label>
+      </div>
+
+      <div class="stack gap-16">
+        <div class="field">
+          <label for="nome">Nome do produto</label>
+          <input class="input" id="nome" type="text" placeholder="Ex: Bolo de Cenoura com Chocolate">
+        </div>
+
+        <div class="form-grid">
+          <div class="field">
+            <label for="marca">Marca / Fornecedor</label>
+            <input class="input" id="marca" type="text" placeholder="Exemplo: Nestlé">
+          </div>
+          <div class="field">
+            <label for="tamanho">Tamanho / Peso</label>
+            <input class="input" id="tamanho" type="text" placeholder="Ex: 500g, 1 Unidade">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="refrigeracao-box">
+      <div class="row gap-12">
+        <span class="refrigeracao-box__icon">❄️</span>
+        <div>
+          <p class="refrigeracao-box__title">Necessidade de Refrigeração</p>
+          <p class="refrigeracao-box__sub">Este item precisa ser armazenado em câmara fria?</p>
+        </div>
+      </div>
+      <div class="radio-choice">
+        <label><input type="radio" name="refrigeracao"> Sim</label>
+        <label><input type="radio" name="refrigeracao" checked> Não</label>
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <button type="button" class="btn btn--outline" data-cancel-btn>Cancelar</button>
+      <button type="submit" class="btn btn--primary">💾 Cadastrar produto</button>
+    </div>
+  </form>
+</main>
+
+<script src="js/app.js"></script>
+</body>
+</html>

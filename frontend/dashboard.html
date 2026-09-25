@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SweetLog — Início</title>
+<link rel="stylesheet" href="css/base.css">
+<link rel="stylesheet" href="css/dashboard.css">
+</head>
+<body class="app">
+
+<header class="topbar">
+  <button class="menu-btn" data-open-menu aria-label="Abrir menu">☰</button>
+  <div class="topbar__brand"><span class="logo-dot">🥐</span> SweetLog</div>
+  <div class="topbar__search">
+    <span class="icon">🔍</span>
+    <input type="text" placeholder="Buscar...">
+  </div>
+  <div class="topbar__spacer"></div>
+  <div class="topbar__actions">
+    <button class="icon-btn" aria-label="Notificações">🔔</button>
+    <button class="icon-btn" aria-label="Configurações">⚙️</button>
+    <button class="avatar" data-open-profile>VA</button>
+  </div>
+</header>
+
+<div class="profile-pop" data-profile-pop>
+  <div class="profile-pop__label">Perfil</div>
+  <div class="profile-pop__row">
+    <div class="profile-pop__avatar">VA</div>
+    <div class="profile-pop__info">
+      <strong>Vinícius Assunção</strong>
+      <p>Matrícula: 10425<br>Setor: Logística<br>Telefone: (11) 90234-5678</p>
+    </div>
+  </div>
+  <button class="profile-pop__logout">↩ Sair da conta</button>
+</div>
+
+<div class="drawer-overlay" data-drawer-overlay></div>
+<aside class="drawer" data-drawer>
+  <div class="drawer__head">
+    <div class="topbar__brand"><span class="logo-dot">🥐</span> SweetLog</div>
+    <button class="drawer__close" data-close-menu aria-label="Fechar menu">✕</button>
+  </div>
+  <div class="drawer__label">Menu</div>
+  <nav class="drawer__nav">
+    <a class="drawer__link is-active" href="dashboard.html"><span class="ico">🏠</span> Início</a>
+    <a class="drawer__link" href="produtos-lista.html"><span class="ico">🥐</span> Produtos</a>
+    <a class="drawer__link" href="estoque.html"><span class="ico">📦</span> Controle de estoque</a>
+    <a class="drawer__link" href="pedidos.html"><span class="ico">🧺</span> Pedidos</a>
+    <a class="drawer__link" href="saldo-diario.html"><span class="ico">💰</span> Saldo diário</a>
+    <a class="drawer__link" href="lotes.html"><span class="ico">📅</span> Lotes e validade</a>
+  </nav>
+  <div class="drawer__footer">
+    <button class="drawer__logout">↩ Sair da Conta</button>
+  </div>
+</aside>
+
+<main class="page">
+  <div class="page-head">
+    <h1>Bom dia, Chef!</h1>
+    <p>Aqui está o resumo da sua padaria hoje.</p>
+  </div>
+
+  <h2 class="section-title">Acesso Rápido</h2>
+  <div class="quick-grid">
+    <a class="quick-card" href="produtos-lista.html">
+      <span class="quick-card__icon">🥐</span>
+      <span>Produtos</span>
+    </a>
+    <a class="quick-card" href="estoque.html">
+      <span class="quick-card__icon">📦</span>
+      <span>Controle de Estoque</span>
+    </a>
+    <a class="quick-card" href="#">
+      <span class="quick-card__icon">💳</span>
+      <span>Vendas</span>
+    </a>
+    <a class="quick-card" href="pedidos.html">
+      <span class="quick-card__icon">🧾</span>
+      <span>Pedidos</span>
+    </a>
+    <a class="quick-card" href="saldo-diario.html">
+      <span class="quick-card__icon">💰</span>
+      <span>Saldo Diário</span>
+    </a>
+  </div>
+
+  <h2 class="section-title">Alertas e Atenção Imediata</h2>
+  <div class="card alert-card">
+    <div class="alert-card__head">
+      <div class="row gap-8">
+        <span class="alert-card__warn">⚠️</span>
+        <strong>Próximo do Vencimento</strong>
+      </div>
+      <span class="badge badge--danger">3 itens</span>
+    </div>
+
+    <div class="alert-row">
+      <div class="row gap-12">
+        <span class="alert-row__icon">🥚</span>
+        <div>
+          <p class="alert-row__title">Ovos Brancos (Caixa)</p>
+          <p class="alert-row__sub">Vence em 2 dias</p>
+        </div>
+      </div>
+      <a href="lotes.html" class="alert-row__action">Revisar</a>
+    </div>
+
+    <div class="alert-row">
+      <div class="row gap-12">
+        <span class="alert-row__icon">🥛</span>
+        <div>
+          <p class="alert-row__title">Leite Integral</p>
+          <p class="alert-row__sub">Vence amanhã</p>
+        </div>
+      </div>
+      <a href="lotes.html" class="alert-row__action">Revisar</a>
+    </div>
+  </div>
+</main>
+
+<script src="js/app.js"></script>
+</body>
+</html>

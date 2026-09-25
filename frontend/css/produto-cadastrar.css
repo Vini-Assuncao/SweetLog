@@ -1,0 +1,43 @@
+/* produto-cadastrar.css */
+
+.form-card{ padding: 26px 28px; }
+
+.form-grid--photo{
+  grid-template-columns: 220px 1fr;
+  margin-bottom: 24px;
+}
+@media (max-width: 720px){ .form-grid--photo{ grid-template-columns: 1fr; } }
+
+.upload-box{
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 6px;
+  height: 100%;
+  min-height: 150px;
+  border: 1.5px dashed var(--border);
+  border-radius: var(--radius);
+  background: var(--bg);
+  cursor: pointer;
+  text-align: center;
+  padding: 20px;
+}
+.upload-box:hover{ border-color: var(--primary-light); }
+.upload-box__icon{ font-size: 1.5rem; color: var(--primary); }
+.upload-box__text{ font-size: 0.85rem; font-weight: 600; color: var(--primary); }
+.upload-box__hint{ font-size: 0.72rem; color: var(--text-faint); }
+.upload-box img[data-upload-preview]{
+  max-width: 100%; max-height: 96px; border-radius: var(--radius-sm); object-fit: cover;
+}
+.upload-box.is-dragover{ border-color: var(--primary); background: var(--primary-soft); }
+
+.refrigeracao-box{
+  display:flex; align-items:center; justify-content: space-between;
+  gap: 20px;
+  background: var(--primary-soft);
+  border: 1px solid #DCD3FB;
+  border-radius: var(--radius);
+  padding: 16px 20px;
+  flex-wrap: wrap;
+}
+.refrigeracao-box__icon{ font-size: 1.2rem; }
+.refrigeracao-box__title{ font-weight: 600; font-size: 0.9rem; }
+.refrigeracao-box__sub{ font-size: 0.8rem; color: var(--text-muted); max-width: 360px; }

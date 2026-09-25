@@ -1,0 +1,105 @@
+/* lotes.css */
+
+.list-head{
+  display:flex; align-items:flex-start; justify-content: space-between;
+  gap: 16px; margin-bottom: 24px; flex-wrap: wrap;
+}
+.list-head p{ max-width: 560px; }
+
+.kpi-grid{
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 18px;
+  margin-bottom: 22px;
+}
+@media (max-width: 860px){ .kpi-grid{ grid-template-columns: 1fr; } }
+
+.kpi-card{ padding: 20px 22px; position: relative; overflow: hidden; }
+.kpi-card::after{
+  content:''; position:absolute; top:-20px; right:-20px;
+  width: 70px; height: 70px; border-radius: 50%;
+  background: var(--bg);
+}
+.kpi-card__icon{
+  width: 34px; height: 34px; border-radius: 9px;
+  background: var(--primary-soft);
+  display:flex; align-items:center; justify-content:center;
+  margin-bottom: 10px; position:relative; z-index:1;
+}
+.kpi-card__icon--warning{ background: var(--warning-soft); }
+.kpi-card__icon--danger{ background: var(--danger-soft); }
+.kpi-card__label{ font-size: 0.82rem; color: var(--text-muted); margin-bottom: 4px; position:relative; z-index:1; }
+.kpi-card__value{ font-size: 1.9rem; font-weight: 700; position:relative; z-index:1; }
+.kpi-card__note{ font-size: 0.76rem; margin-top: 6px; position:relative; z-index:1; }
+.kpi-card__note--muted{ color: var(--primary-dark); font-weight: 600; }
+.kpi-card__note--warning{ color: var(--warning); }
+.kpi-card__note--danger{ color: var(--danger); font-weight: 600; }
+
+.table-card{ padding: 20px 22px 8px; }
+.table-card__head{
+  display:flex; align-items:center; justify-content: space-between;
+  margin-bottom: 14px;
+}
+.table-card__head h3{ font-size: 1rem; }
+
+.table-scroll{ overflow-x: auto; }
+.lotes-table{
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+  min-width: 620px;
+}
+.lotes-table thead th{
+  text-align:left;
+  font-size: 0.72rem; text-transform: uppercase; letter-spacing: .04em;
+  color: var(--text-faint);
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border);
+}
+.lotes-table tbody td{
+  padding: 13px 12px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: middle;
+}
+.lotes-table tbody tr.is-warning{ background: rgba(217,119,6,0.05); }
+.lotes-table tbody tr.is-danger{ background: rgba(220,38,38,0.05); }
+
+.lotes-table__icon{
+  width: 34px; height: 34px; border-radius: 9px;
+  display:flex; align-items:center; justify-content:center;
+  flex-shrink: 0;
+}
+.lotes-table__title{ font-weight: 600; }
+.lotes-table__sub{ font-size: 0.76rem; color: var(--text-muted); }
+
+.text-warning{ color: var(--warning); font-weight: 600; }
+.text-danger{ color: var(--danger); font-weight: 600; }
+
+.table-card__foot{
+  display:flex; align-items:center; justify-content: space-between;
+  padding: 14px 4px;
+  font-size: 0.8rem; color: var(--text-muted);
+}
+.pagination{ display:flex; gap: 6px; }
+.pagination__btn{
+  width: 30px; height: 30px;
+  border: 1px solid var(--border);
+  background: var(--card);
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.82rem;
+  color: var(--text-muted);
+}
+.pagination__btn.is-active{ background: var(--primary); color: #fff; border-color: var(--primary); }
+.pagination__btn:hover:not(.is-active){ border-color: var(--primary-light); color: var(--primary); }
+
+/* ---------- busca inline na tabela de lotes ---------- */
+.table-search input{
+  width: 200px;
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-family: inherit;
+  font-size: 0.85rem;
+}
+@media (max-width: 560px){ .table-search input{ width: 140px; } }

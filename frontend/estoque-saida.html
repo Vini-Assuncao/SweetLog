@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SweetLog — Saída de Produtos</title>
+<link rel="stylesheet" href="css/base.css">
+<link rel="stylesheet" href="css/estoque-form.css">
+</head>
+<body class="app">
+
+<header class="topbar">
+  <button class="menu-btn" data-open-menu aria-label="Abrir menu">☰</button>
+  <div class="topbar__brand"><span class="logo-dot">🥐</span> SweetLog</div>
+  <div class="topbar__spacer"></div>
+  <div class="topbar__actions">
+    <button class="icon-btn" aria-label="Notificações">🔔</button>
+    <button class="icon-btn" aria-label="Configurações">⚙️</button>
+    <button class="avatar" data-open-profile>VA</button>
+  </div>
+</header>
+
+<div class="profile-pop" data-profile-pop>
+  <div class="profile-pop__label">Perfil</div>
+  <div class="profile-pop__row">
+    <div class="profile-pop__avatar">VA</div>
+    <div class="profile-pop__info">
+      <strong>Vinícius Assunção</strong>
+      <p>Matrícula: 10425<br>Setor: Logística<br>Telefone: (11) 90234-5678</p>
+    </div>
+  </div>
+  <button class="profile-pop__logout">↩ Sair da conta</button>
+</div>
+
+<div class="drawer-overlay" data-drawer-overlay></div>
+<aside class="drawer" data-drawer>
+  <div class="drawer__head">
+    <div class="topbar__brand"><span class="logo-dot">🥐</span> SweetLog</div>
+    <button class="drawer__close" data-close-menu aria-label="Fechar menu">✕</button>
+  </div>
+  <div class="drawer__label">Menu</div>
+  <nav class="drawer__nav">
+    <a class="drawer__link" href="dashboard.html"><span class="ico">🏠</span> Início</a>
+    <a class="drawer__link" href="produtos-lista.html"><span class="ico">🥐</span> Produtos</a>
+    <a class="drawer__link is-active" href="estoque.html"><span class="ico">📦</span> Controle de estoque</a>
+    <a class="drawer__link" href="pedidos.html"><span class="ico">🧺</span> Pedidos</a>
+    <a class="drawer__link" href="saldo-diario.html"><span class="ico">💰</span> Saldo diário</a>
+    <a class="drawer__link" href="lotes.html"><span class="ico">📅</span> Lotes e validade</a>
+  </nav>
+  <div class="drawer__footer">
+    <button class="drawer__logout">↩ Sair da Conta</button>
+  </div>
+</aside>
+
+<main class="page">
+  <a class="back-link" href="estoque.html">← Voltar</a>
+  <div class="page-head">
+    <h1>Saída de Produtos</h1>
+    <p>Registre a venda ou perda de produtos no estoque.</p>
+  </div>
+
+  <form class="card form-card" data-saida-form>
+    <div class="form-grid">
+      <div class="field">
+        <label for="produto2">Produto *</label>
+        <select class="input" id="produto2">
+          <option>Selecione um produto</option>
+          <option>Bolo de Chocolate</option>
+          <option>Croissant Tradicional</option>
+          <option>Pão Francês</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label for="motivo">Motivo da Saída *</label>
+        <select class="input" id="motivo">
+          <option>Selecione o motivo</option>
+          <option>Venda</option>
+          <option>Perda / Validade vencida</option>
+          <option>Doação</option>
+          <option>Uso em produção</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label for="qtd2">Quantidade *</label>
+        <div class="stepper" data-stepper>
+          <button type="button" class="stepper__btn" aria-label="Diminuir" data-stepper-minus>−</button>
+          <input class="stepper__value" id="qtd2" type="text" value="1" data-stepper-value>
+          <button type="button" class="stepper__btn" aria-label="Aumentar" data-stepper-plus>+</button>
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="lucro">Lucro Estimado / Valor</label>
+        <input class="input" id="lucro" type="text" placeholder="R$ 0,00" data-currency-input>
+      </div>
+    </div>
+
+    <div class="field" style="margin-top:18px;">
+      <label for="destino">Destino (Opcional)</label>
+      <div class="input-group">
+        <span class="icon">📍</span>
+        <input class="input" id="destino" type="text" placeholder="Ex: Cliente João, Loja Centro, Lixo Orgânico">
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <button type="button" class="btn btn--outline" data-cancel-btn data-cancel-href="estoque.html">Cancelar</button>
+      <button type="submit" class="btn btn--primary">📤 Registrar Saída</button>
+    </div>
+  </form>
+</main>
+
+<script src="js/app.js"></script>
+</body>
+</html>

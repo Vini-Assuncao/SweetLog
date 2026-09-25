@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SweetLog — Saldo Diário</title>
+<link rel="stylesheet" href="css/base.css">
+<link rel="stylesheet" href="css/saldo.css">
+</head>
+<body class="app">
+
+<header class="topbar">
+  <button class="menu-btn" data-open-menu aria-label="Abrir menu">☰</button>
+  <div class="topbar__brand"><span class="logo-dot">🥐</span> SweetLog</div>
+  <div class="topbar__search">
+    <span class="icon">🔍</span>
+    <input type="text" placeholder="Buscar...">
+  </div>
+  <div class="topbar__spacer"></div>
+  <div class="topbar__actions">
+    <button class="icon-btn" aria-label="Notificações">🔔</button>
+    <button class="icon-btn" aria-label="Configurações">⚙️</button>
+    <button class="avatar" data-open-profile>VA</button>
+  </div>
+</header>
+
+<div class="profile-pop" data-profile-pop>
+  <div class="profile-pop__label">Perfil</div>
+  <div class="profile-pop__row">
+    <div class="profile-pop__avatar">VA</div>
+    <div class="profile-pop__info">
+      <strong>Vinícius Assunção</strong>
+      <p>Matrícula: 10425<br>Setor: Logística<br>Telefone: (11) 90234-5678</p>
+    </div>
+  </div>
+  <button class="profile-pop__logout">↩ Sair da conta</button>
+</div>
+
+<div class="drawer-overlay" data-drawer-overlay></div>
+<aside class="drawer" data-drawer>
+  <div class="drawer__head">
+    <div class="topbar__brand"><span class="logo-dot">🥐</span> SweetLog</div>
+    <button class="drawer__close" data-close-menu aria-label="Fechar menu">✕</button>
+  </div>
+  <div class="drawer__label">Menu</div>
+  <nav class="drawer__nav">
+    <a class="drawer__link" href="dashboard.html"><span class="ico">🏠</span> Início</a>
+    <a class="drawer__link" href="produtos-lista.html"><span class="ico">🥐</span> Produtos</a>
+    <a class="drawer__link" href="estoque.html"><span class="ico">📦</span> Controle de estoque</a>
+    <a class="drawer__link" href="pedidos.html"><span class="ico">🧺</span> Pedidos</a>
+    <a class="drawer__link is-active" href="saldo-diario.html"><span class="ico">💰</span> Saldo diário</a>
+    <a class="drawer__link" href="lotes.html"><span class="ico">📅</span> Lotes e validade</a>
+  </nav>
+  <div class="drawer__footer">
+    <button class="drawer__logout">↩ Sair da Conta</button>
+  </div>
+</aside>
+
+<main class="page">
+  <div class="list-head">
+    <div class="page-head" style="margin-bottom:0;">
+      <h1>Saldo Diário</h1>
+      <p>Terça-feira, 24 de Outubro de 2023</p>
+    </div>
+    <button class="btn btn--primary" data-export-btn>⬇ Exportar Relatório</button>
+  </div>
+
+  <div class="saldo-grid">
+    <div class="card saldo-panel">
+      <h3 class="saldo-panel__title">⭐ Maiores vendas</h3>
+
+      <div class="sale-row">
+        <span class="sale-row__icon" style="background:#F1E8FF;">🥐</span>
+        <div class="sale-row__info">
+          <p class="sale-row__title">Croissants Tradicionais</p>
+        </div>
+        <strong>R$ 850,00</strong>
+      </div>
+      <div class="sale-row">
+        <span class="sale-row__icon" style="background:#E4E8FD;">🎂</span>
+        <div class="sale-row__info">
+          <p class="sale-row__title">Bolos Decorados</p>
+        </div>
+        <strong>R$ 620,00</strong>
+      </div>
+      <div class="sale-row">
+        <span class="sale-row__icon" style="background:#FDE8DE;">☕</span>
+        <div class="sale-row__info">
+          <p class="sale-row__title">Cafés Especiais</p>
+        </div>
+        <strong>R$ 415,50</strong>
+      </div>
+    </div>
+
+    <div class="stack gap-16">
+      <div class="card saldo-panel">
+        <h3 class="saldo-panel__title">💳 Saldo do dia</h3>
+        <div class="row" style="justify-content:space-between; align-items:flex-end;">
+          <p class="saldo-value">R$ 4.250,00</p>
+          <span class="badge badge--success">+12% hoje</span>
+        </div>
+      </div>
+
+      <div class="card saldo-panel chart-panel">
+        <div class="chart-bars">
+          <span style="height:32%"></span>
+          <span style="height:52%"></span>
+          <span style="height:66%"></span>
+          <span style="height:80%"></span>
+          <span style="height:38%"></span>
+          <span style="height:48%"></span>
+          <span style="height:56%"></span>
+          <span style="height:70%"></span>
+          <span style="height:44%"></span>
+          <span style="height:92%" class="is-highlight"></span>
+        </div>
+        <div class="chart-axis">
+          <span>1</span><span>2</span><span>3</span><span>4</span><span>5</span>
+          <span>6</span><span>7</span><span>8</span><span>9</span><span>10</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script src="js/app.js"></script>
+</body>
+</html>

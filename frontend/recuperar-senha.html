@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SweetLog — Recuperar Senha</title>
+<link rel="stylesheet" href="css/base.css">
+<link rel="stylesheet" href="css/auth.css">
+</head>
+<body>
+
+<div class="auth">
+  <div class="auth__art auth__art--bakery-1">
+    <div class="auth__art-caption">
+      <h3>Gestão Artesanal de Panificação</h3>
+      <p>Controle seu estoque com a precisão que sua receita exige.</p>
+    </div>
+  </div>
+
+  <div class="auth__panel">
+    <div class="auth__brand"><span class="logo-dot">🥐</span> SweetLog</div>
+
+    <h1>Recuperar Senha</h1>
+    <p class="subtitle">Insira seu telefone para receber um código de verificação.</p>
+
+    <form class="stack gap-16" onsubmit="return false;">
+      <div class="field">
+        <label for="telefone">Telefone</label>
+        <div class="input-group">
+          <span class="icon">📞</span>
+          <input class="input" id="telefone" type="tel" placeholder="(11) 90000-0000">
+        </div>
+      </div>
+
+      <a class="btn btn--primary btn--block btn--lg" href="verificar-codigo.html">Enviar Código</a>
+    </form>
+  </div>
+</div>
+
+</body>
+</html>

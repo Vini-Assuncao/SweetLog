@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SweetLog — Controle de Lotes e Validade</title>
+<link rel="stylesheet" href="css/base.css">
+<link rel="stylesheet" href="css/lotes.css">
+</head>
+<body class="app">
+
+<header class="topbar">
+  <button class="menu-btn" data-open-menu aria-label="Abrir menu">☰</button>
+  <div class="topbar__brand"><span class="logo-dot">🥐</span> SweetLog</div>
+  <div class="topbar__search">
+    <span class="icon">🔍</span>
+    <input type="text" placeholder="Buscar lotes, produtos...">
+  </div>
+  <div class="topbar__spacer"></div>
+  <div class="topbar__actions">
+    <button class="icon-btn" aria-label="Notificações">🔔</button>
+    <button class="icon-btn" aria-label="Configurações">⚙️</button>
+    <button class="avatar" data-open-profile>VA</button>
+  </div>
+</header>
+
+<div class="profile-pop" data-profile-pop>
+  <div class="profile-pop__label">Perfil</div>
+  <div class="profile-pop__row">
+    <div class="profile-pop__avatar">VA</div>
+    <div class="profile-pop__info">
+      <strong>Vinícius Assunção</strong>
+      <p>Matrícula: 10425<br>Setor: Logística<br>Telefone: (11) 90234-5678</p>
+    </div>
+  </div>
+  <button class="profile-pop__logout">↩ Sair da conta</button>
+</div>
+
+<div class="drawer-overlay" data-drawer-overlay></div>
+<aside class="drawer" data-drawer>
+  <div class="drawer__head">
+    <div class="topbar__brand"><span class="logo-dot">🥐</span> SweetLog</div>
+    <button class="drawer__close" data-close-menu aria-label="Fechar menu">✕</button>
+  </div>
+  <div class="drawer__label">Menu</div>
+  <nav class="drawer__nav">
+    <a class="drawer__link" href="dashboard.html"><span class="ico">🏠</span> Início</a>
+    <a class="drawer__link" href="produtos-lista.html"><span class="ico">🥐</span> Produtos</a>
+    <a class="drawer__link" href="estoque.html"><span class="ico">📦</span> Controle de estoque</a>
+    <a class="drawer__link" href="pedidos.html"><span class="ico">🧺</span> Pedidos</a>
+    <a class="drawer__link" href="saldo-diario.html"><span class="ico">💰</span> Saldo diário</a>
+    <a class="drawer__link is-active" href="lotes.html"><span class="ico">📅</span> Lotes e validade</a>
+  </nav>
+  <div class="drawer__footer">
+    <button class="drawer__logout">↩ Sair da Conta</button>
+  </div>
+</aside>
+
+<main class="page">
+  <div class="list-head">
+    <div class="page-head" style="margin-bottom:0;">
+      <h1>Controle de Lotes e Validade</h1>
+      <p>Monitoramento detalhado do ciclo de vida dos insumos e produtos. Evite desperdícios acompanhando as datas de vencimento em tempo real.</p>
+    </div>
+    <div class="row gap-12">
+      <button class="btn btn--outline" data-lote-filtros-toggle>▤ Filtros</button>
+      <a class="btn btn--primary" href="estoque-entrada.html">+ Novo Lote</a>
+    </div>
+  </div>
+
+  <div class="filter-chips" data-lote-filtros hidden>
+    <button type="button" class="filter-chip is-active" data-lote-filter="todos">Todos</button>
+    <button type="button" class="filter-chip" data-lote-filter="valido">✓ Dentro da validade</button>
+    <button type="button" class="filter-chip" data-lote-filter="proximo">⚠ Vencimento próximo</button>
+    <button type="button" class="filter-chip" data-lote-filter="vencido">⛔ Vencidos</button>
+  </div>
+
+  <div class="kpi-grid">
+    <div class="card kpi-card">
+      <div class="kpi-card__icon">🗄️</div>
+      <p class="kpi-card__label">Lotes Ativos</p>
+      <p class="kpi-card__value">142</p>
+      <p class="kpi-card__note kpi-card__note--muted">+12 adicionados hoje</p>
+    </div>
+    <div class="card kpi-card">
+      <div class="kpi-card__icon kpi-card__icon--warning">⚠️</div>
+      <p class="kpi-card__label">Vencimento Próximo (7 dias)</p>
+      <p class="kpi-card__value">8</p>
+      <p class="kpi-card__note kpi-card__note--warning">Ação recomendada: Promoção ou Uso Rápido</p>
+    </div>
+    <div class="card kpi-card">
+      <div class="kpi-card__icon kpi-card__icon--danger">⛔</div>
+      <p class="kpi-card__label">Lotes Vencidos</p>
+      <p class="kpi-card__value">2</p>
+      <p class="kpi-card__note kpi-card__note--danger">Ação imediata: Descarte necessário</p>
+    </div>
+  </div>
+
+  <div class="card table-card">
+    <div class="table-card__head">
+      <h3>Detalhamento de Lotes</h3>
+      <div class="row gap-12">
+        <div class="table-search" data-lote-search-wrap hidden>
+          <input class="input" type="text" placeholder="Buscar por produto ou insumo..." data-lote-search>
+        </div>
+        <button class="icon-btn" aria-label="Buscar" data-lote-search-toggle>🔍</button>
+        <button class="icon-btn" aria-label="Mais opções" data-lote-more>⋮</button>
+      </div>
+    </div>
+
+    <div class="table-scroll">
+      <table class="lotes-table" data-lotes-table>
+        <thead>
+          <tr>
+            <th>Produto / Insumo</th>
+            <th>Nº do Lote</th>
+            <th>Fabricação</th>
+            <th>Validade</th>
+            <th>Status</th>
+            <th>Qtd. Restante</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>
+              <div class="row gap-12">
+                <span class="lotes-table__icon" style="background:#F1E8FF;">🌾</span>
+                <div>
+                  <p class="lotes-table__title">Farinha de Trigo Premium</p>
+                  <p class="lotes-table__sub">Fornecedor: Moinho Sul</p>
+                </div>
+              </div>
+            </td>
+            <td>LT-2023-10-A</td>
+            <td>10/10/2023</td>
+            <td>25/04/2024</td>
+            <td><span class="badge badge--blue">✓ Dentro da Validade</span></td>
+            <td>150 kg</td>
+          </tr>
+          <tr class="is-warning">
+            <td>
+              <div class="row gap-12">
+                <span class="lotes-table__icon" style="background:#FDF1E4;">🥚</span>
+                <div>
+                  <p class="lotes-table__title">Ovos Brancos Grandes</p>
+                  <p class="lotes-table__sub">Fornecedor: Granja São João</p>
+                </div>
+              </div>
+            </td>
+            <td>LT-OV-882</td>
+            <td>01/11/2023</td>
+            <td class="text-warning">15/11/2023</td>
+            <td><span class="badge badge--warning">⚠ Vence em 4 dias</span></td>
+            <td>12 dúzias</td>
+          </tr>
+          <tr class="is-danger">
+            <td>
+              <div class="row gap-12">
+                <span class="lotes-table__icon" style="background:#FCEAEA;">🥛</span>
+                <div>
+                  <p class="lotes-table__title">Leite Integral</p>
+                  <p class="lotes-table__sub">Fornecedor: Laticínios Vale</p>
+                </div>
+              </div>
+            </td>
+            <td>LT-LE-004</td>
+            <td>25/10/2023</td>
+            <td class="text-danger">05/11/2023</td>
+            <td><span class="badge badge--danger">⛔ Vencido</span></td>
+            <td>8 litros</td>
+          </tr>
+          <tr>
+            <td>
+              <div class="row gap-12">
+                <span class="lotes-table__icon" style="background:#F1E8FF;">🧈</span>
+                <div>
+                  <p class="lotes-table__title">Manteiga sem Sal</p>
+                  <p class="lotes-table__sub">Fornecedor: Laticínios Vale</p>
+                </div>
+              </div>
+            </td>
+            <td>LT-MT-991</td>
+            <td>10/09/2023</td>
+            <td>10/03/2024</td>
+            <td><span class="badge badge--blue">✓ Dentro da Validade</span></td>
+            <td>45 kg</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p class="empty-state" data-lote-empty hidden style="margin: 16px 20px;">Nenhum lote encontrado para os filtros selecionados.</p>
+
+    <div class="table-card__foot">
+      <span>Mostrando 1 a 4 de 142 lotes</span>
+      <div class="pagination" data-pagination>
+        <button class="pagination__btn" aria-label="Anterior" data-page-prev disabled>‹</button>
+        <button class="pagination__btn is-active" data-page="1">1</button>
+        <button class="pagination__btn" data-page="2">2</button>
+        <button class="pagination__btn" data-page="3">3</button>
+        <button class="pagination__btn" aria-label="Próximo" data-page-next>›</button>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script src="js/app.js"></script>
+</body>
+</html>

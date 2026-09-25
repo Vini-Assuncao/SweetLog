@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SweetLog — Pedidos em Andamento</title>
+<link rel="stylesheet" href="css/base.css">
+<link rel="stylesheet" href="css/pedidos.css">
+</head>
+<body class="app">
+
+<header class="topbar">
+  <button class="menu-btn" data-open-menu aria-label="Abrir menu">☰</button>
+  <div class="topbar__brand"><span class="logo-dot">🥐</span> SweetLog</div>
+  <div class="topbar__search">
+    <span class="icon">🔍</span>
+    <input type="text" placeholder="Buscar pedidos..." data-pedido-search>
+  </div>
+  <div class="topbar__spacer"></div>
+  <div class="topbar__actions">
+    <button class="icon-btn" aria-label="Notificações">🔔</button>
+    <button class="icon-btn" aria-label="Configurações">⚙️</button>
+    <button class="avatar" data-open-profile>VA</button>
+  </div>
+</header>
+
+<div class="profile-pop" data-profile-pop>
+  <div class="profile-pop__label">Perfil</div>
+  <div class="profile-pop__row">
+    <div class="profile-pop__avatar">VA</div>
+    <div class="profile-pop__info">
+      <strong>Vinícius Assunção</strong>
+      <p>Matrícula: 10425<br>Setor: Logística<br>Telefone: (11) 90234-5678</p>
+    </div>
+  </div>
+  <button class="profile-pop__logout">↩ Sair da conta</button>
+</div>
+
+<div class="drawer-overlay" data-drawer-overlay></div>
+<aside class="drawer" data-drawer>
+  <div class="drawer__head">
+    <div class="topbar__brand"><span class="logo-dot">🥐</span> SweetLog</div>
+    <button class="drawer__close" data-close-menu aria-label="Fechar menu">✕</button>
+  </div>
+  <div class="drawer__label">Menu</div>
+  <nav class="drawer__nav">
+    <a class="drawer__link" href="dashboard.html"><span class="ico">🏠</span> Início</a>
+    <a class="drawer__link" href="produtos-lista.html"><span class="ico">🥐</span> Produtos</a>
+    <a class="drawer__link" href="estoque.html"><span class="ico">📦</span> Controle de estoque</a>
+    <a class="drawer__link is-active" href="pedidos.html"><span class="ico">🧺</span> Pedidos</a>
+    <a class="drawer__link" href="saldo-diario.html"><span class="ico">💰</span> Saldo diário</a>
+    <a class="drawer__link" href="lotes.html"><span class="ico">📅</span> Lotes e validade</a>
+  </nav>
+  <div class="drawer__footer">
+    <button class="drawer__logout">↩ Sair da Conta</button>
+  </div>
+</aside>
+
+<main class="page">
+  <div class="list-head">
+    <div class="page-head" style="margin-bottom:0;">
+      <h1>Pedidos em Andamento</h1>
+      <p>Acompanhe as entregas programadas e em preparo.</p>
+    </div>
+    <span class="badge badge--purple">🧺 12 Ativos</span>
+  </div>
+
+  <div class="order-grid" data-order-grid>
+    <div class="card order-card" data-numero="PED-8492">
+      <div class="order-card__head">
+        <strong>#PED-8492</strong>
+        <span class="badge badge--purple badge--dot">Em preparo</span>
+      </div>
+      <div class="order-card__row">
+        <span>📦 Qtd</span><strong>145 un</strong>
+      </div>
+      <div class="order-card__row">
+        <span>💲 Valor</span><strong>R$ 1.250,00</strong>
+      </div>
+      <div class="order-card__foot">
+        <span>📅 Data pedido<br><strong>24/10/2023</strong></span>
+        <span>🚚 Data entrega prev.<br><strong>26/10/2023</strong></span>
+      </div>
+    </div>
+
+    <div class="card order-card" data-numero="PED-8493">
+      <div class="order-card__head">
+        <strong>#PED-8493</strong>
+        <span class="badge badge--blue badge--dot">Aguardando coleta</span>
+      </div>
+      <div class="order-card__row">
+        <span>📦 Qtd</span><strong>60 un</strong>
+      </div>
+      <div class="order-card__row">
+        <span>💲 Valor</span><strong>R$ 480,50</strong>
+      </div>
+      <div class="order-card__foot">
+        <span>📅 Data pedido<br><strong>25/10/2023</strong></span>
+        <span>🚚 Data entrega prev.<br><strong>25/10/2023</strong></span>
+      </div>
+    </div>
+
+    <div class="card order-card" data-numero="PED-8495">
+      <div class="order-card__head">
+        <strong>#PED-8495</strong>
+        <span class="badge badge--purple badge--dot">Em preparo</span>
+      </div>
+      <div class="order-card__row">
+        <span>📦 Qtd</span><strong>210 un</strong>
+      </div>
+      <div class="order-card__row">
+        <span>💲 Valor</span><strong>R$ 2.100,00</strong>
+      </div>
+      <div class="order-card__foot">
+        <span>📅 Data pedido<br><strong>25/10/2023</strong></span>
+        <span>🚚 Data entrega prev.<br><strong>27/10/2023</strong></span>
+      </div>
+    </div>
+
+    <div class="card order-card" data-numero="PED-8498">
+      <div class="order-card__head">
+        <strong>#PED-8498</strong>
+        <span class="badge badge--purple badge--dot">Em preparo</span>
+      </div>
+      <div class="order-card__row">
+        <span>📦 Qtd</span><strong>45 un</strong>
+      </div>
+      <div class="order-card__row">
+        <span>💲 Valor</span><strong>R$ 320,00</strong>
+      </div>
+      <div class="order-card__foot">
+        <span>📅 Data pedido<br><strong>26/10/2023</strong></span>
+        <span>🚚 Data entrega prev.<br><strong>26/10/2023</strong></span>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script src="js/app.js"></script>
+</body>
+</html>
