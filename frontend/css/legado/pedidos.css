@@ -1,0 +1,36 @@
+/* pedidos.css */
+
+.list-head{
+  display:flex; align-items:flex-start; justify-content: space-between;
+  gap: 16px; margin-bottom: 24px; flex-wrap: wrap;
+}
+
+.order-grid{
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 18px;
+}
+@media (max-width: 980px){ .order-grid{ grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 560px){ .order-grid{ grid-template-columns: 1fr; } }
+
+.order-card{ padding: 18px; }
+.order-card__head{
+  display:flex; align-items:center; justify-content: space-between;
+  margin-bottom: 14px;
+  font-size: 0.95rem;
+}
+.order-card__row{
+  display:flex; justify-content: space-between;
+  font-size: 0.85rem; color: var(--text-muted);
+  padding: 6px 0;
+}
+.order-card__row strong{ color: var(--text); }
+
+.order-card__foot{
+  display:flex; justify-content: space-between;
+  gap: 10px;
+  margin-top: 12px; padding-top: 12px;
+  border-top: 1px solid var(--border);
+  font-size: 0.72rem; color: var(--text-faint);
+}
+.order-card__foot strong{ display:block; margin-top: 2px; font-size: 0.78rem; color: var(--text); font-weight: 600; }

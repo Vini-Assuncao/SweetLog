@@ -1,54 +1,44 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="pt-BR">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>SweetLog — Nova Senha</title>
-    <link rel="stylesheet" href="css/base.css" />
-    <link rel="stylesheet" href="css/auth.css" />
-  </head>
-  <body>
-    <div class="auth">
-      <div class="auth__art auth__art--bakery-3"></div>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="css/build.css">
+<title>SweetLog — Nova Senha</title>
 
-      <div class="auth__panel">
-        <div class="auth__brand"><span class="logo-dot">🥐</span> SweetLog</div>
+</head>
+<body>
 
-        <h1>Nova Senha</h1>
-        <p class="subtitle">Crie uma senha forte para proteger sua conta.</p>
+<div class="auth">
+  <div class="auth__art auth__art--bakery-3"></div>
 
-        <form class="stack gap-16" onsubmit="return false;">
-          <div class="field">
-            <label for="nova">Nova Senha</label>
-            <div class="input-group">
-              <span class="icon">🔒</span>
-              <input
-                class="input"
-                id="nova"
-                type="password"
-                placeholder="Mínimo de 8 caracteres"
-              />
-            </div>
-          </div>
+  <div class="auth__panel">
+    <div class="auth__brand"><span class="logo-dot">🥐</span> SweetLog</div>
 
-          <div class="field">
-            <label for="confirma">Confirmar Nova Senha</label>
-            <div class="input-group">
-              <span class="icon">🔒</span>
-              <input
-                class="input"
-                id="confirma"
-                type="password"
-                placeholder="Repita a nova senha"
-              />
-            </div>
-          </div>
+    <h1>Nova Senha</h1>
+    <p class="subtitle">Crie uma senha forte para proteger sua conta.</p>
 
-          <a class="btn btn--primary btn--block btn--lg" href="login.html"
-            >Redefinir Senha →</a
-          >
-        </form>
+    <form class="stack gap-16" onsubmit="return false;">
+      <div class="field">
+        <label for="nova">Nova Senha</label>
+        <div class="input-group">
+          <span class="icon">🔒</span>
+          <input class="input" id="nova" type="password" placeholder="Mínimo de 8 caracteres">
+        </div>
       </div>
-    </div>
-  </body>
+
+      <div class="field">
+        <label for="confirma">Confirmar Nova Senha</label>
+        <div class="input-group">
+          <span class="icon">🔒</span>
+          <input class="input" id="confirma" type="password" placeholder="Repita a nova senha">
+        </div>
+      </div>
+
+      <a class="btn btn--primary btn--block btn--lg" href="login.html">Redefinir Senha →</a>
+    </form>
+  </div>
+</div>
+
+</body>
 </html>

@@ -1,0 +1,46 @@
+/* estoque.css */
+
+.page--center{
+  min-height: calc(100vh - 70px);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+}
+
+.op-grid{
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  max-width: 620px;
+  width: 100%;
+}
+@media (max-width: 600px){ .op-grid{ grid-template-columns: 1fr; } }
+
+.op-card{
+  padding: 36px 24px;
+  text-align: center;
+  color: var(--text);
+  display: flex; flex-direction: column; align-items: center; gap: 10px;
+  position: relative;
+  overflow: hidden;
+  transition: transform .15s ease, box-shadow .15s ease;
+}
+.op-card:hover{ transform: translateY(-4px); box-shadow: var(--shadow-lg); }
+.op-card::before{
+  content:'';
+  position:absolute; top:-30px; right:-30px;
+  width: 90px; height: 90px; border-radius: 50%;
+  background: var(--primary-soft); opacity: .6;
+}
+
+.op-card__icon{
+  width: 58px; height: 58px;
+  border-radius: 16px;
+  display:flex; align-items:center; justify-content:center;
+  font-size: 1.6rem;
+  margin-bottom: 6px;
+  position: relative; z-index: 1;
+}
+.op-card__icon--blue{ background: #E4E8FD; }
+.op-card__icon--purple{ background: var(--primary-soft); }
+
+.op-card h3{ font-size: 1.15rem; position: relative; z-index: 1; }
+.op-card p{ font-size: 0.84rem; color: var(--text-muted); position: relative; z-index: 1; }
