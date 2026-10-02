@@ -505,7 +505,7 @@ document.addEventListener('DOMContentLoaded', function () {
       setTimeout(function () {
         exportBtn.innerHTML = original;
         exportBtn.disabled = false;
-        showToast('Relatório de 24/10/2023 exportado com sucesso!', 'success');
+        showToast('Relatório de 24/10/2026 exportado com sucesso!', 'success');
       }, 900);
     });
   }
