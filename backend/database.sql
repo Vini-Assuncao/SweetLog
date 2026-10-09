@@ -1,4 +1,4 @@
-DROP DATABASE IF EXISTS sweetlog;
+# DROP DATABASE IF EXISTS sweetlog;
 CREATE DATABASE IF NOT EXISTS sweetlog;
 USE sweetlog;
 SET GLOBAL event_scheduler = ON;
