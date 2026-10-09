@@ -1,4 +1,5 @@
 const FuncionarioRepository = require('../repositories/FuncionarioRepository')
+const MatriculaRepository = require('../repositories/MatriculaRepository')
 const bcrypt = require('bcryptjs');
 
 class FuncionarioService {
@@ -29,14 +30,22 @@ class FuncionarioService {
     }
 
     async cadastrar(funcionarioData) {
-        const { numero_matricula, senha, nome, telefone, cargo } = funcionarioData
+        const { numero_matricula, senha, nome, telefone } = funcionarioData
 
-        if (!numero_matricula || !senha || !nome || !cargo) {
-            throw { status: 400, mensagem: "Número da matrícula, senha, nome e cargo são obrigarórios" }
+        if (!numero_matricula || !senha || !nome) {
+            throw { status: 400, mensagem: "Número da matrícula, senha e nome são obrigarórios" }
         }
 
         if (isNaN(numero_matricula) || numero_matricula <= 0) {
             throw { status: 400, mensagem: "Número da matrícula deve ser um número positivo" }
+        }
+
+        const matriculaExistente = await MatriculaRepository.selectById(numero_matricula)
+        const funcionarioExistente = await FuncionarioRepository.selectById(numero_matricula)
+        if (!matriculaExistente) {
+            throw { status: 404, mensagem: "Número da matrícula não encontrado" }
+        } else if (funcionarioExistente) {
+            throw { status: 400, mensagem: "Funcionário já cadastrado" }
         }
 
         if (senha.trim().length < 8 ) {
@@ -59,7 +68,6 @@ class FuncionarioService {
             senha: senhaHash,
             nome: nome.trim(),
             telefone: numeros_telefone,
-            cargo
         }
 
         await FuncionarioRepository.insert(funcionario)
@@ -67,12 +75,7 @@ class FuncionarioService {
         return {
             sucesso: true,
             mensagem: "Funcionário cadastrado com sucesso",
-            funcionario: {
-                numero_matricula: funcionario.numero_matricula,
-                nome: funcionario.nome,
-                telefone: funcionario.telefone,
-                cargo: funcionario.cargo
-            }
+            funcionario: await FuncionarioRepository.selectById(numero_matricula)
         }
     }
 
@@ -87,7 +90,7 @@ class FuncionarioService {
         }
 
         const funcionarioAtualizado = {}
-        const { senha, nome, telefone, cargo } = funcionarioData
+        const { senha, nome, telefone } = funcionarioData
 
         if (nome !== undefined) {
             if (nome === null || nome.trim() === '') {
@@ -118,12 +121,6 @@ class FuncionarioService {
                 }
                 funcionarioAtualizado.telefone = numeros_telefone
             }
-        }
-        if (cargo !== undefined) {
-            if (cargo === null || cargo.trim() === '') {
-                throw { status: 400, mensagem: "Cargo não pode ser vazio" }
-            }
-            funcionarioAtualizado.cargo = cargo
         }
 
         if (Object.keys(funcionarioAtualizado).length == 0) {

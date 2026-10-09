@@ -2,12 +2,12 @@ const pool = require('../config/database')
 
 class FuncionarioRepository {
     async selectAll() {
-        const [rows] = await pool.query('SELECT numero_matricula, nome, telefone, cargo FROM tbl_funcionarios')
+        const [rows] = await pool.query('SELECT numero_matricula, nome, telefone FROM tbl_funcionarios')
         return rows
     }
     
     async selectById(numero_matricula) {
-        const [rows] = await pool.query('SELECT numero_matricula, nome, telefone, cargo FROM tbl_funcionarios WHERE numero_matricula = ?', [numero_matricula])
+        const [rows] = await pool.query('SELECT numero_matricula, nome, telefone FROM tbl_funcionarios WHERE numero_matricula = ?', [numero_matricula])
         return rows[0]
     }
 
@@ -17,10 +17,10 @@ class FuncionarioRepository {
     }
     
     async insert(funcionarioData) {
-        const { numero_matricula, senha, nome, telefone, cargo } = funcionarioData
+        const { numero_matricula, senha, nome, telefone } = funcionarioData
         const [result] = await pool.query(
-            'INSERT INTO tbl_funcionarios (numero_matricula, senha, nome, telefone, cargo) VALUES (?, ?, ?, ?, ?)',
-            [numero_matricula, senha, nome, telefone, cargo]
+            'INSERT INTO tbl_funcionarios (numero_matricula, senha, nome, telefone) VALUES (?, ?, ?, ?)',
+            [numero_matricula, senha, nome, telefone]
         )
         return result.affectedRows
     }
