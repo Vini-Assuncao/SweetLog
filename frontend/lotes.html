@@ -14,7 +14,7 @@
   <div class="topbar__brand"><span class="logo-dot">🥐</span> SweetLog</div>
   <div class="topbar__search">
     <span class="icon">🔍</span>
-    <input type="text" placeholder="Buscar lotes, produtos...">
+    <input type="text" placeholder="Buscar lotes, produtos..." aria-label="Buscar lotes e produtos" data-lote-search>
   </div>
   <div class="topbar__spacer"></div>
   <div class="topbar__actions">
@@ -101,7 +101,7 @@
       <h3>Detalhamento de Lotes</h3>
       <div class="row gap-12">
         <div class="table-search" data-lote-search-wrap hidden>
-          <input class="input" type="text" placeholder="Buscar por produto ou insumo..." data-lote-search>
+          <input class="input" type="text" placeholder="Buscar por produto ou insumo..." aria-label="Buscar por produto ou insumo" data-lote-search>
         </div>
         <button class="icon-btn" aria-label="Buscar" data-lote-search-toggle>🔍</button>
         <button class="icon-btn" aria-label="Mais opções" data-lote-more>⋮</button>

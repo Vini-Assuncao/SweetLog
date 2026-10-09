@@ -23,19 +23,20 @@
     <h1>Recuperar Senha</h1>
     <p class="subtitle">Insira seu telefone para receber um código de verificação.</p>
 
-    <form class="stack gap-16" onsubmit="return false;">
+    <form class="stack gap-16" data-recuperar-form novalidate>
       <div class="field">
         <label for="telefone">Telefone</label>
         <div class="input-group">
           <span class="icon">📞</span>
-          <input class="input" id="telefone" type="tel" placeholder="(11) 90000-0000">
+          <input class="input" id="telefone" name="telefone" type="tel" inputmode="tel" autocomplete="tel" placeholder="(11) 90000-0000" required>
         </div>
       </div>
 
-      <a class="btn btn--primary btn--block btn--lg" href="verificar-codigo.html">Enviar Código</a>
+      <button class="btn btn--primary btn--block btn--lg" type="submit">Enviar Código</button>
     </form>
   </div>
 </div>
 
+<script src="js/app.js"></script>
 </body>
 </html>

@@ -6,6 +6,15 @@
 <title>SweetLog — Pedidos em Andamento</title>
 <link rel="stylesheet" href="css/base.css">
 <link rel="stylesheet" href="css/pedidos.css">
+<style>
+  /* Busca dentro da página: a do topo (.topbar__search) some abaixo de 720px */
+  .orders-search-mobile{ display:none; margin-bottom:16px; }
+  @media (max-width:720px){ .orders-search-mobile{ display:block; } }
+
+  /* Mensagem de "nenhum pedido encontrado" */
+  .orders-empty{ text-align:center; color:var(--text-muted); padding:32px 16px; }
+  .orders-empty[hidden]{ display:none; }
+</style>
 </head>
 <body class="app">
 
@@ -14,7 +23,7 @@
   <div class="topbar__brand"><span class="logo-dot">🥐</span> SweetLog</div>
   <div class="topbar__search">
     <span class="icon">🔍</span>
-    <input type="text" placeholder="Buscar pedidos..." data-pedido-search>
+    <input type="text" placeholder="Buscar pedidos..." aria-label="Buscar pedidos" data-pedido-search>
   </div>
   <div class="topbar__spacer"></div>
   <div class="topbar__actions">
@@ -63,6 +72,13 @@
       <p>Acompanhe as entregas programadas e em preparo.</p>
     </div>
     <span class="badge badge--purple">🧺 12 Ativos</span>
+  </div>
+
+  <div class="orders-search-mobile">
+    <div class="input-group">
+      <span class="icon">🔍</span>
+      <input class="input" type="search" placeholder="Buscar pedidos..." aria-label="Buscar pedidos" data-pedido-search>
+    </div>
   </div>
 
   <div class="order-grid" data-order-grid>
@@ -134,6 +150,8 @@
       </div>
     </div>
   </div>
+
+  <p class="orders-empty" data-empty-state hidden>Nenhum pedido encontrado.</p>
 </main>
 
 <script src="js/app.js"></script>

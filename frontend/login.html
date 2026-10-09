@@ -15,12 +15,12 @@
     <h1>Bem-vindo(a)</h1>
     <p class="subtitle">Acesse sua conta para iniciar o turno</p>
 
-    <form class="stack gap-16" data-login-form>
+    <form class="stack gap-16" data-login-form novalidate>
       <div class="field">
         <label for="matricula">Número de matrícula</label>
         <div class="input-group">
           <span class="icon">🪪</span>
-          <input class="input" id="matricula" type="text" placeholder="Ex: 12345">
+          <input class="input" id="matricula" name="matricula" type="text" inputmode="numeric" autocomplete="username" placeholder="Ex: 12345" required autofocus>
         </div>
       </div>
 
@@ -28,13 +28,13 @@
         <label for="senha">Senha</label>
         <div class="input-group">
           <span class="icon">🔒</span>
-          <input class="input" id="senha" type="password" placeholder="••••••••">
+          <input class="input" id="senha" name="senha" type="password" autocomplete="current-password" placeholder="••••••••" required>
         </div>
       </div>
 
       <div class="login-card__row">
         <label class="remember">
-          <input type="checkbox"> Lembrar de mim
+          <input type="checkbox" name="lembrar"> Lembrar de mim
         </label>
         <a href="recuperar-senha.html">Esqueci a senha</a>
       </div>

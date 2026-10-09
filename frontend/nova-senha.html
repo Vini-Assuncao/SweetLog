@@ -18,12 +18,12 @@
     <h1>Nova Senha</h1>
     <p class="subtitle">Crie uma senha forte para proteger sua conta.</p>
 
-    <form class="stack gap-16" onsubmit="return false;">
+    <form class="stack gap-16" data-senha-form novalidate>
       <div class="field">
         <label for="nova">Nova Senha</label>
         <div class="input-group">
           <span class="icon">🔒</span>
-          <input class="input" id="nova" type="password" placeholder="Mínimo de 8 caracteres">
+          <input class="input" id="nova" name="nova" type="password" autocomplete="new-password" minlength="8" placeholder="Mínimo de 8 caracteres" required>
         </div>
       </div>
 
@@ -31,14 +31,15 @@
         <label for="confirma">Confirmar Nova Senha</label>
         <div class="input-group">
           <span class="icon">🔒</span>
-          <input class="input" id="confirma" type="password" placeholder="Repita a nova senha">
+          <input class="input" id="confirma" name="confirma" type="password" autocomplete="new-password" placeholder="Repita a nova senha" required>
         </div>
       </div>
 
-      <a class="btn btn--primary btn--block btn--lg" href="login.html">Redefinir Senha →</a>
+      <button class="btn btn--primary btn--block btn--lg" type="submit">Redefinir Senha →</button>
     </form>
   </div>
 </div>
 
+<script src="js/app.js"></script>
 </body>
 </html>

@@ -59,7 +59,7 @@
     <p>Preencha os detalhes abaixo para adicionar um novo item ao catálogo da padaria.</p>
   </div>
 
-  <form class="card form-card" data-produto-form>
+  <form class="card form-card" data-produto-form novalidate>
     <div class="form-grid form-grid--photo">
       <div class="field">
         <label>Foto do produto</label>
@@ -74,18 +74,18 @@
 
       <div class="stack gap-16">
         <div class="field">
-          <label for="nome">Nome do produto</label>
-          <input class="input" id="nome" type="text" placeholder="Ex: Bolo de Cenoura com Chocolate">
+          <label for="nome">Nome do produto *</label>
+          <input class="input" id="nome" name="nome" type="text" placeholder="Ex: Bolo de Cenoura com Chocolate" required>
         </div>
 
         <div class="form-grid">
           <div class="field">
-            <label for="marca">Marca / Fornecedor</label>
-            <input class="input" id="marca" type="text" placeholder="Exemplo: Nestlé">
+            <label for="marca">Marca / Fornecedor *</label>
+            <input class="input" id="marca" name="marca" type="text" placeholder="Exemplo: Nestlé" required>
           </div>
           <div class="field">
-            <label for="tamanho">Tamanho / Peso</label>
-            <input class="input" id="tamanho" type="text" placeholder="Ex: 500g, 1 Unidade">
+            <label for="tamanho">Tamanho / Peso *</label>
+            <input class="input" id="tamanho" name="tamanho" type="text" placeholder="Ex: 500g, 1 Unidade" required>
           </div>
         </div>
       </div>
@@ -100,8 +100,8 @@
         </div>
       </div>
       <div class="radio-choice">
-        <label><input type="radio" name="refrigeracao"> Sim</label>
-        <label><input type="radio" name="refrigeracao" checked> Não</label>
+        <label><input type="radio" name="refrigeracao" value="sim"> Sim</label>
+        <label><input type="radio" name="refrigeracao" value="nao" checked> Não</label>
       </div>
     </div>
 

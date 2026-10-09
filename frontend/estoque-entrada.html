@@ -59,15 +59,15 @@
     <p>Registre o recebimento de novos produtos no estoque.</p>
   </div>
 
-  <form class="card form-card" data-entrada-form>
+  <form class="card form-card" data-entrada-form novalidate>
     <div class="form-grid">
       <div class="field">
         <label for="produto">Produto *</label>
-        <select class="input" id="produto">
-          <option>Selecione um produto...</option>
-          <option>Farinha de Trigo Premium</option>
-          <option>Ovos Brancos Grandes</option>
-          <option>Leite Integral</option>
+        <select class="input" id="produto" name="produto" required>
+          <option value="">Selecione um produto...</option>
+          <option value="farinha-trigo-premium">Farinha de Trigo Premium</option>
+          <option value="ovos-brancos-grandes">Ovos Brancos Grandes</option>
+          <option value="leite-integral">Leite Integral</option>
         </select>
       </div>
 
@@ -75,19 +75,19 @@
         <label for="qtd">Quantidade *</label>
         <div class="stepper" data-stepper>
           <button type="button" class="stepper__btn" aria-label="Diminuir" data-stepper-minus>−</button>
-          <input class="stepper__value" id="qtd" type="text" value="1" data-stepper-value>
+          <input class="stepper__value" id="qtd" type="text" inputmode="numeric" value="1" data-stepper-value>
           <button type="button" class="stepper__btn" aria-label="Aumentar" data-stepper-plus>+</button>
         </div>
       </div>
 
       <div class="field">
         <label for="lote">Lote de Produção *</label>
-        <input class="input" id="lote" type="text" placeholder="Ex: L-202310">
+        <input class="input" id="lote" name="lote" type="text" placeholder="Ex: L-202310" required>
       </div>
 
       <div class="field">
         <label for="validade">Data de Validade *</label>
-        <input class="input" id="validade" type="date">
+        <input class="input" id="validade" name="validade" type="date" required>
       </div>
     </div>
 
@@ -98,7 +98,7 @@
           <span class="upload-box__icon">📄</span>
           <span class="upload-box__text" data-upload-text>Anexar arquivo ou arraste e solte</span>
           <span class="upload-box__hint" data-upload-hint>PDF até 10MB</span>
-          <input id="nf" type="file" class="visually-hidden" accept="application/pdf" data-upload-input>
+          <input id="nf" type="file" class="visually-hidden" accept="application/pdf" data-upload-input data-max-mb="10">
         </label>
       </div>
 
@@ -106,8 +106,8 @@
         <label>Inspeção de Qualidade *</label>
         <p class="hint" style="margin-bottom:8px;">O produto foi inspecionado visualmente e atende aos padrões de qualidade para recebimento?</p>
         <div class="radio-choice">
-          <label><input type="radio" name="inspecao" checked> Sim, aprovado</label>
-          <label><input type="radio" name="inspecao"> Não, reprovado</label>
+          <label><input type="radio" name="inspecao" value="aprovado" checked> Sim, aprovado</label>
+          <label><input type="radio" name="inspecao" value="reprovado"> Não, reprovado</label>
         </div>
       </div>
     </div>

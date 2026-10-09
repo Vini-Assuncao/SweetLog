@@ -59,26 +59,26 @@
     <p>Registre a venda ou perda de produtos no estoque.</p>
   </div>
 
-  <form class="card form-card" data-saida-form>
+  <form class="card form-card" data-saida-form novalidate>
     <div class="form-grid">
       <div class="field">
         <label for="produto2">Produto *</label>
-        <select class="input" id="produto2">
-          <option>Selecione um produto</option>
-          <option>Bolo de Chocolate</option>
-          <option>Croissant Tradicional</option>
-          <option>Pão Francês</option>
+        <select class="input" id="produto2" name="produto2" required>
+          <option value="">Selecione um produto</option>
+          <option value="bolo-chocolate">Bolo de Chocolate</option>
+          <option value="croissant-tradicional">Croissant Tradicional</option>
+          <option value="pao-frances">Pão Francês</option>
         </select>
       </div>
 
       <div class="field">
         <label for="motivo">Motivo da Saída *</label>
-        <select class="input" id="motivo">
-          <option>Selecione o motivo</option>
-          <option>Venda</option>
-          <option>Perda / Validade vencida</option>
-          <option>Doação</option>
-          <option>Uso em produção</option>
+        <select class="input" id="motivo" name="motivo" required>
+          <option value="">Selecione o motivo</option>
+          <option value="venda">Venda</option>
+          <option value="perda-validade">Perda / Validade vencida</option>
+          <option value="doacao">Doação</option>
+          <option value="producao">Uso em produção</option>
         </select>
       </div>
 
@@ -86,14 +86,14 @@
         <label for="qtd2">Quantidade *</label>
         <div class="stepper" data-stepper>
           <button type="button" class="stepper__btn" aria-label="Diminuir" data-stepper-minus>−</button>
-          <input class="stepper__value" id="qtd2" type="text" value="1" data-stepper-value>
+          <input class="stepper__value" id="qtd2" type="text" inputmode="numeric" value="1" data-stepper-value>
           <button type="button" class="stepper__btn" aria-label="Aumentar" data-stepper-plus>+</button>
         </div>
       </div>
 
       <div class="field">
         <label for="lucro">Lucro Estimado / Valor</label>
-        <input class="input" id="lucro" type="text" placeholder="R$ 0,00" data-currency-input>
+        <input class="input" id="lucro" type="text" inputmode="numeric" placeholder="R$ 0,00" data-currency-input>
       </div>
     </div>
 

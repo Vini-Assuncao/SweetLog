@@ -3,9 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SweetLog — Croissant de Amêndoas</title>
+<title>SweetLog — Saldo Diário</title>
 <link rel="stylesheet" href="css/base.css">
-<link rel="stylesheet" href="css/produto-detalhe.css">
+<link rel="stylesheet" href="css/saldo.css">
 </head>
 <body class="app">
 
@@ -14,7 +14,7 @@
   <div class="topbar__brand"><span class="logo-dot">🥐</span> SweetLog</div>
   <div class="topbar__search">
     <span class="icon">🔍</span>
-    <input type="text" placeholder="Buscar produtos...">
+    <input type="text" placeholder="Buscar...">
   </div>
   <div class="topbar__spacer"></div>
   <div class="topbar__actions">
@@ -45,10 +45,10 @@
   <div class="drawer__label">Menu</div>
   <nav class="drawer__nav">
     <a class="drawer__link" href="dashboard.html"><span class="ico">🏠</span> Início</a>
-    <a class="drawer__link is-active" href="produtos-lista.html"><span class="ico">🥐</span> Produtos</a>
+    <a class="drawer__link" href="produtos-lista.html"><span class="ico">🥐</span> Produtos</a>
     <a class="drawer__link" href="estoque.html"><span class="ico">📦</span> Controle de estoque</a>
     <a class="drawer__link" href="pedidos.html"><span class="ico">🧺</span> Pedidos</a>
-    <a class="drawer__link" href="saldo-diario.html"><span class="ico">💰</span> Saldo diário</a>
+    <a class="drawer__link is-active" href="saldo-diario.html"><span class="ico">💰</span> Saldo diário</a>
     <a class="drawer__link" href="lotes.html"><span class="ico">📅</span> Lotes e validade</a>
   </nav>
   <div class="drawer__footer">
@@ -57,48 +57,66 @@
 </aside>
 
 <main class="page">
-  <div class="crumb-row">
-    <div>
-      <a class="back-link" href="produtos-lista.html">← Produtos / Pães Especiais / 0042</a>
-      <h1>Croissant de Amêndoas</h1>
+  <div class="list-head">
+    <div class="page-head" style="margin-bottom:0;">
+      <h1>Saldo Diário</h1>
+      <p data-today></p>
     </div>
-    <a class="btn btn--outline" href="produto-cadastrar.html">✎ Editar</a>
+    <button class="btn btn--primary" data-export-btn>⬇ Exportar Relatório</button>
   </div>
 
-  <div class="detail-grid">
-    <div class="card detail-photo">
-      <div class="detail-photo__img"><span class="badge badge--success detail-photo__tag">Ativo</span></div>
-      <div class="detail-photo__desc">
-        <h3>Descrição</h3>
-        <p>Croissant tradicional francês com recheio cremoso de amêndoas, cobertura crocante e açúcar de confeiteiro. Ideal para vitrines premium e serviço de café da manhã.</p>
-        <p class="sku">SKU: CR-AMD-001 &nbsp;•&nbsp; Cód. Barras: 78910293847</p>
+  <div class="saldo-grid">
+    <div class="card saldo-panel">
+      <h3 class="saldo-panel__title">⭐ Maiores vendas</h3>
+
+      <div class="sale-row">
+        <span class="sale-row__icon" style="background:#F1E8FF;">🥐</span>
+        <div class="sale-row__info">
+          <p class="sale-row__title">Croissants Tradicionais</p>
+        </div>
+        <strong>R$ 850,00</strong>
+      </div>
+      <div class="sale-row">
+        <span class="sale-row__icon" style="background:#E4E8FD;">🎂</span>
+        <div class="sale-row__info">
+          <p class="sale-row__title">Bolos Decorados</p>
+        </div>
+        <strong>R$ 620,00</strong>
+      </div>
+      <div class="sale-row">
+        <span class="sale-row__icon" style="background:#FDE8DE;">☕</span>
+        <div class="sale-row__info">
+          <p class="sale-row__title">Cafés Especiais</p>
+        </div>
+        <strong>R$ 415,50</strong>
       </div>
     </div>
 
     <div class="stack gap-16">
-      <div class="card info-card">
-        <h4>📁 Marca &amp; Categoria</h4>
-        <div class="info-row"><span>Marca</span><strong>SweetLog Premium</strong></div>
-        <div class="info-row"><span>Categoria</span><strong>Viennoiserie</strong></div>
-      </div>
-
-      <div class="card info-card">
-        <h4>📐 Especificações</h4>
-        <div class="info-row"><span>Tamanho / Peso</span><strong>120g (Unidade)</strong></div>
-        <div class="info-row"><span>Necessidade de refrigeração</span><strong>Vitrine Seca (Até 25°C)</strong></div>
-      </div>
-
-      <div class="stat-row">
-        <div class="card stat-box stat-box--purple">
-          <span class="stat-box__icon">🍞</span>
-          <p class="stat-box__label">Quantidade em Estoque</p>
-          <p class="stat-box__value">245 <small>unidades</small></p>
+      <div class="card saldo-panel">
+        <h3 class="saldo-panel__title">💳 Saldo do dia</h3>
+        <div class="row" style="justify-content:space-between; align-items:flex-end;">
+          <p class="saldo-value">R$ 4.250,00</p>
+          <span class="badge badge--success">+12% hoje</span>
         </div>
-        <div class="card stat-box">
-          <span class="stat-box__icon">📅</span>
-          <p class="stat-box__label">Próxima Validade</p>
-          <p class="stat-box__value" style="font-size:1.3rem;">12 Nov</p>
-          <span class="badge badge--warning">Faltam 3 dias</span>
+      </div>
+
+      <div class="card saldo-panel chart-panel">
+        <div class="chart-bars">
+          <span style="height:32%"></span>
+          <span style="height:52%"></span>
+          <span style="height:66%"></span>
+          <span style="height:80%"></span>
+          <span style="height:38%"></span>
+          <span style="height:48%"></span>
+          <span style="height:56%"></span>
+          <span style="height:70%"></span>
+          <span style="height:44%"></span>
+          <span style="height:92%" class="is-highlight"></span>
+        </div>
+        <div class="chart-axis">
+          <span>1</span><span>2</span><span>3</span><span>4</span><span>5</span>
+          <span>6</span><span>7</span><span>8</span><span>9</span><span>10</span>
         </div>
       </div>
     </div>
