@@ -7,24 +7,24 @@
     <title>SweetLog — Entrada de Produtos</title>
   </head>
   <body class="app">
-    <header class="topbar">
+    <header class="barra-topo">
       <button class="menu-btn" data-open-menu aria-label="Abrir menu">
         ☰
       </button>
-      <div class="topbar__brand"><span class="logo-dot">🥐</span> SweetLog</div>
-      <div class="topbar__spacer"></div>
-      <div class="topbar__actions">
+      <div class="barra-topo-marca"><span class="logo-bolinha">🥐</span> SweetLog</div>
+      <div class="barra-topo-espaco"></div>
+      <div class="barra-topo-acoes">
         <button class="botao-icone" aria-label="Notificações">🔔</button>
         <button class="botao-icone" aria-label="Configurações">⚙️</button>
         <button class="avatar" data-open-profile>VA</button>
       </div>
     </header>
 
-    <div class="profile-pop" data-profile-pop>
-      <div class="profile-pop__label">Perfil</div>
-      <div class="profile-pop__row">
-        <div class="profile-pop__avatar">VA</div>
-        <div class="profile-pop__info">
+    <div class="perfil-pop" data-profile-pop>
+      <div class="perfil-pop-titulo">Perfil</div>
+      <div class="perfil-pop-linha">
+        <div class="perfil-pop-avatar">VA</div>
+        <div class="perfil-pop-dados">
           <strong>Vinícius Assunção</strong>
           <p>
             Matrícula: 10425<br />Setor: Logística<br />Telefone: (11)
@@ -32,47 +32,47 @@
           </p>
         </div>
       </div>
-      <button class="profile-pop__logout">↩ Sair da conta</button>
+      <button class="perfil-pop-sair">↩ Sair da conta</button>
     </div>
 
-    <div class="drawer-overlay" data-drawer-overlay aria-hidden="true"></div>
-    <aside class="drawer" data-drawer aria-label="Menu de navegação">
-      <div class="drawer__head">
-        <div class="topbar__brand">
-          <span class="logo-dot">🥐</span> SweetLog
+    <div class="menu-lateral-fundo" data-drawer-overlay aria-hidden="true"></div>
+    <aside class="menu-lateral" data-drawer aria-label="Menu de navegação">
+      <div class="menu-lateral-topo">
+        <div class="barra-topo-marca">
+          <span class="logo-bolinha">🥐</span> SweetLog
         </div>
-        <button class="drawer__close" data-close-menu aria-label="Fechar menu">
+        <button class="menu-lateral-fechar" data-close-menu aria-label="Fechar menu">
           ✕
         </button>
       </div>
-      <div class="drawer__label">Menu</div>
-      <nav class="drawer__nav">
-        <a class="drawer__link" href="dashboard.html"
+      <div class="menu-lateral-titulo-secao">Menu</div>
+      <nav class="menu-lateral-lista">
+        <a class="menu-lateral-link" href="dashboard.html"
           ><span class="ico">🏠</span> Início</a
         >
-        <a class="drawer__link" href="produtos-lista.html"
+        <a class="menu-lateral-link" href="produtos-lista.html"
           ><span class="ico">🥐</span> Produtos</a
         >
-        <a class="drawer__link is-active" href="estoque.html"
+        <a class="menu-lateral-link is-active" href="estoque.html"
           ><span class="ico">📦</span> Controle de estoque</a
         >
-        <a class="drawer__link" href="pedidos.html"
+        <a class="menu-lateral-link" href="pedidos.html"
           ><span class="ico">🧺</span> Pedidos</a
         >
-        <a class="drawer__link" href="saldo-diario.html"
+        <a class="menu-lateral-link" href="saldo-diario.html"
           ><span class="ico">💰</span> Saldo diário</a
         >
-        <a class="drawer__link" href="lotes.html"
+        <a class="menu-lateral-link" href="lotes.html"
           ><span class="ico">📅</span> Lotes e validade</a
         >
       </nav>
-      <div class="drawer__footer">
+      <div class="menu-lateral-rodape">
         <button class="menu-lateral-sair">↩ Sair da Conta</button>
       </div>
     </aside>
 
     <main class="page">
-      <a class="back-link" href="estoque.html">← Voltar</a>
+      <a class="voltar-link" href="estoque.html">← Voltar</a>
       <div class="page-head">
         <h1>Entrada de Produtos</h1>
         <p>Registre o recebimento de novos produtos no estoque.</p>
@@ -92,17 +92,17 @@
 
           <div class="grupo-campo">
             <label for="qtd">Quantidade *</label>
-            <div class="stepper" data-stepper>
+            <div class="contador-quantidade" data-stepper>
               <button
                 type="button"
-                class="stepper__btn"
+                class="contador-qtd-btn"
                 aria-label="Diminuir"
                 data-stepper-minus
               >
                 −
               </button>
               <input
-                class="stepper__value"
+                class="contador-qtd-valor"
                 id="qtd"
                 type="text"
                 value="1"
@@ -110,7 +110,7 @@
               />
               <button
                 type="button"
-                class="stepper__btn"
+                class="contador-qtd-btn"
                 aria-label="Aumentar"
                 data-stepper-plus
               >
@@ -139,11 +139,11 @@
           <div class="grupo-campo">
             <label>Nota Fiscal (PDF) *</label>
             <label class="upload-box upload-box--sm" for="nf" data-upload-box>
-              <span class="upload-box__icon">📄</span>
-              <span class="upload-box__text" data-upload-text
+              <span class="upload-box-icon">📄</span>
+              <span class="upload-box-text" data-upload-text
                 >Anexar arquivo ou arraste e solte</span
               >
-              <span class="upload-box__hint" data-upload-hint
+              <span class="upload-box-dica" data-upload-hint
                 >PDF até 10MB</span
               >
               <input
@@ -158,7 +158,7 @@
 
           <div class="grupo-campo">
             <label>Inspeção de Qualidade *</label>
-            <p class="hint" style="margin-bottom: 8px">
+            <p class="ajuda" style="margin-bottom: 8px">
               O produto foi inspecionado visualmente e atende aos padrões de
               qualidade para recebimento?
             </p>
