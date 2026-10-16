@@ -1,14 +1,20 @@
-# DROP DATABASE IF EXISTS sweetlog;
+DROP DATABASE IF EXISTS sweetlog;
 CREATE DATABASE IF NOT EXISTS sweetlog;
 USE sweetlog;
 SET GLOBAL event_scheduler = ON;
+
+CREATE TABLE IF NOT EXISTS tbl_matriculas (
+	numero_matricula INT PRIMARY KEY,
+    setor ENUM('Administrador', 'RH', 'Administrativo', 'Logística', 'Compras', 'Almoxarifado') NOT NULL
+);
 
 CREATE TABLE IF NOT EXISTS tbl_funcionarios (
     numero_matricula INT PRIMARY KEY,
     senha VARCHAR(255) NOT NULL,
     nome VARCHAR(100) NOT NULL,
     telefone VARCHAR(15),
-    cargo VARCHAR(50) NOT NULL
+    CONSTRAINT FK_numero_matricula_funcionarios
+        FOREIGN KEY (numero_matricula) REFERENCES tbl_matriculas(numero_matricula)
 );
 
 CREATE TABLE IF NOT EXISTS tbl_produtos (
@@ -202,18 +208,24 @@ WHERE ativo = FALSE
 EXEMPLOS DE INSERÇÕES -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 */
 
+INSERT INTO tbl_matriculas (
+	numero_matricula,
+    setor
+) VALUES (
+	1001,
+    'Administrativo'
+);
+
 INSERT INTO tbl_funcionarios (
     numero_matricula,
     senha,
     nome,
-    telefone,
-    cargo
+    telefone
 ) VALUES (
     1001,
     'senha123',
     'Joao da Silva',
-    '11953898096',
-    'Estoquista'
+    '11953898096'
 );
 
 INSERT INTO tbl_produtos (

@@ -1,6 +1,7 @@
 const express = require('express')
 const router = express.Router()
 
+const matriculaRoutes = require('./matriculaRoutes')
 const funcionarioRoutes = require('./funcionarioRoutes')
 const produtoRoutes = require('./produtoRoutes')
 const estoqueRoutes = require('./estoqueRoutes')
@@ -12,6 +13,7 @@ router.get('/', (req, res) => {
     })
 })
 
+router.use('/matriculas', matriculaRoutes)
 router.use('/funcionarios', funcionarioRoutes)
 router.use('/produtos', produtoRoutes)
 router.use('/estoques', estoqueRoutes)

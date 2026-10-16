@@ -160,6 +160,32 @@ function initGlobalNav() {
   });
 }
 
+// ---------- menu: garante o item "Funcionários e Matrículas" em todas as páginas ----------
+// Se a página já tem um item equivalente no HTML (pelo endereço OU pelo texto,
+// qualquer que seja o nome do arquivo), não faz nada: nunca duplica.
+function initDrawerFuncionarios() {
+  var nav = document.querySelector('.drawer__nav');
+  if (!nav) return;
+
+  var jaExiste = Array.prototype.slice.call(nav.querySelectorAll('a')).some(function (a) {
+    var href = (a.getAttribute('href') || '').toLowerCase();
+    var texto = (a.textContent || '').toLowerCase();
+    return href.indexOf('funcionario') > -1 || href.indexOf('matricula') > -1 ||
+      texto.indexOf('funcionários') > -1 || texto.indexOf('funcionarios') > -1;
+  });
+  if (jaExiste) return;
+
+  var path = window.location.pathname;
+  var ativo = /funcionariosMatricula|nova-matricula|novo-funcionario/.test(path);
+
+  var link = document.createElement('a');
+  link.className = 'drawer__link' + (ativo ? ' is-active' : '');
+  link.href = 'funcionariosMatricula.html';
+  if (ativo) link.setAttribute('aria-current', 'page');
+  link.innerHTML = '<span class="ico" aria-hidden="true">👥</span> Funcionários e Matrículas';
+  nav.appendChild(link);
+}
+
 // ---------- busca do topo em telas sem lista própria ----------
 // Nas telas com lista (produtos, pedidos, lotes) o campo do topo filtra a lista.
 // Nas demais, avisa que a busca geral ainda não existe em vez de não fazer nada.
@@ -375,6 +401,7 @@ function initNovaSenha() {
 
 document.addEventListener('DOMContentLoaded', function () {
   initGlobalNav();
+  initDrawerFuncionarios();
   initTopbarSearch();
   initPlaceholderLinks();
   initLoginForm();
@@ -910,4 +937,211 @@ document.addEventListener('DOMContentLoaded', function () {
       });
     }
   }
+});
+
+// funcionarios.js — telas Funcionários e Matrículas (lista, nova matrícula, novo funcionário)
+
+function markInvalid(field) {
+  field.classList.add('is-invalid');
+  var wrap = field.closest('.field');
+  if (wrap) wrap.classList.add('field--error');
+}
+
+function clearInvalid(field) {
+  field.classList.remove('is-invalid');
+  var wrap = field.closest('.field');
+  if (wrap) wrap.classList.remove('field--error');
+}
+
+// ---------- funcionariosMatricula.html: abas, busca e ações ----------
+function initFuncionariosLista() {
+  var panels = Array.prototype.slice.call(document.querySelectorAll('[data-panel]'));
+  var tabs = Array.prototype.slice.call(document.querySelectorAll('[data-tab]'));
+  if (!panels.length || !tabs.length) return;
+
+  function activateTab(name) {
+    tabs.forEach(function (btn) {
+      var on = btn.getAttribute('data-tab') === name;
+      btn.classList.toggle('is-active', on);
+      btn.setAttribute('aria-selected', on ? 'true' : 'false');
+    });
+    panels.forEach(function (panel) {
+      panel.hidden = panel.getAttribute('data-panel') !== name;
+    });
+  }
+
+  tabs.forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var name = btn.getAttribute('data-tab');
+      activateTab(name);
+      history.replaceState(null, '', '#' + name);
+    });
+  });
+
+  // abre direto na aba pedida pela URL (ex.: depois de cadastrar uma matrícula)
+  var inicial = window.location.hash.replace('#', '');
+  activateTab(inicial === 'matriculas' ? 'matriculas' : 'funcionarios');
+
+  function rowsOf(name) {
+    var tbody = document.querySelector('[data-rows="' + name + '"]');
+    return tbody ? Array.prototype.slice.call(tbody.querySelectorAll('tr')) : [];
+  }
+
+  // atualiza contador da aba, rodapé e estado vazio
+  function refresh(name) {
+    var rows = rowsOf(name);
+    var visiveis = rows.filter(function (r) { return r.style.display !== 'none'; }).length;
+
+    var count = document.querySelector('[data-count="' + name + '"]');
+    if (count) count.textContent = rows.length;
+
+    var foot = document.querySelector('[data-foot="' + name + '"]');
+    if (foot) {
+      var rotulo = name === 'funcionarios' ? 'funcionários' : 'matrículas';
+      foot.textContent = 'Mostrando ' + visiveis + ' de ' + rows.length + ' ' + rotulo;
+    }
+
+    var panel = document.querySelector('[data-panel="' + name + '"]');
+    var empty = panel && panel.querySelector('[data-empty]');
+    if (empty) empty.hidden = visiveis > 0;
+  }
+
+  // ---------- busca ----------
+  document.querySelectorAll('[data-func-search]').forEach(function (input) {
+    var name = input.getAttribute('data-func-search');
+    input.addEventListener('input', function () {
+      var term = input.value.trim().toLowerCase();
+      rowsOf(name).forEach(function (row) {
+        var match = row.textContent.toLowerCase().indexOf(term) > -1;
+        row.style.display = match ? '' : 'none';
+      });
+      refresh(name);
+    });
+  });
+
+  // ---------- ver / editar / excluir (demonstração) ----------
+  document.addEventListener('click', function (e) {
+    var btn = e.target.closest('[data-action]');
+    if (!btn) return;
+    var action = btn.getAttribute('data-action');
+    var row = btn.closest('tr');
+
+    if (action === 'excluir') {
+      var id = row.getAttribute('data-id');
+      var tipo = btn.getAttribute('data-tipo');
+      var texto = tipo === 'matricula'
+        ? 'Excluir a matrícula ' + id + '?'
+        : 'Excluir o funcionário da matrícula ' + id + '?';
+      if (!confirm(texto)) return;
+      var tbody = row.parentNode;
+      var name = tbody.getAttribute('data-rows');
+      row.remove();
+      refresh(name);
+      showToast(tipo === 'matricula' ? 'Matrícula excluída.' : 'Funcionário excluído.', 'success');
+    } else {
+      showToast('Esta ação ainda está em desenvolvimento.', 'info');
+    }
+  });
+
+  refresh('funcionarios');
+  refresh('matriculas');
+}
+
+// ---------- nova-matricula.html ----------
+function initMatriculaForm() {
+  var form = document.querySelector('[data-matricula-form]');
+  if (!form) return;
+
+  var numero = document.getElementById('numero');
+  var setor = document.getElementById('setor');
+  [numero, setor].forEach(clearErrorOnInput);
+
+  // aceita 10426 ou MAT-001: letras, números e hífen (maiúsculas), até 12 caracteres
+  numero.addEventListener('input', function () {
+    numero.value = numero.value.toUpperCase().replace(/[^A-Z0-9-]/g, '').slice(0, 12);
+  });
+
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+    var isValid = validateRequired([numero, setor]);
+    if (!isValid) {
+      showToast('Preencha o número da matrícula e o setor.', 'error');
+      return;
+    }
+    if (numero.value.length < 3 || !/\d/.test(numero.value)) {
+      markInvalid(numero);
+      showToast('Informe uma matrícula válida (ex.: 10426 ou MAT-001).', 'error');
+      return;
+    }
+
+    var btn = form.querySelector('button[type="submit"]');
+    btn.disabled = true;
+    btn.textContent = 'Salvando...';
+
+    setTimeout(function () {
+      showToast('Matrícula ' + numero.value + ' cadastrada com sucesso!', 'success');
+      redirectAfterToast('funcionariosMatricula.html#matriculas');
+    }, 700);
+  });
+}
+
+// ---------- novo-funcionario.html ----------
+function initFuncionarioForm() {
+  var form = document.querySelector('[data-funcionario-form]');
+  if (!form) return;
+
+  var matricula = document.getElementById('matricula');
+  var nome = document.getElementById('nome');
+  var setor = document.getElementById('setor');
+  var telefone = document.getElementById('telefone');
+  [matricula, nome, setor, telefone].forEach(clearErrorOnInput);
+
+  // a matrícula já define o setor: preenche sozinho (continua editável)
+  matricula.addEventListener('change', function () {
+    var opt = matricula.options[matricula.selectedIndex];
+    var s = opt && opt.getAttribute('data-setor');
+    if (s) {
+      setor.value = s;
+      clearInvalid(setor);
+    }
+  });
+
+  telefone.addEventListener('input', function () {
+    telefone.value = formatPhone(telefone.value.replace(/\D/g, ''));
+  });
+
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+    var isValid = validateRequired([matricula, nome, setor, telefone]);
+    if (!isValid) {
+      showToast('Preencha os campos obrigatórios do funcionário.', 'error');
+      return;
+    }
+    if (nome.value.trim().split(/\s+/).length < 2) {
+      markInvalid(nome);
+      showToast('Informe o nome e o sobrenome.', 'error');
+      return;
+    }
+    var digitos = telefone.value.replace(/\D/g, '');
+    if (digitos.length < 10 || digitos.length > 11) {
+      markInvalid(telefone);
+      showToast('Informe um telefone válido com DDD.', 'error');
+      return;
+    }
+
+    var btn = form.querySelector('button[type="submit"]');
+    btn.disabled = true;
+    btn.textContent = 'Salvando...';
+
+    setTimeout(function () {
+      showToast('Funcionário "' + nome.value.trim() + '" cadastrado com sucesso!', 'success');
+      redirectAfterToast('funcionariosMatricula.html#funcionarios');
+    }, 700);
+  });
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+  initFuncionariosLista();
+  initMatriculaForm();
+  initFuncionarioForm();
 });

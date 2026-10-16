@@ -1,5 +1,19 @@
 {
   "dependencies": {
     "multer": "^2.2.0"
+  },
+  "name": "frontend",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "build:css": "tailwindcss -i ./src/styles.css -o ./css/build.css --minify",
+    "watch:css": "tailwindcss -i ./src/styles.css -o ./css/build.css --watch"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "tailwindcss": "^3.4.19"
   }
 }
