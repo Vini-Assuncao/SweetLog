@@ -194,10 +194,10 @@
   .drawer__footer {
     @apply mt-auto;
   }
-  .drawer__logout {
+  .menu-lateral-sair {
     @apply flex items-center gap-2.5 text-danger font-semibold text-[0.9rem] p-2.5 rounded-[10px] cursor-pointer border-0 bg-transparent w-full text-left font-sans;
   }
-  .drawer__logout:hover {
+  .menu-lateral-sair:hover {
     @apply bg-danger-soft;
   }
 
@@ -285,13 +285,13 @@
   }
 
   /* ---------- forms ---------- */
-  .field {
+  .grupo-campo {
     @apply flex flex-col gap-1.5;
   }
-  .field label {
+  .grupo-campo label {
     @apply text-[0.82rem] font-semibold text-ink;
   }
-  .field .hint {
+  .grupo-campo .hint {
     @apply text-[0.76rem] text-ink-faint;
   }
 
@@ -480,8 +480,8 @@
   }
 
   /* ---------- erro em campo de formulário ---------- */
-  .field--error .input,
-  .field--error select.input,
+  .grupo-campo-com-erro.input,
+  .grupo-campo-com-erro select.input,
   .input.is-invalid {
     @apply border-danger;
     box-shadow: 0 0 0 3px #fceaea;

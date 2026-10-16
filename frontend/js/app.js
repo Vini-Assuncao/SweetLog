@@ -82,10 +82,10 @@ function validateRequired(fields) {
     if (!value) {
       isValid = false;
       field.classList.add('is-invalid');
-      if (wrap) wrap.classList.add('field--error');
+      if (wrap) wrap.classList.add('grupo-campo-com-erro');
     } else {
       field.classList.remove('is-invalid');
-      if (wrap) wrap.classList.remove('field--error');
+      if (wrap) wrap.classList.remove('grupo-campo-com-erro');
     }
   });
   return isValid;
@@ -97,7 +97,7 @@ function clearErrorOnInput(field) {
   field.addEventListener(evt, function () {
     field.classList.remove('is-invalid');
     var wrap = field.closest('.field');
-    if (wrap) wrap.classList.remove('field--error');
+    if (wrap) wrap.classList.remove('grupo-campo-com-erro');
   });
 }
 
@@ -139,7 +139,7 @@ function initGlobalNav() {
   }
 
   // sair da conta (drawer e popover de perfil)
-  document.querySelectorAll('.profile-pop__logout, .drawer__logout').forEach(function (btn) {
+  document.querySelectorAll('.profile-pop__logout, .menu-lateral-sair').forEach(function (btn) {
     btn.addEventListener('click', function () {
       if (confirm('Deseja realmente sair da sua conta?')) {
         window.location.href = 'login.html';
