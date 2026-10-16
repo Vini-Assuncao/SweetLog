@@ -973,7 +973,7 @@ a{
   margin-top: auto;
 }
 
-.drawer__logout{
+.menu-lateral-sair{
   color: #DC2626;
   display: flex;
   width: 100%;
@@ -992,7 +992,7 @@ a{
   color: rgb(220 38 38 / var(--tw-text-opacity, 1));
 }
 
-.drawer__logout:hover{
+.menu-lateral-sair:hover{
   --tw-bg-opacity: 1;
   background-color: rgb(252 234 234 / var(--tw-bg-opacity, 1));
 }

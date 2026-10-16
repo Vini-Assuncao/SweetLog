@@ -315,7 +315,7 @@ img {
 .drawer__footer {
   margin-top: auto;
 }
-.drawer__logout {
+.menu-lateral-sair {
   display: flex;
   align-items: center;
   gap: 10px;
@@ -331,7 +331,7 @@ img {
   text-align: left;
   font-family: inherit;
 }
-.drawer__logout:hover {
+.menu-lateral-sair:hover {
   background: var(--danger-soft);
 }
 

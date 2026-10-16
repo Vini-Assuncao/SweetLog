@@ -14,8 +14,8 @@
       <div class="topbar__brand"><span class="logo-dot">🥐</span> SweetLog</div>
       <div class="topbar__spacer"></div>
       <div class="topbar__actions">
-        <button class="icon-btn" aria-label="Notificações">🔔</button>
-        <button class="icon-btn" aria-label="Configurações">⚙️</button>
+        <button class="botao-icone" aria-label="Notificações">🔔</button>
+        <button class="botao-icone" aria-label="Configurações">⚙️</button>
         <button class="avatar" data-open-profile>VA</button>
       </div>
     </header>
@@ -67,7 +67,7 @@
         >
       </nav>
       <div class="drawer__footer">
-        <button class="drawer__logout">↩ Sair da Conta</button>
+        <button class="menu-lateral-sair">↩ Sair da Conta</button>
       </div>
     </aside>
 
@@ -80,7 +80,7 @@
 
       <form class="card form-card" data-entrada-form>
         <div class="form-grid">
-          <div class="field">
+          <div class="grupo-campo">
             <label for="produto">Produto *</label>
             <select class="input" id="produto">
               <option>Selecione um produto...</option>
@@ -90,7 +90,7 @@
             </select>
           </div>
 
-          <div class="field">
+          <div class="grupo-campo">
             <label for="qtd">Quantidade *</label>
             <div class="stepper" data-stepper>
               <button
@@ -119,7 +119,7 @@
             </div>
           </div>
 
-          <div class="field">
+          <div class="grupo-campo">
             <label for="lote">Lote de Produção *</label>
             <input
               class="input"
@@ -129,14 +129,14 @@
             />
           </div>
 
-          <div class="field">
+          <div class="grupo-campo">
             <label for="validade">Data de Validade *</label>
             <input class="input" id="validade" type="date" />
           </div>
         </div>
 
         <div class="form-grid" style="margin-top: 18px">
-          <div class="field">
+          <div class="grupo-campo">
             <label>Nota Fiscal (PDF) *</label>
             <label class="upload-box upload-box--sm" for="nf" data-upload-box>
               <span class="upload-box__icon">📄</span>
@@ -156,7 +156,7 @@
             </label>
           </div>
 
-          <div class="field">
+          <div class="grupo-campo">
             <label>Inspeção de Qualidade *</label>
             <p class="hint" style="margin-bottom: 8px">
               O produto foi inspecionado visualmente e atende aos padrões de
