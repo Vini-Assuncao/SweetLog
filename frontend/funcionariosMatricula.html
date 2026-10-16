@@ -1,0 +1,370 @@
+<!doctype html>
+<html lang="pt-BR">
+
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="css/build.css" />
+    <link rel="stylesheet" href="css/funcionarios.css" />
+    <title>SweetLog — Funcionários e Matrículas</title>
+  </head>
+  <body class="app">
+    <header class="topbar">
+      <button class="menu-btn" data-open-menu aria-label="Abrir menu">
+        ☰
+      </button>
+      <div class="topbar__brand">
+        <span class="logo-dot" aria-hidden="true">🥐</span> SweetLog
+      </div>
+      <div class="topbar__search">
+        <span class="icon" aria-hidden="true">🔍</span>
+        <input type="search" placeholder="Buscar..." aria-label="Buscar" />
+      </div>
+      <div class="topbar__spacer"></div>
+      <div class="topbar__actions">
+        <button class="icon-btn" aria-label="Notificações">🔔</button>
+        <button class="icon-btn" aria-label="Configurações">⚙️</button>
+        <button
+          class="avatar"
+          data-open-profile
+          aria-label="Abrir perfil de Vinícius Assunção"
+          aria-haspopup="true"
+        >
+          VA
+        </button>
+      </div>
+    </header>
+
+    <div class="profile-pop" data-profile-pop>
+      <div class="profile-pop__label">Perfil</div>
+      <div class="profile-pop__row">
+        <div class="profile-pop__avatar" aria-hidden="true">VA</div>
+        <div class="profile-pop__info">
+          <strong>Vinícius Assunção</strong>
+          <p>
+            Matrícula: 10425<br />Setor: Logística<br />Telefone: (11)
+            90234-5678
+          </p>
+        </div>
+      </div>
+      <button type="button" class="profile-pop__logout">↩ Sair da conta</button>
+    </div>
+
+    <div class="drawer-overlay" data-drawer-overlay aria-hidden="true"></div>
+    <aside class="drawer" data-drawer aria-label="Menu de navegação">
+      <div class="drawer__head">
+        <div class="topbar__brand">
+          <span class="logo-dot" aria-hidden="true">🥐</span> SweetLog
+        </div>
+        <button class="drawer__close" data-close-menu aria-label="Fechar menu">
+          ✕
+        </button>
+      </div>
+      <div class="drawer__label">Menu</div>
+      <nav class="drawer__nav">
+        <a class="drawer__link" href="dashboard.html"
+          ><span class="ico" aria-hidden="true">🏠</span> Início</a
+        >
+        <a class="drawer__link" href="produtos-lista.html"
+          ><span class="ico" aria-hidden="true">🥐</span> Produtos</a
+        >
+        <a class="drawer__link" href="estoque.html"
+          ><span class="ico" aria-hidden="true">📦</span> Controle de estoque</a
+        >
+        <a class="drawer__link" href="pedidos.html"
+          ><span class="ico" aria-hidden="true">🧺</span> Pedidos</a
+        >
+        <a class="drawer__link" href="saldo-diario.html"
+          ><span class="ico" aria-hidden="true">💰</span> Saldo diário</a
+        >
+        <a class="drawer__link" href="lotes.html"
+          ><span class="ico" aria-hidden="true">📅</span> Lotes e validade</a
+        >
+        <a
+          class="drawer__link is-active"
+          href="funcionariosMatricula.html"
+          aria-current="page"
+          ><span class="ico" aria-hidden="true">👥</span> Funcionários e
+          Matrículas</a
+        >
+      </nav>
+      <div class="drawer__footer">
+        <button type="button" class="drawer__logout">↩ Sair da Conta</button>
+      </div>
+    </aside>
+
+    <main class="page">
+      <div class="list-head">
+        <div class="page-head">
+          <h1>Funcionários e Matrículas</h1>
+          <p>Gerencie os funcionários da loja e as matrículas dos colaboradores.</p>
+        </div>
+        <div class="head-actions">
+          <a class="btn btn--outline" href="novoFuncionario.html">＋ Novo Funcionário</a>
+          <a class="btn btn--primary" href="novaMatricula.html">＋ Nova Matrícula</a>
+        </div>
+      </div>
+
+      <div class="tab-bar" role="tablist" aria-label="Alternar entre funcionários e matrículas">
+        <button
+          type="button"
+          class="tab-bar__btn is-active"
+          role="tab"
+          id="tab-funcionarios"
+          aria-selected="true"
+          aria-controls="panel-funcionarios"
+          data-tab="funcionarios"
+        >
+          👥 Funcionários <span class="badge badge--purple" data-count="funcionarios">6</span>
+        </button>
+        <button
+          type="button"
+          class="tab-bar__btn"
+          role="tab"
+          id="tab-matriculas"
+          aria-selected="false"
+          aria-controls="panel-matriculas"
+          data-tab="matriculas"
+        >
+          🎓 Matrículas <span class="badge badge--purple" data-count="matriculas">6</span>
+        </button>
+      </div>
+
+      <!-- Funcionários: matrícula, nome, setor, telefone -->
+      <section
+        class="card table-card"
+        id="panel-funcionarios"
+        role="tabpanel"
+        aria-labelledby="tab-funcionarios"
+        data-panel="funcionarios"
+      >
+        <div class="table-card__head">
+          <h3>Funcionários</h3>
+          <div class="table-search">
+            <input
+              type="search"
+              placeholder="Buscar funcionário..."
+              aria-label="Buscar funcionário"
+              data-func-search="funcionarios"
+            />
+          </div>
+        </div>
+
+        <div class="table-scroll">
+          <table class="lotes-table">
+            <thead>
+              <tr>
+                <th>Matrícula</th>
+                <th>Nome</th>
+                <th>Setor</th>
+                <th>Telefone</th>
+                <th>Ações</th>
+              </tr>
+            </thead>
+            <tbody data-rows="funcionarios">
+              <tr data-id="10420">
+                <td class="cell-nowrap">10420</td>
+                <td><div class="person"><span class="mini-avatar" aria-hidden="true">AC</span>Ana Carolina Silva</div></td>
+                <td>Administrativo</td>
+                <td class="cell-nowrap">(11) 90234-5671</td>
+                <td>
+                  <div class="row-actions">
+                    <button type="button" class="icon-btn" aria-label="Ver funcionário" data-action="ver">👁️</button>
+                    <button type="button" class="icon-btn" aria-label="Editar funcionário" data-action="editar">✏️</button>
+                    <button type="button" class="icon-btn icon-btn--danger" aria-label="Excluir funcionário" data-action="excluir" data-tipo="funcionario">🗑️</button>
+                  </div>
+                </td>
+              </tr>
+              <tr data-id="10421">
+                <td class="cell-nowrap">10421</td>
+                <td><div class="person"><span class="mini-avatar" aria-hidden="true">BR</span>Bruno Rodrigues</div></td>
+                <td>Almoxarifado</td>
+                <td class="cell-nowrap">(11) 90234-5672</td>
+                <td>
+                  <div class="row-actions">
+                    <button type="button" class="icon-btn" aria-label="Ver funcionário" data-action="ver">👁️</button>
+                    <button type="button" class="icon-btn" aria-label="Editar funcionário" data-action="editar">✏️</button>
+                    <button type="button" class="icon-btn icon-btn--danger" aria-label="Excluir funcionário" data-action="excluir" data-tipo="funcionario">🗑️</button>
+                  </div>
+                </td>
+              </tr>
+              <tr data-id="10422">
+                <td class="cell-nowrap">10422</td>
+                <td><div class="person"><span class="mini-avatar" aria-hidden="true">CM</span>Carlos Mendes</div></td>
+                <td>Compras</td>
+                <td class="cell-nowrap">(11) 90234-5673</td>
+                <td>
+                  <div class="row-actions">
+                    <button type="button" class="icon-btn" aria-label="Ver funcionário" data-action="ver">👁️</button>
+                    <button type="button" class="icon-btn" aria-label="Editar funcionário" data-action="editar">✏️</button>
+                    <button type="button" class="icon-btn icon-btn--danger" aria-label="Excluir funcionário" data-action="excluir" data-tipo="funcionario">🗑️</button>
+                  </div>
+                </td>
+              </tr>
+              <tr data-id="10423">
+                <td class="cell-nowrap">10423</td>
+                <td><div class="person"><span class="mini-avatar" aria-hidden="true">DS</span>Daniela Souza</div></td>
+                <td>RH</td>
+                <td class="cell-nowrap">(11) 90234-5674</td>
+                <td>
+                  <div class="row-actions">
+                    <button type="button" class="icon-btn" aria-label="Ver funcionário" data-action="ver">👁️</button>
+                    <button type="button" class="icon-btn" aria-label="Editar funcionário" data-action="editar">✏️</button>
+                    <button type="button" class="icon-btn icon-btn--danger" aria-label="Excluir funcionário" data-action="excluir" data-tipo="funcionario">🗑️</button>
+                  </div>
+                </td>
+              </tr>
+              <tr data-id="10424">
+                <td class="cell-nowrap">10424</td>
+                <td><div class="person"><span class="mini-avatar" aria-hidden="true">FL</span>Fernanda Lima</div></td>
+                <td>Logística</td>
+                <td class="cell-nowrap">(11) 90234-5675</td>
+                <td>
+                  <div class="row-actions">
+                    <button type="button" class="icon-btn" aria-label="Ver funcionário" data-action="ver">👁️</button>
+                    <button type="button" class="icon-btn" aria-label="Editar funcionário" data-action="editar">✏️</button>
+                    <button type="button" class="icon-btn icon-btn--danger" aria-label="Excluir funcionário" data-action="excluir" data-tipo="funcionario">🗑️</button>
+                  </div>
+                </td>
+              </tr>
+              <tr data-id="10425">
+                <td class="cell-nowrap">10425</td>
+                <td><div class="person"><span class="mini-avatar" aria-hidden="true">VA</span>Vinícius Assunção</div></td>
+                <td>Logística</td>
+                <td class="cell-nowrap">(11) 90234-5678</td>
+                <td>
+                  <div class="row-actions">
+                    <button type="button" class="icon-btn" aria-label="Ver funcionário" data-action="ver">👁️</button>
+                    <button type="button" class="icon-btn" aria-label="Editar funcionário" data-action="editar">✏️</button>
+                    <button type="button" class="icon-btn icon-btn--danger" aria-label="Excluir funcionário" data-action="excluir" data-tipo="funcionario">🗑️</button>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <p class="empty-state" data-empty hidden>Nenhum funcionário encontrado.</p>
+        <div class="table-card__foot">
+          <span data-foot="funcionarios">Mostrando 6 de 6 funcionários</span>
+        </div>
+      </section>
+
+      <!-- Matrículas: número, setor, status -->
+      <section
+        class="card table-card"
+        id="panel-matriculas"
+        role="tabpanel"
+        aria-labelledby="tab-matriculas"
+        data-panel="matriculas"
+        hidden
+      >
+        <div class="table-card__head">
+          <h3>Matrículas</h3>
+          <div class="table-search">
+            <input
+              type="search"
+              placeholder="Buscar matrícula..."
+              aria-label="Buscar matrícula"
+              data-func-search="matriculas"
+            />
+          </div>
+        </div>
+
+        <div class="table-scroll">
+          <table class="lotes-table">
+            <thead>
+              <tr>
+                <th>Nº Matrícula</th>
+                <th>Setor</th>
+                <th>Status</th>
+                <th>Ações</th>
+              </tr>
+            </thead>
+            <tbody data-rows="matriculas">
+              <tr data-id="10420">
+                <td class="cell-nowrap">10420</td>
+                <td>Administrativo</td>
+                <td><span class="badge badge--success badge--dot">Ativa</span></td>
+                <td>
+                  <div class="row-actions">
+                    <button type="button" class="icon-btn" aria-label="Ver matrícula" data-action="ver">👁️</button>
+                    <button type="button" class="icon-btn" aria-label="Editar matrícula" data-action="editar">✏️</button>
+                    <button type="button" class="icon-btn icon-btn--danger" aria-label="Excluir matrícula" data-action="excluir" data-tipo="matricula">🗑️</button>
+                  </div>
+                </td>
+              </tr>
+              <tr data-id="10421">
+                <td class="cell-nowrap">10421</td>
+                <td>Almoxarifado</td>
+                <td><span class="badge badge--success badge--dot">Ativa</span></td>
+                <td>
+                  <div class="row-actions">
+                    <button type="button" class="icon-btn" aria-label="Ver matrícula" data-action="ver">👁️</button>
+                    <button type="button" class="icon-btn" aria-label="Editar matrícula" data-action="editar">✏️</button>
+                    <button type="button" class="icon-btn icon-btn--danger" aria-label="Excluir matrícula" data-action="excluir" data-tipo="matricula">🗑️</button>
+                  </div>
+                </td>
+              </tr>
+              <tr data-id="10422">
+                <td class="cell-nowrap">10422</td>
+                <td>Compras</td>
+                <td><span class="badge badge--success badge--dot">Ativa</span></td>
+                <td>
+                  <div class="row-actions">
+                    <button type="button" class="icon-btn" aria-label="Ver matrícula" data-action="ver">👁️</button>
+                    <button type="button" class="icon-btn" aria-label="Editar matrícula" data-action="editar">✏️</button>
+                    <button type="button" class="icon-btn icon-btn--danger" aria-label="Excluir matrícula" data-action="excluir" data-tipo="matricula">🗑️</button>
+                  </div>
+                </td>
+              </tr>
+              <tr data-id="10423">
+                <td class="cell-nowrap">10423</td>
+                <td>RH</td>
+                <td><span class="badge badge--success badge--dot">Ativa</span></td>
+                <td>
+                  <div class="row-actions">
+                    <button type="button" class="icon-btn" aria-label="Ver matrícula" data-action="ver">👁️</button>
+                    <button type="button" class="icon-btn" aria-label="Editar matrícula" data-action="editar">✏️</button>
+                    <button type="button" class="icon-btn icon-btn--danger" aria-label="Excluir matrícula" data-action="excluir" data-tipo="matricula">🗑️</button>
+                  </div>
+                </td>
+              </tr>
+              <tr data-id="10424">
+                <td class="cell-nowrap">10424</td>
+                <td>Logística</td>
+                <td><span class="badge badge--danger badge--dot">Inativa</span></td>
+                <td>
+                  <div class="row-actions">
+                    <button type="button" class="icon-btn" aria-label="Ver matrícula" data-action="ver">👁️</button>
+                    <button type="button" class="icon-btn" aria-label="Editar matrícula" data-action="editar">✏️</button>
+                    <button type="button" class="icon-btn icon-btn--danger" aria-label="Excluir matrícula" data-action="excluir" data-tipo="matricula">🗑️</button>
+                  </div>
+                </td>
+              </tr>
+              <tr data-id="10425">
+                <td class="cell-nowrap">10425</td>
+                <td>Logística</td>
+                <td><span class="badge badge--success badge--dot">Ativa</span></td>
+                <td>
+                  <div class="row-actions">
+                    <button type="button" class="icon-btn" aria-label="Ver matrícula" data-action="ver">👁️</button>
+                    <button type="button" class="icon-btn" aria-label="Editar matrícula" data-action="editar">✏️</button>
+                    <button type="button" class="icon-btn icon-btn--danger" aria-label="Excluir matrícula" data-action="excluir" data-tipo="matricula">🗑️</button>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <p class="empty-state" data-empty hidden>Nenhuma matrícula encontrada.</p>
+        <div class="table-card__foot">
+          <span data-foot="matriculas">Mostrando 6 de 6 matrículas</span>
+        </div>
+      </section>
+    </main>
+
+    <script src="js/app.js"></script>
+  </body>
+</html>
