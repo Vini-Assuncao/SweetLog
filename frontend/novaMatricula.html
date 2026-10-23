@@ -69,8 +69,8 @@
         <a class="drawer__link" href="estoque.html"
           ><span class="ico" aria-hidden="true">📦</span> Controle de estoque</a
         >
-        <a class="drawer__link" href="pedidos.html"
-          ><span class="ico" aria-hidden="true">🧺</span> Pedidos</a
+        <a class="drawer__link" href="vendas.html"
+          ><span class="ico" aria-hidden="true">🧺</span> Vendas</a
         >
         <a class="drawer__link" href="saldo-diario.html"
           ><span class="ico" aria-hidden="true">💰</span> Saldo diário</a
@@ -108,13 +108,14 @@
             <input
               class="input"
               id="numero"
-              name="numero"
-              type="text"
-              maxlength="12"
-              placeholder="Ex.: MAT-001"
+              name="numero_matricula"
+              type="number"
+              min="1"
+              step="1"
+              placeholder="Ex.: 10426"
               autocomplete="off"
             />
-            <p class="hint">Letras, números e hífen (ex.: 10426 ou MAT-001).</p>
+            <p class="hint">A matrícula deve ser um número inteiro positivo.</p>
           </div>
 
           <div class="field">

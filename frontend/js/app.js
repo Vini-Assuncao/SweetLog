@@ -372,8 +372,14 @@ function initLoginForm() {
   form.addEventListener('submit', function (e) {
     e.preventDefault();
     var isValid = validateRequired([matricula, senha]);
+    var numeroMatricula = Number(matricula.value);
+    if (matricula.value &&
+        (!Number.isInteger(numeroMatricula) || numeroMatricula <= 0)) {
+      markInvalid(matricula);
+      isValid = false;
+    }
     if (!isValid) {
-      showToast('Informe matrícula e senha para continuar.', 'error');
+      showToast('Informe uma matrícula numérica positiva e a senha.', 'error');
       return;
     }
 
@@ -548,6 +554,8 @@ document.addEventListener('DOMContentLoaded', function () {
   initTopbarSearch();
   initPlaceholderLinks();
   initProductDetailEdit();
+  initSalesList();
+  initSaleDetailPage();
   initSalesEditing();
   initLoginForm();
   initRecuperarSenha();
@@ -555,6 +563,127 @@ document.addEventListener('DOMContentLoaded', function () {
   initNovaSenha();
   initTodayLabel();
 });
+
+function initSalesList() {
+  var cards = Array.prototype.slice.call(document.querySelectorAll('[data-order-grid] [data-numero]'));
+  if (!cards.length) return;
+
+  function formatDate(value) {
+    if (!value) return 'Não informada';
+    return new Date(value + 'T00:00:00').toLocaleDateString('pt-BR');
+  }
+
+  function formatCurrency(value) {
+    return new Intl.NumberFormat('pt-BR', {
+      style: 'currency',
+      currency: 'BRL'
+    }).format(value);
+  }
+
+  function applySaleToCard(card, sale) {
+    var buyer = card.querySelector('[data-list-value="buyer"]');
+    var total = card.querySelector('[data-list-value="total"]');
+    var orderDate = card.querySelector('[data-list-value="orderDate"]');
+    var deliveryDate = card.querySelector('[data-list-value="deliveryDate"]');
+    var items = Array.isArray(sale.items) ? sale.items : [{
+      quantity: sale.quantity,
+      unitPrice: sale.unitPrice
+    }];
+    var saleTotal = items.reduce(function (sum, item) {
+      return sum + (Number(item.quantity) * Number(item.unitPrice));
+    }, 0);
+
+    if (buyer && typeof sale.buyer === 'string') buyer.textContent = sale.buyer;
+    if (total && items.length) total.textContent = formatCurrency(saleTotal);
+    if (orderDate && typeof sale.orderDate === 'string') {
+      orderDate.textContent = formatDate(sale.orderDate);
+    }
+    if (deliveryDate && typeof sale.deliveryDate === 'string') {
+      deliveryDate.textContent = sale.deliveryDate ? formatDate(sale.deliveryDate) : '';
+      deliveryDate.closest('[data-list-delivery]').style.display =
+        sale.deliveryDate ? '' : 'none';
+    }
+    card.dataset.comprador = buyer ? buyer.textContent : '';
+  }
+
+  try {
+    var stored = localStorage.getItem('sweetlog-vendas');
+    var savedSales = stored ? JSON.parse(stored) : {};
+    if (!savedSales || typeof savedSales !== 'object' || Array.isArray(savedSales)) {
+      throw new Error('Os dados salvos das vendas são inválidos.');
+    }
+
+    cards.forEach(function (card) {
+      var sale = savedSales[card.dataset.numero];
+      if (!sale) return;
+      applySaleToCard(card, sale);
+    });
+  } catch (error) {
+    showToast('Não foi possível carregar as alterações salvas das vendas.', 'error');
+  }
+}
+
+function initSaleDetailPage() {
+  var page = document.querySelector('[data-sale-detail]');
+  if (!page) return;
+
+  var card = page.querySelector('[data-sale-card]');
+  var saleId = new URLSearchParams(window.location.search).get('id');
+  var defaults = {
+    '1': {
+      buyer: 'Padaria Central',
+      items: [{ stockId: '1', quantity: '145', unitPrice: '8.62' }],
+      employeeRegistration: '10425',
+      orderDate: '2023-10-24',
+      deliveryDate: '2023-10-26'
+    },
+    '2': {
+      buyer: 'Cliente Mariana',
+      items: [{ stockId: '2', quantity: '60', unitPrice: '8.01' }],
+      employeeRegistration: '10424',
+      orderDate: '2023-10-25',
+      deliveryDate: '2023-10-25'
+    },
+    '3': {
+      buyer: 'Mercado Bom Preço',
+      items: [{ stockId: '3', quantity: '210', unitPrice: '10.00' }],
+      employeeRegistration: '10423',
+      orderDate: '2023-10-25',
+      deliveryDate: '2023-10-27'
+    },
+    '4': {
+      buyer: 'Café da Praça',
+      items: [{ stockId: '4', quantity: '45', unitPrice: '7.11' }],
+      employeeRegistration: '10422',
+      orderDate: '2023-10-26',
+      deliveryDate: '2023-10-26'
+    }
+  };
+  var sale = defaults[saleId];
+
+  if (!sale) {
+    card.remove();
+    showToast('Venda não encontrada. Selecione uma venda na lista.', 'error');
+    return;
+  }
+
+  card.dataset.numero = saleId;
+  page.querySelector('[data-sale-page-heading]').textContent = 'Detalhes da venda #' + saleId;
+  card.querySelector('[data-sale-heading]').textContent = 'Venda #' + saleId;
+  card.querySelector('[data-sale-download]').download = 'nota-fiscal-venda-' + saleId + '.pdf';
+  card.saleDefaults = sale;
+  Object.keys(sale).forEach(function (field) {
+    var input = card.querySelector('[data-sale-input="' + field + '"]');
+    var output = card.querySelector('[data-sale-value="' + field + '"]');
+    if (!input || !output) return;
+    input.value = sale[field];
+    if (field === 'orderDate' || field === 'deliveryDate') {
+      output.textContent = new Date(sale[field] + 'T00:00:00').toLocaleDateString('pt-BR');
+    } else {
+      output.textContent = sale[field];
+    }
+  });
+}
 
 function initProductDetailEdit() {
   var form = document.querySelector('[data-product-detail-form]');
@@ -579,18 +708,25 @@ function initProductDetailEdit() {
     inputs.forEach(function (input) {
       var value = form.querySelector('[data-detail-value="' + input.dataset.detailInput + '"]');
       input.value = values[input.dataset.detailInput];
-      value.textContent = input.value;
+      value.textContent = input.dataset.detailInput === 'refrigeracao'
+        ? (input.value === 'true' ? 'Sim' : 'Não')
+        : input.value;
     });
   }
 
   try {
     var storedValues = localStorage.getItem(storageKey);
     if (storedValues) {
-      var values = JSON.parse(storedValues);
-      var validValues = inputs.every(function (input) {
-        return typeof values[input.dataset.detailInput] === 'string';
+      var stored = JSON.parse(storedValues);
+      var values = {};
+      inputs.forEach(function (input) {
+        var key = input.dataset.detailInput;
+        var saved = stored && stored[key];
+        values[key] = typeof saved === 'string' ? saved : input.value;
       });
-      if (!validValues) throw new Error('Os dados salvos do produto são inválidos.');
+      if (values.refrigeracao !== 'true' && values.refrigeracao !== 'false') {
+        values.refrigeracao = 'false';
+      }
       applyValues(values);
     }
   } catch (error) {
@@ -604,7 +740,9 @@ function initProductDetailEdit() {
   form.querySelector('[data-cancel-detail]').addEventListener('click', function () {
     inputs.forEach(function (input) {
       var value = form.querySelector('[data-detail-value="' + input.dataset.detailInput + '"]');
-      input.value = value.textContent;
+      input.value = input.dataset.detailInput === 'refrigeracao'
+        ? (value.textContent === 'Sim' ? 'true' : 'false')
+        : value.textContent;
       input.classList.remove('is-invalid');
     });
     setEditing(false);
@@ -617,17 +755,20 @@ function initProductDetailEdit() {
 
     inputs.forEach(function (input) {
       var value = input.value.trim();
-      if (!value) {
+      var key = input.dataset.detailInput;
+      var isRequired = key === 'cnpj_fabricante';
+      var validCnpj = key !== 'cnpj_fabricante' || value.replace(/\D/g, '').length === 14;
+      if ((isRequired && !value) || !validCnpj) {
         input.classList.add('is-invalid');
         isValid = false;
       } else {
         input.classList.remove('is-invalid');
-        values[input.dataset.detailInput] = value;
+        values[key] = value;
       }
     });
 
     if (!isValid) {
-      showToast('Preencha todos os campos antes de salvar.', 'error');
+      showToast('Informe um CNPJ válido com 14 dígitos.', 'error');
       return;
     }
 
@@ -649,18 +790,63 @@ function initSalesEditing() {
   if (!cards.length) return;
 
   var storageKey = 'sweetlog-vendas';
-  var fields = ['status', 'buyer', 'quantity', 'amount', 'orderDate', 'deliveryDate'];
+  var fields = ['buyer', 'employeeRegistration', 'orderDate', 'deliveryDate'];
+  var itemFields = ['stockId', 'quantity', 'unitPrice'];
   var invoiceDataBySale = {};
-  var statusClasses = {
-    'Em preparo': 'badge--purple',
-    'Aguardando coleta': 'badge--blue',
-    Entregue: 'badge--success',
-    Cancelado: 'badge--danger'
-  };
+  var itemTemplate = document.querySelector('[data-sale-item-template]');
 
   function formatDate(value) {
-    var date = new Date(value + 'T00:00:00');
-    return date.toLocaleDateString('pt-BR');
+    return value ? new Date(value + 'T00:00:00').toLocaleDateString('pt-BR') : '';
+  }
+
+  function formatCurrency(value) {
+    return new Intl.NumberFormat('pt-BR', {
+      style: 'currency',
+      currency: 'BRL'
+    }).format(value);
+  }
+
+  function isValidDate(value) {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
+    var parts = value.split('-').map(Number);
+    var date = new Date(parts[0], parts[1] - 1, parts[2]);
+    return date.getFullYear() === parts[0] &&
+      date.getMonth() === parts[1] - 1 &&
+      date.getDate() === parts[2];
+  }
+
+  function normalizeSale(sale, fallback) {
+    var source = sale || {};
+    var defaultSale = fallback || {};
+    var sourceItems = Array.isArray(source.items) ? source.items : null;
+    if (!sourceItems && source.stockId !== undefined) {
+      sourceItems = [{
+        stockId: source.stockId,
+        quantity: source.quantity,
+        unitPrice: source.unitPrice
+      }];
+    }
+    if (!sourceItems) sourceItems = defaultSale.items || [];
+
+    return {
+      buyer: typeof source.buyer === 'string' ? source.buyer : defaultSale.buyer || '',
+      employeeRegistration: source.employeeRegistration === undefined
+        ? defaultSale.employeeRegistration || ''
+        : String(source.employeeRegistration || ''),
+      orderDate: typeof source.orderDate === 'string' ? source.orderDate : defaultSale.orderDate || '',
+      deliveryDate: typeof source.deliveryDate === 'string' ? source.deliveryDate : defaultSale.deliveryDate || '',
+      items: sourceItems.map(function (item) {
+        return {
+          stockId: String(item.stockId !== undefined ? item.stockId : item.id_estoque || ''),
+          quantity: String(item.quantity !== undefined
+            ? item.quantity
+            : item.quantidade_venda_item || ''),
+          unitPrice: String(item.unitPrice !== undefined
+            ? item.unitPrice
+            : item.preco_unitario || '')
+        };
+      })
+    };
   }
 
   function getValues(card) {
@@ -668,21 +854,95 @@ function initSalesEditing() {
     fields.forEach(function (field) {
       values[field] = card.querySelector('[data-sale-input="' + field + '"]').value;
     });
+    values.items = Array.prototype.slice.call(card.querySelectorAll('[data-sale-item]'))
+      .map(function (row) {
+        var item = {};
+        itemFields.forEach(function (field) {
+          item[field] = row.querySelector('[data-sale-item-input="' + field + '"]').value;
+        });
+        return item;
+      });
     return values;
   }
 
+  function totalFor(values) {
+    return values.items.reduce(function (sum, item) {
+      return sum + Number(item.quantity) * Number(item.unitPrice);
+    }, 0);
+  }
+
   function isValidSale(values) {
-    var quantity = Number(values.quantity);
-    var amount = Number(values.amount);
-    return Number.isInteger(quantity) && quantity > 0 &&
-      values.quantity.trim() !== '' && values.amount.trim() !== '' &&
-      values.buyer.trim() !== '' &&
-      Number.isFinite(amount) && amount >= 0 &&
-      !!statusClasses[values.status] &&
-      /^\d{4}-\d{2}-\d{2}$/.test(values.orderDate) &&
+    var registration = values.employeeRegistration ? Number(values.employeeRegistration) : null;
+    var validItems = values.items.length > 0 && values.items.every(function (item) {
+      var stockId = Number(item.stockId);
+      var quantity = Number(item.quantity);
+      var unitPrice = Number(item.unitPrice);
+      return item.stockId.trim() !== '' && Number.isInteger(stockId) && stockId > 0 &&
+        item.quantity.trim() !== '' && Number.isInteger(quantity) && quantity > 0 &&
+        item.unitPrice.trim() !== '' && Number.isFinite(unitPrice) && unitPrice >= 0;
+    });
+    return validItems && values.buyer.trim() !== '' &&
+      (registration === null || (Number.isInteger(registration) && registration > 0)) &&
+      isValidDate(values.orderDate) &&
       (!values.deliveryDate ||
-        (/^\d{4}-\d{2}-\d{2}$/.test(values.deliveryDate) &&
+        (isValidDate(values.deliveryDate) &&
           values.deliveryDate >= values.orderDate));
+  }
+
+  function updateItemTotals(card) {
+    var itemTotal = 0;
+    card.querySelectorAll('[data-sale-item]').forEach(function (row, index) {
+      var stockId = row.querySelector('[data-sale-item-input="stockId"]').value;
+      var quantity = row.querySelector('[data-sale-item-input="quantity"]').value;
+      var unitPrice = row.querySelector('[data-sale-item-input="unitPrice"]').value;
+      var subtotal = Number(quantity) * Number(unitPrice);
+      var itemValues = {
+        stockId: stockId || 'Não informado',
+        quantity: quantity ? quantity + ' un' : 'Não informado',
+        unitPrice: unitPrice === '' ? 'Não informado' : formatCurrency(Number(unitPrice)),
+        subtotal: Number.isFinite(subtotal) ? formatCurrency(subtotal) : formatCurrency(0)
+      };
+      row.querySelector('[data-sale-item-heading]').textContent = 'Produto ' + (index + 1);
+      Object.keys(itemValues).forEach(function (field) {
+        row.querySelector('[data-sale-item-value="' + field + '"]').textContent = itemValues[field];
+      });
+      if (Number.isFinite(subtotal)) itemTotal += subtotal;
+    });
+    card.querySelector('[data-sale-value="total"]').textContent =
+      'Total: ' + formatCurrency(itemTotal);
+  }
+
+  function updateItemControls(card) {
+    var rows = Array.prototype.slice.call(card.querySelectorAll('[data-sale-item]'));
+    rows.forEach(function (row) {
+      row.querySelector('[data-sale-remove-item]').style.display =
+        rows.length > 1 ? '' : 'none';
+    });
+  }
+
+  function renderItems(card, items) {
+    var container = card.querySelector('[data-sale-items]');
+    container.textContent = '';
+    items.forEach(function (item) {
+      var row = itemTemplate.content.firstElementChild.cloneNode(true);
+      itemFields.forEach(function (field) {
+        row.querySelector('[data-sale-item-input="' + field + '"]').value = item[field];
+      });
+      itemFields.forEach(function (field) {
+        var input = row.querySelector('[data-sale-item-input="' + field + '"]');
+        input.addEventListener('input', function () { updateItemTotals(card); });
+        input.addEventListener('change', function () { updateItemTotals(card); });
+      });
+      row.querySelector('[data-sale-remove-item]').addEventListener('click', function () {
+        if (card.querySelectorAll('[data-sale-item]').length === 1) return;
+        row.remove();
+        updateItemTotals(card);
+        updateItemControls(card);
+      });
+      container.appendChild(row);
+    });
+    updateItemControls(card);
+    updateItemTotals(card);
   }
 
   function applyValues(card, values) {
@@ -691,27 +951,17 @@ function initSalesEditing() {
       var output = card.querySelector('[data-sale-value="' + field + '"]');
       input.value = values[field];
 
-      if (field === 'quantity') output.textContent = values[field] + ' un';
-      else if (field === 'buyer') output.textContent = values[field];
-      else if (field === 'amount') {
-        output.textContent = new Intl.NumberFormat('pt-BR', {
-          style: 'currency',
-          currency: 'BRL'
-        }).format(Number(values[field]));
+      if (field === 'buyer' || field === 'employeeRegistration') {
+        output.textContent = values[field] || 'Não informado';
       } else if (field === 'orderDate' || field === 'deliveryDate') {
         output.textContent = values[field] ? formatDate(values[field]) : '';
         if (field === 'deliveryDate') {
           output.closest('[data-sale-delivery]').style.display =
             values[field] ? '' : 'none';
         }
-      } else {
-        output.textContent = values[field];
-        Object.keys(statusClasses).forEach(function (status) {
-          output.classList.remove(statusClasses[status]);
-        });
-        output.classList.add(statusClasses[values[field]]);
       }
     });
+    renderItems(card, values.items);
   }
 
   function makeInvoicePdf(card, values) {
@@ -724,26 +974,43 @@ function initSalesEditing() {
       'SweetLog - Resumo de venda',
       'Pedido: ' + card.dataset.numero,
       'Comprador: ' + values.buyer,
-      'Quantidade: ' + values.quantity + ' unidades',
-      'Valor total: R$ ' + Number(values.amount).toFixed(2),
+      'Matricula responsavel: ' + (values.employeeRegistration || 'Nao informada'),
       'Data do pedido: ' + formatDate(values.orderDate),
-      'Data de entrega: ' + (values.deliveryDate ? formatDate(values.deliveryDate) : 'Nao informada')
+      'Data de entrega: ' + (values.deliveryDate ? formatDate(values.deliveryDate) : 'Nao informada'),
+      'Itens da venda:'
     ];
-    var commands = ['BT', '/F1 12 Tf', '50 750 Td'];
-    lines.forEach(function (line, index) {
-      if (index) commands.push('0 -24 Td');
-      commands.push('(' + pdfText(line) + ') Tj');
+    values.items.forEach(function (item, index) {
+      var subtotal = Number(item.quantity) * Number(item.unitPrice);
+      lines.push('Produto ' + (index + 1) + ' | Estoque: ' + item.stockId +
+        ' | Quantidade: ' + item.quantity + ' | Unitario: R$ ' +
+        Number(item.unitPrice).toFixed(2) + ' | Subtotal: R$ ' + subtotal.toFixed(2));
     });
-    commands.push('ET');
-
-    var stream = commands.join('\n');
-    var objects = [
-      '<< /Type /Catalog /Pages 2 0 R >>',
-      '<< /Type /Pages /Kids [3 0 R] /Count 1 >>',
-      '<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 4 0 R >> >> /Contents 5 0 R >>',
-      '<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>',
-      '<< /Length ' + stream.length + ' >>\nstream\n' + stream + '\nendstream'
-    ];
+    lines.push('Valor total da venda: R$ ' + totalFor(values).toFixed(2));
+    var pages = [];
+    for (var lineIndex = 0; lineIndex < lines.length; lineIndex += 38) {
+      pages.push(lines.slice(lineIndex, lineIndex + 38));
+    }
+    var objects = ['<< /Type /Catalog /Pages 2 0 R >>', ''];
+    var kids = [];
+    pages.forEach(function (pageLines, index) {
+      var pageObject = 4 + index * 2;
+      var contentObject = pageObject + 1;
+      var commands = ['BT', '/F1 10 Tf', '50 750 Td'];
+      kids.push(pageObject + ' 0 R');
+      pageLines.forEach(function (line, pageLineIndex) {
+        if (pageLineIndex) commands.push('0 -18 Td');
+        commands.push('(' + pdfText(line) + ') Tj');
+      });
+      commands.push('ET');
+      var stream = commands.join('\n');
+      objects.push(
+        '<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 3 0 R >> >> /Contents ' +
+          contentObject + ' 0 R >>',
+        '<< /Length ' + stream.length + ' >>\nstream\n' + stream + '\nendstream'
+      );
+    });
+    objects[1] = '<< /Type /Pages /Kids [' + kids.join(' ') + '] /Count ' + pages.length + ' >>';
+    objects.splice(2, 0, '<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>');
     var pdf = '%PDF-1.4\n';
     var offsets = [0];
     objects.forEach(function (object, index) {
@@ -794,13 +1061,23 @@ function initSalesEditing() {
       input.disabled = !isEditing;
       input.style.display = isEditing ? '' : 'none';
     });
+    card.querySelectorAll('[data-sale-item-input]').forEach(function (input) {
+      input.disabled = !isEditing;
+      input.style.display = isEditing ? '' : 'none';
+    });
+    card.querySelector('[data-sale-add-item]').style.display = isEditing ? '' : 'none';
+    card.querySelectorAll('[data-sale-remove-item]').forEach(function (button) {
+      button.style.display = isEditing && card.querySelectorAll('[data-sale-item]').length > 1
+        ? ''
+        : 'none';
+    });
     var invoiceInput = card.querySelector('[data-sale-invoice]');
     invoiceInput.disabled = !isEditing;
-    invoiceInput.required = isEditing;
+    invoiceInput.required = false;
     invoiceInput.style.display = isEditing ? '' : 'none';
     card.querySelector('[data-sale-download]').style.display = isEditing ? 'none' : '';
     card.querySelector('[data-sale-invoice-name]').style.display = isEditing ? '' : 'none';
-    card.querySelectorAll('[data-sale-value]').forEach(function (value) {
+    card.querySelectorAll('[data-sale-value]:not([data-sale-value="total"])').forEach(function (value) {
       value.style.display = isEditing ? 'none' : '';
     });
     card.querySelector('[data-sale-actions]').style.display = isEditing ? 'flex' : 'none';
@@ -808,13 +1085,13 @@ function initSalesEditing() {
   }
 
   function updateActiveCount() {
-    var count = cards.filter(function (card) {
-      var status = card.querySelector('[data-sale-value="status"]').textContent;
-      return status !== 'Entregue' && status !== 'Cancelado';
-    }).length;
     var countBadge = document.querySelector('[data-sales-count]');
-    if (countBadge) countBadge.textContent = '🧺 ' + count + ' Ativas';
+    if (countBadge) countBadge.textContent = '🧺 ' + cards.length + ' Vendas';
   }
+
+  cards.forEach(function (card) {
+    applyValues(card, normalizeSale(null, card.saleDefaults));
+  });
 
   try {
     var stored = localStorage.getItem(storageKey);
@@ -826,8 +1103,7 @@ function initSalesEditing() {
       cards.forEach(function (card) {
         var sale = savedSales[card.dataset.numero];
         if (!sale) return;
-        var defaults = getValues(card);
-        var migratedSale = Object.assign({}, defaults, sale);
+        var migratedSale = normalizeSale(sale, card.saleDefaults);
         var validSale = fields.every(function (field) {
           return typeof migratedSale[field] === 'string';
         }) && isValidSale(migratedSale) &&
@@ -863,13 +1139,22 @@ function initSalesEditing() {
         invoiceName.textContent = '';
         return;
       }
-      if (file.size > 2 * 1024 * 1024) {
-        showToast('A nota fiscal deve ter no máximo 2MB.', 'error');
+      if (file.size > 5 * 1024 * 1024) {
+        showToast('A nota fiscal deve ter no máximo 5MB.', 'error');
         invoiceInput.value = '';
         invoiceName.textContent = '';
         return;
       }
       invoiceName.textContent = file.name;
+    });
+
+    card.querySelector('[data-sale-add-item]').addEventListener('click', function () {
+      var items = getValues(card).items;
+      items.push({ stockId: '', quantity: '1', unitPrice: '0' });
+      renderItems(card, items);
+      setEditing(card, true);
+      card.querySelectorAll('[data-sale-item]')[items.length - 1]
+        .querySelector('[data-sale-item-input="stockId"]').focus();
     });
 
     card.querySelector('[data-sale-download]').addEventListener('click', function (event) {
@@ -891,7 +1176,7 @@ function initSalesEditing() {
       setEditing(card, false);
     });
 
-    card.addEventListener('submit', function (event) {
+    card.querySelector('[data-sale-save]').addEventListener('click', function (event) {
       event.preventDefault();
       var values = getValues(card);
       var invoiceFile = invoiceInput.files[0];
@@ -900,13 +1185,13 @@ function initSalesEditing() {
         card.querySelector('[data-sale-input="buyer"]').focus();
         return;
       }
-      if (!invoiceFile) {
-        showToast('Anexe a nota fiscal em PDF antes de salvar.', 'error');
-        invoiceInput.focus();
+      if (!isValidSale(values)) {
+        showToast('Confira comprador, os itens, matrícula e datas da venda.', 'error');
         return;
       }
-      if (!isValidSale(values)) {
-        showToast('Confira a quantidade, o valor, o status e as datas da venda.', 'error');
+
+      if (!invoiceFile) {
+        saveSale(values, card, null);
         return;
       }
 
@@ -927,31 +1212,35 @@ function initSalesEditing() {
           showToast('Não foi possível ler a nota fiscal selecionada.', 'error');
         };
         dataReader.onload = function () {
-          var invoiceDataUrl = dataReader.result;
-          try {
-            var savedSales = JSON.parse(localStorage.getItem(storageKey) || '{}');
-            savedSales[card.dataset.numero] = Object.assign({}, values, {
-              invoiceDataUrl: invoiceDataUrl
-            });
-            localStorage.setItem(storageKey, JSON.stringify(savedSales));
-          } catch (error) {
-            showToast('Não foi possível salvar os dados e a nota fiscal desta venda.', 'error');
-            return;
-          }
-
-          invoiceDataBySale[card.dataset.numero] = invoiceDataUrl;
-          applyValues(card, values);
-          invoiceInput.value = '';
-          invoiceName.textContent = '';
-          setEditing(card, false);
-          updateActiveCount();
-          showToast('Venda ' + card.dataset.numero + ' atualizada com sucesso!', 'success');
+          saveSale(values, card, dataReader.result);
         };
         dataReader.readAsDataURL(invoiceFile);
       };
       reader.readAsArrayBuffer(invoiceFile.slice(0, 5));
     });
   });
+
+  function saveSale(values, card, invoiceDataUrl) {
+    try {
+      var savedSales = JSON.parse(localStorage.getItem(storageKey) || '{}');
+      var savedSale = Object.assign({}, savedSales[card.dataset.numero], values);
+      if (invoiceDataUrl) savedSale.invoiceDataUrl = invoiceDataUrl;
+      savedSales[card.dataset.numero] = savedSale;
+      localStorage.setItem(storageKey, JSON.stringify(savedSales));
+    } catch (error) {
+      showToast('Não foi possível salvar as alterações desta venda.', 'error');
+      return;
+    }
+
+    if (invoiceDataUrl) invoiceDataBySale[card.dataset.numero] = invoiceDataUrl;
+    applyValues(card, values);
+    var invoiceInput = card.querySelector('[data-sale-invoice]');
+    invoiceInput.value = '';
+    card.querySelector('[data-sale-invoice-name]').textContent = '';
+    setEditing(card, false);
+    updateActiveCount();
+    showToast('Venda ' + card.dataset.numero + ' atualizada com sucesso!', 'success');
+  }
 
   updateActiveCount();
 }
@@ -971,11 +1260,23 @@ document.addEventListener('DOMContentLoaded', function () {
   var nome = document.getElementById('nome');
   var marca = document.getElementById('marca');
   var tamanho = document.getElementById('tamanho');
-  [nome, marca, tamanho].forEach(clearErrorOnInput);
+  var cnpj = document.getElementById('cnpj-fabricante');
+  [nome, marca, tamanho, cnpj].forEach(clearErrorOnInput);
+
+  if (cnpj) {
+    cnpj.addEventListener('input', function () {
+      var digits = cnpj.value.replace(/\D/g, '').slice(0, 14);
+      cnpj.value = digits
+        .replace(/^(\d{2})(\d)/, '$1.$2')
+        .replace(/^(\d{2})\.(\d{3})(\d)/, '$1.$2.$3')
+        .replace(/\.(\d{3})(\d)/, '.$1/$2')
+        .replace(/(\d{4})(\d)/, '$1-$2');
+    });
+  }
 
   function showPreview(file) {
-    if (!file || !file.type.startsWith('image/')) {
-      showToast('Selecione um arquivo de imagem válido.', 'error');
+    if (!file || (file.type !== 'image/jpeg' && file.type !== 'image/png')) {
+      showToast('Selecione uma imagem JPG ou PNG válida.', 'error');
       return;
     }
     if (file.size > 5 * 1024 * 1024) {
@@ -1032,9 +1333,15 @@ document.addEventListener('DOMContentLoaded', function () {
 
   form.addEventListener('submit', function (e) {
     e.preventDefault();
-    var isValid = validateRequired([nome, marca, tamanho]);
+    var isValid = validateRequired([nome, cnpj]);
+    var refrigeracao = form.querySelector('input[name="necessidade_refrigeracao"]:checked');
+    if (!refrigeracao) isValid = false;
+    if (cnpj && cnpj.value.replace(/\D/g, '').length !== 14) {
+      markInvalid(cnpj);
+      isValid = false;
+    }
     if (!isValid) {
-      showToast('Preencha os campos obrigatórios do produto.', 'error');
+      showToast('Informe o nome, um CNPJ válido e a necessidade de refrigeração.', 'error');
       return;
     }
 
@@ -1179,11 +1486,10 @@ function initEntradaForm() {
       isValid = false;
     }
 
-    // se nenhuma opção de inspeção estiver marcada, não quebra o envio
-    var inspecao = form.querySelector('input[name="inspecao"]:checked');
-    var reprovado = !!inspecao && inspecao.value === 'reprovado';
-    if (reprovado) {
-      showToast('Produto reprovado na inspeção — a entrada não pode ser registrada.', 'error');
+    // A inspeção é um booleano; reprovação não impede o registro da entrada.
+    var inspecao = form.querySelector('input[name="inspecionado"]:checked');
+    if (!inspecao) {
+      showToast('Informe se o produto foi inspecionado.', 'error');
       isValid = false;
     }
     if (!isValid) return;
@@ -1204,38 +1510,260 @@ function initSaidaForm() {
   var form = document.querySelector('[data-saida-form]');
   if (!form) return;
 
-  var produto2 = document.getElementById('produto2');
-  var motivo = document.getElementById('motivo');
-  var quantidade = document.getElementById('qtd2');
-  [produto2, motivo, quantidade].forEach(clearErrorOnInput);
+  var tipoSaida = form.querySelector('[data-saida-tipo]');
+  var vendaFields = form.querySelector('[data-saida-venda-fields]');
+  var comprador = form.querySelector('[name="comprador"]');
+  var dataPedido = form.querySelector('[name="data_pedido"]');
+  var dataEntrega = form.querySelector('[name="data_entrega"]');
+  var matricula = form.querySelector('[name="numero_matricula"]');
+  var notaFiscal = form.querySelector('[name="nota_fiscal"]');
+  var itemsContainer = form.querySelector('[data-saida-items]');
+  var addItemButton = form.querySelector('[data-add-saida-item]');
+  var hint = form.querySelector('[data-saida-itens-hint]');
+  var totalOutput = form.querySelector('[data-saida-total]');
+  var saleDate = new Date();
+  dataPedido.value = [
+    saleDate.getFullYear(),
+    String(saleDate.getMonth() + 1).padStart(2, '0'),
+    String(saleDate.getDate()).padStart(2, '0')
+  ].join('-');
+
+  function itemRows() {
+    return Array.prototype.slice.call(itemsContainer.querySelectorAll('[data-saida-item]'));
+  }
+
+  function bindItemFields(row) {
+    row.querySelectorAll('[data-item-field]').forEach(function (field) {
+      clearErrorOnInput(field);
+      field.addEventListener('input', updateTotal);
+      field.addEventListener('change', updateTotal);
+    });
+  }
+
+  function updateItems() {
+    var rows = itemRows();
+    var isSale = tipoSaida.value === 'venda';
+    addItemButton.style.display = isSale ? '' : 'none';
+    hint.textContent = isSale
+      ? 'Adicione cada lote do estoque vendido. Informe o ID do registro de estoque, não o ID do produto. Como a tela ainda não consulta o backend, preencha esse ID manualmente.'
+      : 'A baixa simples diminui a quantidade de um único lote do estoque.';
+    rows.forEach(function (row, index) {
+      row.querySelectorAll('[data-item-field]').forEach(function (field) {
+        var fieldName = field.getAttribute('data-item-field');
+        field.name = 'itens[' + index + '][' + fieldName + ']';
+        field.required = fieldName !== 'preco_unitario' || isSale;
+        var suffix = fieldName === 'id_estoque'
+          ? 'stock'
+          : fieldName === 'quantidade_venda_item' ? 'quantity' : 'price';
+        field.id = 'item-' + index + '-' + suffix;
+        var label = row.querySelector('[data-item-label="' + suffix + '"]');
+        if (label) label.htmlFor = field.id;
+      });
+      row.querySelector('[data-item-price-field]').style.display = isSale ? '' : 'none';
+      row.querySelector('[data-remove-saida-item]').style.display =
+        !isSale || rows.length === 1 ? 'none' : '';
+      row.querySelector('[data-item-label="stock"]').textContent =
+        'Produto ' + (index + 1) + ' — ID do estoque *';
+      row.querySelector('[data-item-label="quantity"]').textContent = 'Quantidade *';
+      row.querySelector('[data-item-label="price"]').textContent = 'Preço unitário *';
+    });
+    vendaFields.style.display = isSale ? '' : 'none';
+    [comprador, dataPedido, notaFiscal].forEach(function (field) {
+      field.required = isSale;
+      field.disabled = !isSale;
+    });
+    [dataEntrega, matricula].forEach(function (field) {
+      field.disabled = !isSale;
+    });
+    if (!isSale) {
+      while (rows.length > 1) {
+        rows.pop().remove();
+      }
+      updateTotal();
+      return;
+    }
+    updateTotal();
+  }
+
+  function updateTotal() {
+    var isSale = tipoSaida.value === 'venda';
+    var total = itemRows().reduce(function (sum, row) {
+      var quantity = Number(row.querySelector('[data-item-field="quantidade_venda_item"]').value);
+      var price = Number(row.querySelector('[data-item-field="preco_unitario"]').value);
+      return sum + (Number.isFinite(quantity) && Number.isFinite(price) ? quantity * price : 0);
+    }, 0);
+    totalOutput.style.display = isSale ? '' : 'none';
+    totalOutput.textContent = 'Valor total estimado: ' + new Intl.NumberFormat('pt-BR', {
+      style: 'currency',
+      currency: 'BRL'
+    }).format(total);
+  }
+
+  function addItem() {
+    var rows = itemRows();
+    var clone = rows[0].cloneNode(true);
+    clone.querySelectorAll('[data-item-field]').forEach(function (field) {
+      field.value = field.getAttribute('data-item-field') === 'quantidade_venda_item' ? '1' : '';
+      field.classList.remove('is-invalid');
+    });
+    clone.querySelector('[data-remove-saida-item]').addEventListener('click', function () {
+      clone.remove();
+      updateItems();
+    });
+    bindItemFields(clone);
+    itemsContainer.appendChild(clone);
+    updateItems();
+    clone.querySelector('[data-item-field="id_estoque"]').focus();
+  }
+
+  tipoSaida.addEventListener('change', updateItems);
+  clearErrorOnInput(tipoSaida);
+  clearErrorOnInput(comprador);
+  clearErrorOnInput(dataPedido);
+  clearErrorOnInput(dataEntrega);
+  clearErrorOnInput(matricula);
+  clearErrorOnInput(notaFiscal);
+  bindItemFields(itemRows()[0]);
+  addItemButton.addEventListener('click', addItem);
+  itemRows()[0].querySelector('[data-remove-saida-item]').addEventListener('click', function () {
+    if (itemRows().length > 1) {
+      itemRows()[0].remove();
+      updateItems();
+    }
+  });
+  updateItems();
+
+  function isValidDate(value) {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
+    var parts = value.split('-').map(Number);
+    var date = new Date(parts[0], parts[1] - 1, parts[2]);
+    return date.getFullYear() === parts[0] &&
+      date.getMonth() === parts[1] - 1 &&
+      date.getDate() === parts[2];
+  }
+
+  function validItems() {
+    var isSale = tipoSaida.value === 'venda';
+    var valid = true;
+    var items = itemRows().map(function (row) {
+      var stockInput = row.querySelector('[data-item-field="id_estoque"]');
+      var quantityInput = row.querySelector('[data-item-field="quantidade_venda_item"]');
+      var priceInput = row.querySelector('[data-item-field="preco_unitario"]');
+      var stockId = Number(stockInput.value);
+      var quantity = Number(quantityInput.value);
+      var price = Number(priceInput.value);
+      var stockValid = Number.isInteger(stockId) && stockId > 0;
+      var quantityValid = Number.isInteger(quantity) && quantity > 0;
+      var priceValid = !isSale || (priceInput.value.trim() !== '' && Number.isFinite(price) && price >= 0);
+
+      [[stockInput, stockValid], [quantityInput, quantityValid], [priceInput, priceValid]].forEach(function (field) {
+        if (!field[1]) {
+          field[0].classList.add('is-invalid');
+          valid = false;
+        } else {
+          field[0].classList.remove('is-invalid');
+        }
+      });
+
+      return {
+        id_estoque: stockId,
+        quantidade_venda_item: quantity,
+        preco_unitario: isSale ? price : undefined
+      };
+    });
+    return { valid: valid, items: items };
+  }
 
   form.addEventListener('submit', function (e) {
     e.preventDefault();
-    var isValid = validateRequired([produto2, motivo, quantidade]);
-    var quantidadeInformada = Number(quantidade && quantidade.value);
-    if (quantidade && quantidade.value &&
-        (!Number.isInteger(quantidadeInformada) || quantidadeInformada < 1)) {
-      quantidade.classList.add('is-invalid');
-      showToast('Informe uma quantidade válida (mínimo de 1).', 'error');
-      isValid = false;
+    var isSale = tipoSaida.value === 'venda';
+    var itemsResult = validItems();
+    var isValid = itemsResult.valid;
+
+    if (isSale) {
+      if (!comprador.value.trim()) {
+        markInvalid(comprador);
+        isValid = false;
+      }
+      if (!isValidDate(dataPedido.value)) {
+        markInvalid(dataPedido);
+        isValid = false;
+      }
+      if (dataEntrega.value && !isValidDate(dataEntrega.value)) {
+        markInvalid(dataEntrega);
+        isValid = false;
+      }
+      if (matricula.value &&
+          (!Number.isInteger(Number(matricula.value)) || Number(matricula.value) <= 0)) {
+        markInvalid(matricula);
+        isValid = false;
+      }
+      var file = notaFiscal.files[0];
+      if (!file) {
+        showToast('Anexe a nota fiscal em PDF da venda.', 'error');
+        isValid = false;
+      } else if (!/\.pdf$/i.test(file.name) ||
+          (file.type && file.type !== 'application/pdf') ||
+          file.size > 5 * 1024 * 1024) {
+        markInvalid(notaFiscal);
+        showToast('A nota fiscal precisa ser um PDF de até 5MB.', 'error');
+        isValid = false;
+      }
     }
+
     if (!isValid) {
-      if (!produto2.value || !motivo.value) {
-        showToast('Selecione o produto e o motivo da saída.', 'error');
-      } else if (!quantidade.value) {
-        showToast('Informe a quantidade da saída.', 'error');
+      if (isSale && !comprador.value.trim()) {
+        showToast('Informe o comprador da venda.', 'error');
+        comprador.focus();
+      } else if (isSale && !isValidDate(dataPedido.value)) {
+        showToast('Informe uma data válida para o pedido.', 'error');
+        dataPedido.focus();
+      } else if (isSale && dataEntrega.value && !isValidDate(dataEntrega.value)) {
+        showToast('Informe uma data válida para a entrega ou deixe o campo vazio.', 'error');
+        dataEntrega.focus();
+      } else if (isSale && matricula.value &&
+          (!Number.isInteger(Number(matricula.value)) || Number(matricula.value) <= 0)) {
+        showToast('A matrícula deve ser um número inteiro positivo.', 'error');
+        matricula.focus();
+      } else if (!itemsResult.valid) {
+        showToast(isSale
+          ? 'Confira o ID do estoque, a quantidade e o preço de cada produto.'
+          : 'Informe um ID de estoque e uma quantidade inteira positiva.', 'error');
       }
       return;
     }
 
-    var btn = form.querySelector('button[type="submit"]');
-    btn.disabled = true;
-    btn.textContent = 'Registrando...';
+    function finishRegistration() {
+      var btn = form.querySelector('button[type="submit"]');
+      btn.disabled = true;
+      btn.textContent = 'Registrando...';
+      setTimeout(function () {
+        showToast(isSale
+          ? 'Venda com ' + itemsResult.items.length + ' produto(s) registrada com sucesso!'
+          : 'Saída do estoque registrada com sucesso!', 'success');
+        redirectAfterToast('estoque.html');
+      }, 700);
+    }
 
-    setTimeout(function () {
-      showToast('Saída de produto registrada com sucesso!', 'success');
-      redirectAfterToast('estoque.html');
-    }, 700);
+    if (!isSale) {
+      finishRegistration();
+      return;
+    }
+
+    var reader = new FileReader();
+    reader.onerror = function () {
+      showToast('Não foi possível verificar a nota fiscal selecionada.', 'error');
+    };
+    reader.onload = function () {
+      var signature = new Uint8Array(reader.result);
+      if (signature.length < 5 || signature[0] !== 37 || signature[1] !== 80 ||
+          signature[2] !== 68 || signature[3] !== 70 || signature[4] !== 45) {
+        showToast('O arquivo selecionado não contém um documento PDF válido.', 'error');
+        return;
+      }
+      finishRegistration();
+    };
+    reader.readAsArrayBuffer(notaFiscal.files[0].slice(0, 5));
   });
 }
 
@@ -1332,7 +1860,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
     cards.forEach(function (card) {
       var numero = (card.getAttribute('data-numero') || '').toLowerCase();
-      var matches = numero.indexOf(term) > -1;
+      var matches = numero.indexOf(term) > -1 ||
+        card.textContent.toLowerCase().indexOf(term) > -1;
       card.style.display = matches ? '' : 'none';
       if (matches) visibleCount++;
     });
@@ -1557,8 +2086,8 @@ function initFuncionariosLista() {
 
   function fieldsFor(name) {
     return name === 'funcionarios'
-      ? ['matricula', 'nome', 'setor', 'telefone']
-      : ['numero', 'setor'];
+      ? ['nome', 'telefone']
+      : ['setor'];
   }
 
   function getRowValues(row, name) {
@@ -1643,14 +2172,28 @@ function initFuncionariosLista() {
   function beginRowEdit(row, name) {
     var originalValues = getRowValues(row, name);
     var fields = fieldsFor(name);
-    var columnIndexes = name === 'funcionarios' ? [0, 1, 2, 3] : [0, 1];
+    var columnIndexes = name === 'funcionarios' ? [1, 3] : [1];
     fields.forEach(function (field, index) {
-      var input = document.createElement('input');
+      var input = field === 'setor' ? document.createElement('select') : document.createElement('input');
       input.className = 'input';
-      input.type = 'text';
       input.name = field;
+      if (field === 'setor') {
+        ['RH', 'Administrativo', 'Logística', 'Compras', 'Almoxarifado'].forEach(function (sector) {
+          var option = document.createElement('option');
+          option.value = sector;
+          option.textContent = sector;
+          input.appendChild(option);
+        });
+      } else {
+        input.type = field === 'telefone' ? 'tel' : 'text';
+        if (field === 'telefone') {
+          input.addEventListener('input', function () {
+            input.value = formatPhone(input.value.replace(/\D/g, ''));
+          });
+        }
+      }
       input.value = originalValues[field];
-      input.required = true;
+      input.required = field !== 'telefone';
       input.setAttribute('aria-label', field === 'matricula' || field === 'numero'
         ? 'Número da matrícula'
         : field === 'nome' ? 'Nome do funcionário'
@@ -1682,9 +2225,9 @@ function initFuncionariosLista() {
       var values = {};
       var valid = true;
       fields.forEach(function (field, index) {
-        var input = row.cells[columnIndexes[index]].querySelector('input');
+        var input = row.cells[columnIndexes[index]].querySelector('input, select');
         values[field] = input.value.trim();
-        if (!values[field]) {
+        if (field !== 'telefone' && !values[field]) {
           input.classList.add('is-invalid');
           valid = false;
         }
@@ -1694,15 +2237,10 @@ function initFuncionariosLista() {
         return;
       }
 
-      var primaryField = name === 'funcionarios' ? 'matricula' : 'numero';
-      var duplicate = rowsOf(name).some(function (otherRow) {
-        if (otherRow === row) return false;
-        var otherValues = getRowValues(otherRow, name);
-        return otherValues[primaryField].toLowerCase() === values[primaryField].toLowerCase();
-      });
-      if (duplicate) {
-        row.cells[columnIndexes[0]].querySelector('input').classList.add('is-invalid');
-        showToast('Já existe um registro com esse número de matrícula.', 'error');
+      if (name === 'funcionarios' && values.telefone &&
+          values.telefone.replace(/\D/g, '').length !== 11) {
+        row.cells[columnIndexes[1]].querySelector('input').classList.add('is-invalid');
+        showToast('Informe um telefone com 11 dígitos ou deixe o campo vazio.', 'error');
         return;
       }
 
@@ -1711,21 +2249,16 @@ function initFuncionariosLista() {
         matriculas: Object.assign({}, records.matriculas)
       };
       var key = getStorageKey(row, name);
-      updatedRecords[name][key] = values;
+      var completeValues = Object.assign({}, originalValues, values);
+      updatedRecords[name][key] = completeValues;
 
       var relatedName = name === 'funcionarios' ? 'matriculas' : 'funcionarios';
       var identity = key.slice(name.length + 1);
       var relatedKey = relatedName + '-' + identity;
       var relatedRow = document.querySelector('[data-rows="' + relatedName + '"] [data-record-key="' + relatedKey + '"]');
-      if (relatedRow) {
+      if (relatedRow && name === 'matriculas') {
         var relatedValues = getRowValues(relatedRow, relatedName);
-        if (name === 'funcionarios') {
-          relatedValues.numero = values.matricula;
-          relatedValues.setor = values.setor;
-        } else {
-          relatedValues.matricula = values.numero;
-          relatedValues.setor = values.setor;
-        }
+        relatedValues.setor = completeValues.setor;
         updatedRecords[relatedName][relatedKey] = relatedValues;
       }
 
@@ -1737,9 +2270,11 @@ function initFuncionariosLista() {
       }
 
       records = updatedRecords;
-      renderRow(row, name, values);
+      renderRow(row, name, completeValues);
       restoreRowActions(row, name);
-      if (relatedRow) renderRow(relatedRow, relatedName, updatedRecords[relatedName][relatedKey]);
+      if (relatedRow && name === 'matriculas') {
+        renderRow(relatedRow, relatedName, updatedRecords[relatedName][relatedKey]);
+      }
       refresh('funcionarios');
       refresh('matriculas');
       showToast(name === 'funcionarios'
@@ -1817,6 +2352,11 @@ function initFuncionariosLista() {
     if (action === 'excluir') {
       var id = row.getAttribute('data-id');
       var tipo = btn.getAttribute('data-tipo');
+      if (tipo === 'matricula' &&
+          document.querySelector('[data-rows="funcionarios"] tr[data-id="' + id + '"]')) {
+        showToast('Não é possível excluir uma matrícula vinculada a um funcionário.', 'error');
+        return;
+      }
       var texto = tipo === 'matricula'
         ? 'Excluir a matrícula ' + id + '?'
         : 'Excluir o funcionário da matrícula ' + id + '?';
@@ -1852,11 +2392,6 @@ function initMatriculaForm() {
   var setor = document.getElementById('setor');
   [numero, setor].forEach(clearErrorOnInput);
 
-  // aceita 10426 ou MAT-001: letras, números e hífen (maiúsculas), até 12 caracteres
-  numero.addEventListener('input', function () {
-    numero.value = numero.value.toUpperCase().replace(/[^A-Z0-9-]/g, '').slice(0, 12);
-  });
-
   form.addEventListener('submit', function (e) {
     e.preventDefault();
     var isValid = validateRequired([numero, setor]);
@@ -1864,9 +2399,9 @@ function initMatriculaForm() {
       showToast('Preencha o número da matrícula e o setor.', 'error');
       return;
     }
-    if (numero.value.length < 3 || !/\d/.test(numero.value)) {
+    if (!Number.isInteger(Number(numero.value)) || Number(numero.value) <= 0) {
       markInvalid(numero);
-      showToast('Informe uma matrícula válida (ex.: 10426 ou MAT-001).', 'error');
+      showToast('Informe uma matrícula numérica inteira e positiva.', 'error');
       return;
     }
 

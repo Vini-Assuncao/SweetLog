@@ -54,8 +54,8 @@
         <a class="drawer__link is-active" href="estoque.html"
           ><span class="ico">📦</span> Controle de estoque</a
         >
-        <a class="drawer__link" href="pedidos.html"
-          ><span class="ico">🧺</span> Pedidos</a
+        <a class="drawer__link" href="vendas.html"
+          ><span class="ico">🧺</span> Vendas</a
         >
         <a class="drawer__link" href="saldo-diario.html"
           ><span class="ico">💰</span> Saldo diário</a
@@ -80,11 +80,11 @@
         <div class="form-grid">
           <div class="grupo-campo">
             <label for="produto">Produto *</label>
-            <select class="input" id="produto" required>
+            <select class="input" id="produto" name="id_produto" required>
               <option value="">Selecione um produto...</option>
-              <option>Farinha de Trigo Premium</option>
-              <option>Ovos Brancos Grandes</option>
-              <option>Leite Integral</option>
+              <option value="1">Farinha de Trigo Premium</option>
+              <option value="2">Ovos Brancos Grandes</option>
+              <option value="3">Leite Integral</option>
             </select>
           </div>
 
@@ -102,6 +102,7 @@
               <input
                 class="stepper__value"
                 id="qtd"
+                name="quantidade"
                 type="number"
                 value="1"
                 min="1"
@@ -127,6 +128,7 @@
             <input
               class="input"
               id="lote"
+              name="lote_producao"
               type="text"
               placeholder="Ex: L-202310"
               required
@@ -135,27 +137,28 @@
 
           <div class="grupo-campo">
             <label for="validade">Data de Validade *</label>
-            <input class="input" id="validade" type="date" required />
+            <input class="input" id="validade" name="data_validade" type="date" required />
           </div>
         </div>
 
         <div class="form-grid" style="margin-top: 18px">
           <div class="grupo-campo">
-            <label for="nf">Nota Fiscal (PDF) *</label>
+            <label for="nf">Nota Fiscal de Entrada (PDF) *</label>
             <label class="upload-box upload-box--sm" for="nf" data-upload-box>
               <span class="upload-box__icon">📄</span>
               <span class="upload-box__text" data-upload-text
                 >Anexar arquivo ou arraste e solte</span
               >
               <span class="upload-box__hint" data-upload-hint
-                >PDF até 10MB</span
+                >PDF até 5MB</span
               >
               <input
                 id="nf"
+                name="nota_fiscal"
                 type="file"
                 class="visually-hidden"
                 accept="application/pdf"
-                data-max-mb="10"
+                data-max-mb="5"
                 required
                 data-upload-input
               />
@@ -165,16 +168,14 @@
           <div class="grupo-campo">
             <p><strong>Inspeção de Qualidade *</strong></p>
             <p class="hint" style="margin-bottom: 8px">
-              O produto foi inspecionado visualmente e atende aos padrões de
-              qualidade para recebimento?
+              O produto foi inspecionado visualmente?
             </p>
             <div class="radio-choice">
               <label
-                ><input type="radio" name="inspecao" value="aprovado" checked /> Sim,
-                aprovado</label
+                ><input type="radio" name="inspecionado" value="true" required checked /> Sim</label
               >
               <label
-                ><input type="radio" name="inspecao" value="reprovado" /> Não, reprovado</label
+                ><input type="radio" name="inspecionado" value="false" required /> Não</label
               >
             </div>
           </div>

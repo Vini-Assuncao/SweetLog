@@ -54,8 +54,8 @@
         <a class="drawer__link is-active" href="estoque.html"
           ><span class="ico">📦</span> Controle de estoque</a
         >
-        <a class="drawer__link" href="pedidos.html"
-          ><span class="ico">🧺</span> Pedidos</a
+        <a class="drawer__link" href="vendas.html"
+          ><span class="ico">🧺</span> Vendas</a
         >
         <a class="drawer__link" href="saldo-diario.html"
           ><span class="ico">💰</span> Saldo diário</a
@@ -73,90 +73,125 @@
       <a class="back-link" href="estoque.html">← Voltar</a>
       <div class="page-head">
         <h1>Saída de Produtos</h1>
-        <p>Registre a venda ou perda de produtos no estoque.</p>
+        <p>Registre uma venda com vários produtos ou uma baixa de estoque.</p>
       </div>
 
-      <form class="card form-card" data-saida-form>
-        <div class="form-grid">
-          <div class="grupo-campo">
-            <label for="produto2">Produto *</label>
-            <select class="input" id="produto2" required>
-              <option value="">Selecione um produto</option>
-              <option>Bolo de Chocolate</option>
-              <option>Croissant Tradicional</option>
-              <option>Pão Francês</option>
-            </select>
-          </div>
+      <form class="card form-card" data-saida-form enctype="multipart/form-data" novalidate>
+        <div class="grupo-campo">
+          <label for="tipo-saida">Tipo de saída *</label>
+          <select class="input" id="tipo-saida" name="tipo_saida" data-saida-tipo required>
+            <option value="venda" selected>Venda</option>
+            <option value="baixa">Baixa simples de estoque</option>
+          </select>
+        </div>
 
-          <div class="grupo-campo">
-            <label for="motivo">Motivo da Saída *</label>
-            <select class="input" id="motivo" required>
-              <option value="">Selecione o motivo</option>
-              <option>Venda</option>
-              <option>Perda / Validade vencida</option>
-              <option>Doação</option>
-              <option>Uso em produção</option>
-            </select>
-          </div>
-
-          <div class="grupo-campo">
-            <label for="qtd2">Quantidade *</label>
-            <div class="stepper" data-stepper>
-              <button
-                type="button"
-                class="stepper__btn"
-                aria-label="Diminuir"
-                data-stepper-minus
-              >
-                −
-              </button>
+        <section class="stack gap-16" data-saida-venda-fields>
+          <h2>Dados da venda</h2>
+          <div class="form-grid">
+            <div class="grupo-campo">
+              <label for="comprador">Comprador *</label>
+              <input class="input" id="comprador" name="comprador" type="text" required />
+            </div>
+            <div class="grupo-campo">
+              <label for="data-pedido">Data do pedido *</label>
+              <input class="input" id="data-pedido" name="data_pedido" type="date" required />
+            </div>
+            <div class="grupo-campo">
+              <label for="data-entrega">Data de entrega (opcional)</label>
+              <input class="input" id="data-entrega" name="data_entrega" type="date" />
+            </div>
+            <div class="grupo-campo">
+              <label for="matricula">Matrícula do funcionário (opcional)</label>
               <input
-                class="stepper__value"
-                id="qtd2"
+                class="input"
+                id="matricula"
+                name="numero_matricula"
                 type="number"
-                value="1"
                 min="1"
                 step="1"
-                inputmode="numeric"
-                required
-                aria-label="Quantidade da saída"
-                data-stepper-value
               />
-              <button
-                type="button"
-                class="stepper__btn"
-                aria-label="Aumentar"
-                data-stepper-plus
-              >
-                +
+            </div>
+            <div class="grupo-campo">
+              <label for="nota-fiscal-saida">Nota fiscal da venda (PDF) *</label>
+              <label class="upload-box upload-box--sm" for="nota-fiscal-saida" data-upload-box>
+                <span class="upload-box__icon">📄</span>
+                <span class="upload-box__text" data-upload-text>Anexar arquivo ou arraste e solte</span>
+                <span class="upload-box__hint" data-upload-hint>PDF até 5MB</span>
+                <input
+                  id="nota-fiscal-saida"
+                  name="nota_fiscal"
+                  type="file"
+                  class="visually-hidden"
+                  accept="application/pdf,.pdf"
+                  data-max-mb="5"
+                  data-upload-input
+                  required
+                />
+              </label>
+            </div>
+          </div>
+        </section>
+
+        <section class="stack gap-16" aria-labelledby="saida-itens-title">
+          <div class="row gap-12" style="justify-content: space-between">
+            <h2 id="saida-itens-title">Produtos da saída</h2>
+            <button class="btn btn--outline" type="button" data-add-saida-item>
+              ＋ Adicionar produto
+            </button>
+          </div>
+          <p class="hint" data-saida-itens-hint>
+            Adicione cada lote do estoque vendido. Informe o ID do registro de estoque, não o ID do produto. Como a tela ainda não consulta o backend, preencha esse ID manualmente.
+          </p>
+          <div class="stack gap-16" data-saida-items>
+            <div class="card" data-saida-item>
+              <div class="form-grid">
+                <div class="grupo-campo">
+                  <label data-item-label="stock" for="item-0-stock">ID do estoque *</label>
+                  <input
+                    class="input"
+                    id="item-0-stock"
+                    type="number"
+                    min="1"
+                    step="1"
+                    placeholder="ID do lote no estoque"
+                    data-item-field="id_estoque"
+                    required
+                  />
+                </div>
+                <div class="grupo-campo">
+                  <label data-item-label="quantity" for="item-0-quantity">Quantidade *</label>
+                  <input
+                    class="input"
+                    id="item-0-quantity"
+                    type="number"
+                    min="1"
+                    step="1"
+                    value="1"
+                    data-item-field="quantidade_venda_item"
+                    required
+                  />
+                </div>
+                <div class="grupo-campo" data-item-price-field>
+                  <label data-item-label="price" for="item-0-price">Preço unitário *</label>
+                  <input
+                    class="input"
+                    id="item-0-price"
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    value="0"
+                    data-item-field="preco_unitario"
+                    required
+                  />
+                </div>
+              </div>
+              <button class="btn btn--outline" type="button" data-remove-saida-item hidden>
+                Remover produto
               </button>
             </div>
           </div>
-
-          <div class="grupo-campo">
-            <label for="lucro">Lucro Estimado / Valor</label>
-            <input
-              class="input"
-              id="lucro"
-              type="text"
-              placeholder="R$ 0,00"
-              data-currency-input
-            />
-          </div>
-        </div>
-
-        <div class="grupo-campo" style="margin-top: 18px">
-          <label for="destino">Destino (Opcional)</label>
-          <div class="input-group">
-            <span class="icon">📍</span>
-            <input
-              class="input"
-              id="destino"
-              type="text"
-              placeholder="Ex: Cliente João, Loja Centro, Lixo Orgânico"
-            />
-          </div>
-        </div>
+          <p class="hint" data-saida-total>Valor total estimado: R$ 0,00</p>
+        </section>
 
         <div class="form-actions">
           <button

@@ -58,8 +58,8 @@
         <a class="drawer__link" href="estoque.html"
           ><span class="ico">📦</span> Controle de estoque</a
         >
-        <a class="drawer__link" href="pedidos.html"
-          ><span class="ico">🧺</span> Pedidos</a
+        <a class="drawer__link" href="vendas.html"
+          ><span class="ico">🧺</span> Vendas</a
         >
         <a class="drawer__link" href="saldo-diario.html"
           ><span class="ico">💰</span> Saldo diário</a
@@ -108,7 +108,7 @@
           <form data-product-detail-form>
             <div class="stack gap-16">
               <div class="card info-card">
-                <h4>📁 Marca &amp; Categoria</h4>
+                <h4>📁 Marca &amp; Fabricante</h4>
                 <div class="info-row">
                   <span>Marca</span>
                   <strong data-detail-value="marca">SweetLog Premium</strong>
@@ -118,21 +118,23 @@
                     aria-label="Marca"
                     value="SweetLog Premium"
                     data-detail-input="marca"
+                    name="marca"
                     style="display: none; flex: 1; min-width: 0; width: auto"
-                    required
                   />
                 </div>
                 <div class="info-row">
-                  <span>Categoria</span>
-                  <strong data-detail-value="categoria">Viennoiserie</strong>
+                  <span>CNPJ do fabricante</span>
+                  <strong data-detail-value="cnpj_fabricante">12.345.678/0001-90</strong>
                   <input
                     class="input"
                     type="text"
-                    aria-label="Categoria"
-                    value="Viennoiserie"
-                    data-detail-input="categoria"
+                    inputmode="numeric"
+                    maxlength="18"
+                    aria-label="CNPJ do fabricante"
+                    value="12.345.678/0001-90"
+                    data-detail-input="cnpj_fabricante"
+                    name="cnpj_fabricante"
                     style="display: none; flex: 1; min-width: 0; width: auto"
-                    required
                   />
                 </div>
               </div>
@@ -148,24 +150,23 @@
                     aria-label="Tamanho ou peso"
                     value="120g (Unidade)"
                     data-detail-input="tamanho"
+                    name="tamanho"
                     style="display: none; flex: 1; min-width: 0; width: auto"
-                    required
                   />
                 </div>
                 <div class="info-row">
                   <span>Necessidade de refrigeração</span>
-                  <strong data-detail-value="refrigeracao"
-                    >Vitrine Seca (Até 25°C)</strong
-                  >
-                  <input
+                  <strong data-detail-value="refrigeracao">Não</strong>
+                  <select
                     class="input"
-                    type="text"
                     aria-label="Necessidade de refrigeração"
-                    value="Vitrine Seca (Até 25°C)"
                     data-detail-input="refrigeracao"
+                    name="necessidade_refrigeracao"
                     style="display: none; flex: 1; min-width: 0; width: auto"
-                    required
-                  />
+                  >
+                    <option value="true">Sim</option>
+                    <option value="false" selected>Não</option>
+                  </select>
                 </div>
               </div>
 

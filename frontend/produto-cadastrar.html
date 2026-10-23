@@ -54,8 +54,8 @@
         <a class="drawer__link" href="estoque.html"
           ><span class="ico">📦</span> Controle de estoque</a
         >
-        <a class="drawer__link" href="pedidos.html"
-          ><span class="ico">🧺</span> Pedidos</a
+        <a class="drawer__link" href="vendas.html"
+          ><span class="ico">🧺</span> Vendas</a
         >
         <a class="drawer__link" href="saldo-diario.html"
           ><span class="ico">💰</span> Saldo diário</a
@@ -97,13 +97,14 @@
                 >Clique para enviar</span
               >
               <span class="upload-box__hint" data-upload-hint
-                >JPG, PNG ou WEBP. Máx. 5MB.</span
+                >JPG ou PNG. Máx. 5MB.</span
               >
               <input
                 id="foto"
+                name="imagem"
                 type="file"
                 class="visually-hidden"
-                accept="image/*"
+                accept="image/jpeg,image/png"
                 data-upload-input
               />
             </label>
@@ -111,21 +112,34 @@
 
           <div class="stack gap-16">
             <div class="grupo-campo">
-              <label for="nome">Nome do produto</label>
+              <label for="nome">Nome do produto *</label>
               <input
                 class="input"
                 id="nome"
+                name="nome"
                 type="text"
                 placeholder="Ex: Bolo de Cenoura com Chocolate"
+                required
               />
+            </div>
+            <div class="grupo-campo">
+              <label for="descricao">Descrição</label>
+              <textarea
+                class="input"
+                id="descricao"
+                name="descricao"
+                rows="3"
+                placeholder="Descreva o produto (opcional)"
+              ></textarea>
             </div>
 
             <div class="form-grid">
               <div class="grupo-campo">
-                <label for="marca">Marca / Fornecedor</label>
+                <label for="marca">Marca</label>
                 <input
                   class="input"
                   id="marca"
+                  name="marca"
                   type="text"
                   placeholder="Exemplo: Nestlé"
                 />
@@ -135,10 +149,24 @@
                 <input
                   class="input"
                   id="tamanho"
+                  name="tamanho"
                   type="text"
                   placeholder="Ex: 500g, 1 Unidade"
                 />
               </div>
+            </div>
+            <div class="grupo-campo">
+              <label for="cnpj-fabricante">CNPJ do fabricante *</label>
+              <input
+                class="input"
+                id="cnpj-fabricante"
+                name="cnpj_fabricante"
+                type="text"
+                inputmode="numeric"
+                maxlength="18"
+                placeholder="00.000.000/0000-00"
+                required
+              />
             </div>
           </div>
         </div>
@@ -147,16 +175,16 @@
           <div class="row gap-12">
             <span class="refrigeracao-box__icon">❄️</span>
             <div>
-              <p class="refrigeracao-box__title">Necessidade de Refrigeração</p>
+              <p class="refrigeracao-box__title">Necessidade de Refrigeração *</p>
               <p class="refrigeracao-box__sub">
                 Este item precisa ser armazenado em câmara fria?
               </p>
             </div>
           </div>
           <div class="radio-choice">
-            <label><input type="radio" name="refrigeracao" /> Sim</label>
+            <label><input type="radio" name="necessidade_refrigeracao" value="true" required /> Sim</label>
             <label
-              ><input type="radio" name="refrigeracao" checked /> Não</label
+              ><input type="radio" name="necessidade_refrigeracao" value="false" required checked /> Não</label
             >
           </div>
         </div>

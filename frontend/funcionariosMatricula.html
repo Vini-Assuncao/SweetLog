@@ -69,8 +69,8 @@
         <a class="drawer__link" href="estoque.html"
           ><span class="ico" aria-hidden="true">📦</span> Controle de estoque</a
         >
-        <a class="drawer__link" href="pedidos.html"
-          ><span class="ico" aria-hidden="true">🧺</span> Pedidos</a
+        <a class="drawer__link" href="vendas.html"
+          ><span class="ico" aria-hidden="true">🧺</span> Vendas</a
         >
         <a class="drawer__link" href="saldo-diario.html"
           ><span class="ico" aria-hidden="true">💰</span> Saldo diário</a
@@ -128,7 +128,7 @@
         </button>
       </div>
 
-      <!-- Funcionários: matrícula, nome, setor, telefone -->
+      <!-- Funcionário: matrícula e setor exibidos por associação; somente nome e telefone são editáveis. -->
       <section
         class="card table-card"
         id="panel-funcionarios"
@@ -154,7 +154,7 @@
               <tr>
                 <th>Matrícula</th>
                 <th>Nome</th>
-                <th>Setor</th>
+                <th>Setor da matrícula</th>
                 <th>Telefone</th>
                 <th>Ações</th>
               </tr>
@@ -242,7 +242,7 @@
         </div>
       </section>
 
-      <!-- Matrículas: número, setor, status -->
+      <!-- Matrícula: número fixo e setor editável. -->
       <section
         class="card table-card"
         id="panel-matriculas"
