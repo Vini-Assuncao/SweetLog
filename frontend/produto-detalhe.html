@@ -18,8 +18,6 @@
       </div>
       <div class="topbar__spacer"></div>
       <div class="topbar__actions">
-        <button class="icon-btn" aria-label="Notificações">🔔</button>
-        <button class="icon-btn" aria-label="Configurações">⚙️</button>
         <button class="avatar" data-open-profile>VA</button>
       </div>
     </header>
@@ -71,7 +69,7 @@
         >
       </nav>
       <div class="drawer__footer">
-        <button class="drawer__logout">↩ Sair da Conta</button>
+        <button class="menu-lateral-sair">↩ Sair da Conta</button>
       </div>
     </aside>
 
@@ -83,7 +81,9 @@
           >
           <h1>Croissant de Amêndoas</h1>
         </div>
-        <a class="btn btn--outline" href="produto-cadastrar.html">✎ Editar</a>
+        <button class="btn btn--outline" type="button" data-edit-product>
+          ✎ Editar
+        </button>
       </div>
 
       <div class="detail-grid">
@@ -105,26 +105,80 @@
         </div>
 
         <div class="stack gap-16">
-          <div class="card info-card">
-            <h4>📁 Marca &amp; Categoria</h4>
-            <div class="info-row">
-              <span>Marca</span><strong>SweetLog Premium</strong>
-            </div>
-            <div class="info-row">
-              <span>Categoria</span><strong>Viennoiserie</strong>
-            </div>
-          </div>
+          <form data-product-detail-form>
+            <div class="stack gap-16">
+              <div class="card info-card">
+                <h4>📁 Marca &amp; Categoria</h4>
+                <div class="info-row">
+                  <span>Marca</span>
+                  <strong data-detail-value="marca">SweetLog Premium</strong>
+                  <input
+                    class="input"
+                    type="text"
+                    aria-label="Marca"
+                    value="SweetLog Premium"
+                    data-detail-input="marca"
+                    style="display: none; flex: 1; min-width: 0; width: auto"
+                    required
+                  />
+                </div>
+                <div class="info-row">
+                  <span>Categoria</span>
+                  <strong data-detail-value="categoria">Viennoiserie</strong>
+                  <input
+                    class="input"
+                    type="text"
+                    aria-label="Categoria"
+                    value="Viennoiserie"
+                    data-detail-input="categoria"
+                    style="display: none; flex: 1; min-width: 0; width: auto"
+                    required
+                  />
+                </div>
+              </div>
 
-          <div class="card info-card">
-            <h4>📐 Especificações</h4>
-            <div class="info-row">
-              <span>Tamanho / Peso</span><strong>120g (Unidade)</strong>
+              <div class="card info-card">
+                <h4>📐 Especificações</h4>
+                <div class="info-row">
+                  <span>Tamanho / Peso</span>
+                  <strong data-detail-value="tamanho">120g (Unidade)</strong>
+                  <input
+                    class="input"
+                    type="text"
+                    aria-label="Tamanho ou peso"
+                    value="120g (Unidade)"
+                    data-detail-input="tamanho"
+                    style="display: none; flex: 1; min-width: 0; width: auto"
+                    required
+                  />
+                </div>
+                <div class="info-row">
+                  <span>Necessidade de refrigeração</span>
+                  <strong data-detail-value="refrigeracao"
+                    >Vitrine Seca (Até 25°C)</strong
+                  >
+                  <input
+                    class="input"
+                    type="text"
+                    aria-label="Necessidade de refrigeração"
+                    value="Vitrine Seca (Até 25°C)"
+                    data-detail-input="refrigeracao"
+                    style="display: none; flex: 1; min-width: 0; width: auto"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div class="form-actions" data-detail-actions style="display: none">
+                <button class="btn btn--outline" type="button" data-cancel-detail>
+                  Cancelar
+                </button>
+                <button class="btn btn--primary" type="submit">
+                  Salvar alterações
+                </button>
+              </div>
             </div>
-            <div class="info-row">
-              <span>Necessidade de refrigeração</span
-              ><strong>Vitrine Seca (Até 25°C)</strong>
-            </div>
-          </div>
+          </form>
 
           <div class="stat-row">
             <div class="card stat-box stat-box--purple">

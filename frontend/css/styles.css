@@ -194,16 +194,17 @@
   .drawer__footer {
     @apply mt-auto;
   }
-  .drawer__logout {
+  .menu-lateral-sair {
     @apply flex items-center gap-2.5 text-danger font-semibold text-[0.9rem] p-2.5 rounded-[10px] cursor-pointer border-0 bg-transparent w-full text-left font-sans;
   }
-  .drawer__logout:hover {
+  .menu-lateral-sair:hover {
     @apply bg-danger-soft;
   }
 
   /* ---------- profile popover ---------- */
   .profile-pop {
-    @apply absolute w-[260px] bg-card border border-border rounded shadow-lg p-[18px] z-[70] hidden;
+    @apply absolute bg-card border border-border rounded shadow-lg p-[18px] z-[70] hidden;
+    width: min(300px, calc(100vw - 32px));
     top: 62px;
     right: 32px;
   }
@@ -228,6 +229,27 @@
   .profile-pop__logout {
     @apply w-full border-0 bg-danger-soft text-danger font-semibold rounded-[10px] cursor-pointer text-[0.85rem] flex gap-2 items-center justify-center font-sans;
     padding: 9px;
+  }
+  .profile-pop__edit,
+  .profile-pop__link {
+    @apply w-full border-0 bg-transparent text-primary font-semibold rounded-[10px] cursor-pointer text-[0.85rem] flex gap-2 items-center font-sans no-underline;
+    padding: 9px;
+  }
+  .profile-pop__edit:hover,
+  .profile-pop__link:hover {
+    @apply bg-primary-soft;
+  }
+  .profile-edit {
+    @apply grid gap-2.5 mb-3;
+  }
+  .profile-edit[hidden] {
+    display: none;
+  }
+  .profile-edit__field {
+    @apply grid gap-1 text-[0.8rem] font-medium text-ink-muted;
+  }
+  .profile-edit .input {
+    @apply w-full;
   }
 
   /* ---------- page header / back link ---------- */
@@ -285,13 +307,13 @@
   }
 
   /* ---------- forms ---------- */
-  .field {
+  .grupo-campo {
     @apply flex flex-col gap-1.5;
   }
-  .field label {
+  .grupo-campo label {
     @apply text-[0.82rem] font-semibold text-ink;
   }
-  .field .hint {
+  .grupo-campo .hint {
     @apply text-[0.76rem] text-ink-faint;
   }
 
@@ -480,8 +502,8 @@
   }
 
   /* ---------- erro em campo de formulário ---------- */
-  .field--error .input,
-  .field--error select.input,
+  .grupo-campo-com-erro.input,
+  .grupo-campo-com-erro select.input,
   .input.is-invalid {
     @apply border-danger;
     box-shadow: 0 0 0 3px #fceaea;
@@ -1150,6 +1172,48 @@
   }
   .order-card__foot strong {
     @apply block mt-0.5 text-[0.78rem] text-ink font-semibold;
+  }
+  .order-card [data-sale-input] {
+    min-width: 0;
+    margin-top: 6px;
+    padding: 8px;
+    font-size: 0.78rem;
+  }
+  .order-card__head [data-sale-input] {
+    width: auto;
+    flex: 1;
+  }
+  .order-card__row [data-sale-input] {
+    width: 45%;
+  }
+  .order-card__invoice {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 8px;
+  }
+  .order-card__invoice [data-sale-download],
+  .order-card__invoice [data-sale-invoice] {
+    width: 100%;
+  }
+  .order-card__invoice [data-sale-invoice-name] {
+    overflow-wrap: anywhere;
+  }
+  .order-card__foot > span {
+    flex: 1;
+    min-width: 0;
+  }
+  .order-card__foot [data-sale-input] {
+    width: 100%;
+    padding: 6px;
+    font-size: 0.72rem;
+  }
+  .order-card [data-sale-edit] {
+    width: 100%;
+    margin-top: 12px;
+  }
+  .order-card [data-sale-actions] {
+    margin-top: 12px;
+    padding-top: 12px;
   }
 
   /* =======================================================

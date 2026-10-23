@@ -1,0 +1,262 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="css/build.css" />
+    <title>SweetLog — Vendas em Andamento</title>
+  </head>
+  <body class="app">
+    <header class="topbar">
+      <button class="menu-btn" data-open-menu aria-label="Abrir menu">
+        ☰
+      </button>
+      <div class="topbar__brand"><span class="logo-dot">🥐</span> SweetLog</div>
+      <div class="topbar__search">
+        <span class="icon">🔍</span>
+        <input type="text" placeholder="Buscar pedidos..." data-pedido-search />
+      </div>
+      <div class="topbar__spacer"></div>
+      <div class="topbar__actions">
+        <button class="avatar" data-open-profile>VA</button>
+      </div>
+    </header>
+
+    <div class="profile-pop" data-profile-pop>
+      <div class="profile-pop__label">Perfil</div>
+      <div class="profile-pop__row">
+        <div class="profile-pop__avatar">VA</div>
+        <div class="profile-pop__info">
+          <strong>Vinícius Assunção</strong>
+          <p>
+            Matrícula: 10425<br />Setor: Logística<br />Telefone: (11)
+            90234-5678
+          </p>
+        </div>
+      </div>
+      <button class="profile-pop__logout">↩ Sair da conta</button>
+    </div>
+
+    <div class="drawer-overlay" data-drawer-overlay></div>
+    <aside class="drawer" data-drawer>
+      <div class="drawer__head">
+        <div class="topbar__brand">
+          <span class="logo-dot">🥐</span> SweetLog
+        </div>
+        <button class="drawer__close" data-close-menu aria-label="Fechar menu">
+          ✕
+        </button>
+      </div>
+      <div class="drawer__label">Menu</div>
+      <nav class="drawer__nav">
+        <a class="drawer__link" href="dashboard.html"
+          ><span class="ico">🏠</span> Início</a
+        >
+        <a class="drawer__link" href="produtos-lista.html"
+          ><span class="ico">🥐</span> Produtos</a
+        >
+        <a class="drawer__link" href="estoque.html"
+          ><span class="ico">📦</span> Controle de estoque</a
+        >
+        <a class="drawer__link is-active" href="vendas.html"
+          ><span class="ico">🧺</span> Vendas</a
+        >
+        <a class="drawer__link" href="saldo-diario.html"
+          ><span class="ico">💰</span> Saldo diário</a
+        >
+        <a class="drawer__link" href="lotes.html"
+          ><span class="ico">📅</span> Lotes e validade</a
+        >
+      </nav>
+      <div class="drawer__footer">
+        <button class="menu-lateral-sair">↩ Sair da Conta</button>
+      </div>
+    </aside>
+
+    <main class="page">
+      <div class="list-head">
+        <div class="page-head" style="margin-bottom: 0">
+          <h1>Vendas em Andamento</h1>
+          <p>Acompanhe as entregas programadas e em preparo.</p>
+        </div>
+        <span class="badge badge--purple" data-sales-count>🧺 4 Ativos</span>
+      </div>
+
+      <div class="order-grid" data-order-grid>
+        <form class="card order-card" data-sale-card data-numero="PED-8492" novalidate>
+          <div class="order-card__head">
+            <strong>#PED-8492</strong>
+            <span class="badge badge--purple badge--dot" data-sale-value="status">Em preparo</span>
+            <select class="input" data-sale-input="status" disabled style="display: none" aria-label="Status da venda">
+              <option>Em preparo</option>
+              <option>Aguardando coleta</option>
+              <option>Entregue</option>
+              <option>Cancelado</option>
+            </select>
+          </div>
+          <div class="order-card__row">
+            <span>👤 Comprador</span>
+            <strong data-sale-value="buyer">Padaria Central</strong>
+            <input class="input" type="text" value="Padaria Central" data-sale-input="buyer" disabled style="display: none" aria-label="Comprador" required />
+          </div>
+          <div class="order-card__row">
+            <span>📦 Quantidade</span>
+            <strong data-sale-value="quantity">145 un</strong>
+            <input class="input" type="number" min="1" step="1" value="145" data-sale-input="quantity" disabled style="display: none" aria-label="Quantidade" />
+          </div>
+          <div class="order-card__row">
+            <span>💲 Valor</span>
+            <strong data-sale-value="amount">R$ 1.250,00</strong>
+            <input class="input" type="number" min="0" step="0.01" value="1250.00" data-sale-input="amount" disabled style="display: none" aria-label="Valor da venda" />
+          </div>
+          <div class="order-card__row order-card__invoice">
+            <span>🧾 Nota fiscal</span>
+            <a class="btn btn--outline" data-sale-download href="#" download="nota-fiscal-PED-8492.pdf">⬇ Baixar nota fiscal</a>
+            <input class="input" type="file" accept="application/pdf,.pdf" data-sale-invoice disabled style="display: none" aria-label="Nota fiscal PDF" />
+            <small data-sale-invoice-name></small>
+          </div>
+          <div class="order-card__foot">
+            <span>📅 Data pedido<br /><strong data-sale-value="orderDate">24/10/2023</strong><input class="input" type="date" value="2023-10-24" data-sale-input="orderDate" disabled style="display: none" aria-label="Data do pedido" /></span>
+            <span data-sale-delivery>🚚 Data entrega<br /><strong data-sale-value="deliveryDate">26/10/2023</strong><input class="input" type="date" value="2023-10-26" data-sale-input="deliveryDate" disabled style="display: none" aria-label="Data de entrega (opcional)" /></span>
+          </div>
+          <div class="form-actions" data-sale-actions style="display: none">
+            <button class="btn btn--outline" type="button" data-sale-cancel>Cancelar</button>
+            <button class="btn btn--primary" type="submit">Salvar alterações</button>
+          </div>
+          <button class="btn btn--outline" type="button" data-sale-edit>✎ Editar venda</button>
+        </form>
+
+        <form class="card order-card" data-sale-card data-numero="PED-8493" novalidate>
+          <div class="order-card__head">
+            <strong>#PED-8493</strong>
+            <span class="badge badge--blue badge--dot" data-sale-value="status">Aguardando coleta</span>
+            <select class="input" data-sale-input="status" disabled style="display: none" aria-label="Status da venda">
+              <option>Em preparo</option>
+              <option selected>Aguardando coleta</option>
+              <option>Entregue</option>
+              <option>Cancelado</option>
+            </select>
+          </div>
+          <div class="order-card__row">
+            <span>👤 Comprador</span>
+            <strong data-sale-value="buyer">Cliente Mariana</strong>
+            <input class="input" type="text" value="Cliente Mariana" data-sale-input="buyer" disabled style="display: none" aria-label="Comprador" required />
+          </div>
+          <div class="order-card__row">
+            <span>📦 Quantidade</span>
+            <strong data-sale-value="quantity">60 un</strong>
+            <input class="input" type="number" min="1" step="1" value="60" data-sale-input="quantity" disabled style="display: none" aria-label="Quantidade" />
+          </div>
+          <div class="order-card__row">
+            <span>💲 Valor</span>
+            <strong data-sale-value="amount">R$ 480,50</strong>
+            <input class="input" type="number" min="0" step="0.01" value="480.50" data-sale-input="amount" disabled style="display: none" aria-label="Valor da venda" />
+          </div>
+          <div class="order-card__row order-card__invoice">
+            <span>🧾 Nota fiscal</span>
+            <a class="btn btn--outline" data-sale-download href="#" download="nota-fiscal-PED-8493.pdf">⬇ Baixar nota fiscal</a>
+            <input class="input" type="file" accept="application/pdf,.pdf" data-sale-invoice disabled style="display: none" aria-label="Nota fiscal PDF" />
+            <small data-sale-invoice-name></small>
+          </div>
+          <div class="order-card__foot">
+            <span>📅 Data pedido<br /><strong data-sale-value="orderDate">25/10/2023</strong><input class="input" type="date" value="2023-10-25" data-sale-input="orderDate" disabled style="display: none" aria-label="Data do pedido" /></span>
+            <span data-sale-delivery>🚚 Data entrega<br /><strong data-sale-value="deliveryDate">25/10/2023</strong><input class="input" type="date" value="2023-10-25" data-sale-input="deliveryDate" disabled style="display: none" aria-label="Data de entrega (opcional)" /></span>
+          </div>
+          <div class="form-actions" data-sale-actions style="display: none">
+            <button class="btn btn--outline" type="button" data-sale-cancel>Cancelar</button>
+            <button class="btn btn--primary" type="submit">Salvar alterações</button>
+          </div>
+          <button class="btn btn--outline" type="button" data-sale-edit>✎ Editar venda</button>
+        </form>
+
+        <form class="card order-card" data-sale-card data-numero="PED-8495" novalidate>
+          <div class="order-card__head">
+            <strong>#PED-8495</strong>
+            <span class="badge badge--purple badge--dot" data-sale-value="status">Em preparo</span>
+            <select class="input" data-sale-input="status" disabled style="display: none" aria-label="Status da venda">
+              <option selected>Em preparo</option>
+              <option>Aguardando coleta</option>
+              <option>Entregue</option>
+              <option>Cancelado</option>
+            </select>
+          </div>
+          <div class="order-card__row">
+            <span>👤 Comprador</span>
+            <strong data-sale-value="buyer">Mercado Bom Preço</strong>
+            <input class="input" type="text" value="Mercado Bom Preço" data-sale-input="buyer" disabled style="display: none" aria-label="Comprador" required />
+          </div>
+          <div class="order-card__row">
+            <span>📦 Quantidade</span>
+            <strong data-sale-value="quantity">210 un</strong>
+            <input class="input" type="number" min="1" step="1" value="210" data-sale-input="quantity" disabled style="display: none" aria-label="Quantidade" />
+          </div>
+          <div class="order-card__row">
+            <span>💲 Valor</span>
+            <strong data-sale-value="amount">R$ 2.100,00</strong>
+            <input class="input" type="number" min="0" step="0.01" value="2100.00" data-sale-input="amount" disabled style="display: none" aria-label="Valor da venda" />
+          </div>
+          <div class="order-card__row order-card__invoice">
+            <span>🧾 Nota fiscal</span>
+            <a class="btn btn--outline" data-sale-download href="#" download="nota-fiscal-PED-8495.pdf">⬇ Baixar nota fiscal</a>
+            <input class="input" type="file" accept="application/pdf,.pdf" data-sale-invoice disabled style="display: none" aria-label="Nota fiscal PDF" />
+            <small data-sale-invoice-name></small>
+          </div>
+          <div class="order-card__foot">
+            <span>📅 Data pedido<br /><strong data-sale-value="orderDate">25/10/2023</strong><input class="input" type="date" value="2023-10-25" data-sale-input="orderDate" disabled style="display: none" aria-label="Data do pedido" /></span>
+            <span data-sale-delivery>🚚 Data entrega<br /><strong data-sale-value="deliveryDate">27/10/2023</strong><input class="input" type="date" value="2023-10-27" data-sale-input="deliveryDate" disabled style="display: none" aria-label="Data de entrega (opcional)" /></span>
+          </div>
+          <div class="form-actions" data-sale-actions style="display: none">
+            <button class="btn btn--outline" type="button" data-sale-cancel>Cancelar</button>
+            <button class="btn btn--primary" type="submit">Salvar alterações</button>
+          </div>
+          <button class="btn btn--outline" type="button" data-sale-edit>✎ Editar venda</button>
+        </form>
+
+        <form class="card order-card" data-sale-card data-numero="PED-8498" novalidate>
+          <div class="order-card__head">
+            <strong>#PED-8498</strong>
+            <span class="badge badge--purple badge--dot" data-sale-value="status">Em preparo</span>
+            <select class="input" data-sale-input="status" disabled style="display: none" aria-label="Status da venda">
+              <option selected>Em preparo</option>
+              <option>Aguardando coleta</option>
+              <option>Entregue</option>
+              <option>Cancelado</option>
+            </select>
+          </div>
+          <div class="order-card__row">
+            <span>👤 Comprador</span>
+            <strong data-sale-value="buyer">Café da Praça</strong>
+            <input class="input" type="text" value="Café da Praça" data-sale-input="buyer" disabled style="display: none" aria-label="Comprador" required />
+          </div>
+          <div class="order-card__row">
+            <span>📦 Quantidade</span>
+            <strong data-sale-value="quantity">45 un</strong>
+            <input class="input" type="number" min="1" step="1" value="45" data-sale-input="quantity" disabled style="display: none" aria-label="Quantidade" />
+          </div>
+          <div class="order-card__row">
+            <span>💲 Valor</span>
+            <strong data-sale-value="amount">R$ 320,00</strong>
+            <input class="input" type="number" min="0" step="0.01" value="320.00" data-sale-input="amount" disabled style="display: none" aria-label="Valor da venda" />
+          </div>
+          <div class="order-card__row order-card__invoice">
+            <span>🧾 Nota fiscal</span>
+            <a class="btn btn--outline" data-sale-download href="#" download="nota-fiscal-PED-8498.pdf">⬇ Baixar nota fiscal</a>
+            <input class="input" type="file" accept="application/pdf,.pdf" data-sale-invoice disabled style="display: none" aria-label="Nota fiscal PDF" />
+            <small data-sale-invoice-name></small>
+          </div>
+          <div class="order-card__foot">
+            <span>📅 Data pedido<br /><strong data-sale-value="orderDate">26/10/2023</strong><input class="input" type="date" value="2023-10-26" data-sale-input="orderDate" disabled style="display: none" aria-label="Data do pedido" /></span>
+            <span data-sale-delivery>🚚 Data entrega<br /><strong data-sale-value="deliveryDate">26/10/2023</strong><input class="input" type="date" value="2023-10-26" data-sale-input="deliveryDate" disabled style="display: none" aria-label="Data de entrega (opcional)" /></span>
+          </div>
+          <div class="form-actions" data-sale-actions style="display: none">
+            <button class="btn btn--outline" type="button" data-sale-cancel>Cancelar</button>
+            <button class="btn btn--primary" type="submit">Salvar alterações</button>
+          </div>
+          <button class="btn btn--outline" type="button" data-sale-edit>✎ Editar venda</button>
+        </form>
+      </div>
+    </main>
+
+    <script src="js/app.js"></script>
+  </body>
+</html>

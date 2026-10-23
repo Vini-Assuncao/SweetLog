@@ -24,17 +24,17 @@
     <h1>Verificar Código</h1>
     <p class="subtitle">Enviamos um código de 6 dígitos para o seu telefone.</p>
 
-    <form class="stack gap-16" onsubmit="return false;">
+    <form class="stack gap-16" data-codigo-form novalidate>
       <div class="otp-group">
-        <input class="otp-box" type="text" inputmode="numeric" maxlength="1" autofocus>
-        <input class="otp-box" type="text" inputmode="numeric" maxlength="1">
-        <input class="otp-box" type="text" inputmode="numeric" maxlength="1">
-        <input class="otp-box" type="text" inputmode="numeric" maxlength="1">
-        <input class="otp-box" type="text" inputmode="numeric" maxlength="1">
-        <input class="otp-box" type="text" inputmode="numeric" maxlength="1">
+        <input class="otp-box" type="text" inputmode="numeric" maxlength="1" autocomplete="one-time-code" aria-label="Dígito 1 do código" autofocus>
+        <input class="otp-box" type="text" inputmode="numeric" maxlength="1" aria-label="Dígito 2 do código">
+        <input class="otp-box" type="text" inputmode="numeric" maxlength="1" aria-label="Dígito 3 do código">
+        <input class="otp-box" type="text" inputmode="numeric" maxlength="1" aria-label="Dígito 4 do código">
+        <input class="otp-box" type="text" inputmode="numeric" maxlength="1" aria-label="Dígito 5 do código">
+        <input class="otp-box" type="text" inputmode="numeric" maxlength="1" aria-label="Dígito 6 do código">
       </div>
 
-      <a class="btn btn--primary btn--block btn--lg" href="nova-senha.html">Verificar →</a>
+      <button class="btn btn--primary btn--block btn--lg" type="submit">Verificar →</button>
       <p class="auth__resend">Não recebeu? <a href="#">Reenviar código</a></p>
     </form>
   </div>
