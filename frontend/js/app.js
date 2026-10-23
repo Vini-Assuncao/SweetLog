@@ -406,12 +406,101 @@ document.addEventListener('DOMContentLoaded', function () {
   initDrawerFuncionarios();
   initTopbarSearch();
   initPlaceholderLinks();
+  initProductDetailEdit();
   initLoginForm();
   initRecuperarSenha();
   initVerificarCodigo();
   initNovaSenha();
   initTodayLabel();
 });
+
+function initProductDetailEdit() {
+  var form = document.querySelector('[data-product-detail-form]');
+  if (!form) return;
+
+  var editButton = document.querySelector('[data-edit-product]');
+  var actions = form.querySelector('[data-detail-actions]');
+  var inputs = Array.prototype.slice.call(form.querySelectorAll('[data-detail-input]'));
+  var storageKey = 'sweetlog-produto-detalhe';
+
+  function setEditing(isEditing) {
+    inputs.forEach(function (input) {
+      var value = form.querySelector('[data-detail-value="' + input.dataset.detailInput + '"]');
+      input.style.display = isEditing ? '' : 'none';
+      value.style.display = isEditing ? 'none' : '';
+    });
+    actions.style.display = isEditing ? 'flex' : 'none';
+    editButton.style.display = isEditing ? 'none' : '';
+  }
+
+  function applyValues(values) {
+    inputs.forEach(function (input) {
+      var value = form.querySelector('[data-detail-value="' + input.dataset.detailInput + '"]');
+      input.value = values[input.dataset.detailInput];
+      value.textContent = input.value;
+    });
+  }
+
+  try {
+    var storedValues = localStorage.getItem(storageKey);
+    if (storedValues) {
+      var values = JSON.parse(storedValues);
+      var validValues = inputs.every(function (input) {
+        return typeof values[input.dataset.detailInput] === 'string';
+      });
+      if (!validValues) throw new Error('Os dados salvos do produto são inválidos.');
+      applyValues(values);
+    }
+  } catch (error) {
+    showToast('Não foi possível carregar as alterações salvas do produto.', 'error');
+  }
+
+  editButton.addEventListener('click', function () {
+    setEditing(true);
+  });
+
+  form.querySelector('[data-cancel-detail]').addEventListener('click', function () {
+    inputs.forEach(function (input) {
+      var value = form.querySelector('[data-detail-value="' + input.dataset.detailInput + '"]');
+      input.value = value.textContent;
+      input.classList.remove('is-invalid');
+    });
+    setEditing(false);
+  });
+
+  form.addEventListener('submit', function (event) {
+    event.preventDefault();
+    var values = {};
+    var isValid = true;
+
+    inputs.forEach(function (input) {
+      var value = input.value.trim();
+      if (!value) {
+        input.classList.add('is-invalid');
+        isValid = false;
+      } else {
+        input.classList.remove('is-invalid');
+        values[input.dataset.detailInput] = value;
+      }
+    });
+
+    if (!isValid) {
+      showToast('Preencha todos os campos antes de salvar.', 'error');
+      return;
+    }
+
+    try {
+      localStorage.setItem(storageKey, JSON.stringify(values));
+    } catch (error) {
+      showToast('Não foi possível salvar as alterações do produto.', 'error');
+      return;
+    }
+
+    applyValues(values);
+    setEditing(false);
+    showToast('Alterações do produto salvas com sucesso!', 'success');
+  });
+}
 
 // produto-cadastrar.js
 document.addEventListener('DOMContentLoaded', function () {
@@ -614,13 +703,21 @@ function initEntradaForm() {
   if (!form) return;
 
   var produto = document.getElementById('produto');
+  var quantidade = document.getElementById('qtd');
   var lote = document.getElementById('lote');
   var validade = document.getElementById('validade');
-  [produto, lote, validade].forEach(clearErrorOnInput);
+  [produto, quantidade, lote, validade].forEach(clearErrorOnInput);
 
   form.addEventListener('submit', function (e) {
     e.preventDefault();
-    var isValid = validateRequired([produto, lote, validade]);
+    var isValid = validateRequired([produto, quantidade, lote, validade]);
+    var quantidadeInformada = Number(quantidade && quantidade.value);
+    if (quantidade && quantidade.value &&
+        (!Number.isInteger(quantidadeInformada) || quantidadeInformada < 1)) {
+      quantidade.classList.add('is-invalid');
+      showToast('Informe uma quantidade válida (mínimo de 1).', 'error');
+      isValid = false;
+    }
 
     var nf = document.getElementById('nf');
     if (nf && !nf.files.length) {
@@ -655,13 +752,25 @@ function initSaidaForm() {
 
   var produto2 = document.getElementById('produto2');
   var motivo = document.getElementById('motivo');
-  [produto2, motivo].forEach(clearErrorOnInput);
+  var quantidade = document.getElementById('qtd2');
+  [produto2, motivo, quantidade].forEach(clearErrorOnInput);
 
   form.addEventListener('submit', function (e) {
     e.preventDefault();
-    var isValid = validateRequired([produto2, motivo]);
+    var isValid = validateRequired([produto2, motivo, quantidade]);
+    var quantidadeInformada = Number(quantidade && quantidade.value);
+    if (quantidade && quantidade.value &&
+        (!Number.isInteger(quantidadeInformada) || quantidadeInformada < 1)) {
+      quantidade.classList.add('is-invalid');
+      showToast('Informe uma quantidade válida (mínimo de 1).', 'error');
+      isValid = false;
+    }
     if (!isValid) {
-      showToast('Selecione o produto e o motivo da saída.', 'error');
+      if (!produto2.value || !motivo.value) {
+        showToast('Selecione o produto e o motivo da saída.', 'error');
+      } else if (!quantidade.value) {
+        showToast('Informe a quantidade da saída.', 'error');
+      }
       return;
     }
 

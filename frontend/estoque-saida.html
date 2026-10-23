@@ -7,24 +7,24 @@
     <title>SweetLog — Saída de Produtos</title>
   </head>
   <body class="app">
-    <header class="barra-topo">
+    <header class="topbar">
       <button class="menu-btn" data-open-menu aria-label="Abrir menu">
         ☰
       </button>
-      <div class="barra-topo-marca"><span class="logo-bolinha">🥐</span> SweetLog</div>
-      <div class="barra-topo-espaco"></div>
-      <div class="barra-topo-acoes">
-        <button class="botao-icone" aria-label="Notificações">🔔</button>
-        <button class="botao-icone" aria-label="Configurações">⚙️</button>
+      <div class="topbar__brand"><span class="logo-dot">🥐</span> SweetLog</div>
+      <div class="topbar__spacer"></div>
+      <div class="topbar__actions">
+        <button class="icon-btn" aria-label="Notificações">🔔</button>
+        <button class="icon-btn" aria-label="Configurações">⚙️</button>
         <button class="avatar" data-open-profile>VA</button>
       </div>
     </header>
 
-    <div class="perfil-pop" data-profile-pop>
-      <div class="perfil-pop-titulo">Perfil</div>
-      <div class="perfil-pop-row">
-        <div class="perfil-pop-vatar">VA</div>
-        <div class="perfil-pop-dados">
+    <div class="profile-pop" data-profile-pop>
+      <div class="profile-pop__label">Perfil</div>
+      <div class="profile-pop__row">
+        <div class="profile-pop__avatar">VA</div>
+        <div class="profile-pop__info">
           <strong>Vinícius Assunção</strong>
           <p>
             Matrícula: 10425<br />Setor: Logística<br />Telefone: (11)
@@ -32,47 +32,47 @@
           </p>
         </div>
       </div>
-      <button class="perfil-pop-sair">↩ Sair da conta</button>
+      <button class="profile-pop__logout">↩ Sair da conta</button>
     </div>
 
-    <div class="menu-lateral-fundo" data-drawer-overlay></div>
-    <aside class="menu-lateral" data-drawer>
-      <div class="menu-lateral-topo">
-        <div class="barra-topo-marca">
-          <span class="logo-bolinha">🥐</span> SweetLog
+    <div class="drawer-overlay" data-drawer-overlay aria-hidden="true"></div>
+    <aside class="drawer" data-drawer aria-label="Menu de navegação">
+      <div class="drawer__head">
+        <div class="topbar__brand">
+          <span class="logo-dot">🥐</span> SweetLog
         </div>
-        <button class="menu-lateral-fechar" data-close-menu aria-label="Fechar menu">
+        <button class="drawer__close" data-close-menu aria-label="Fechar menu">
           ✕
         </button>
       </div>
-      <div class="menu-lateral-titulo-secao">Menu</div>
-      <nav class="menu-lateral-lista">
-        <a class="menu-lateral-link" href="dashboard.html"
+      <div class="drawer__label">Menu</div>
+      <nav class="drawer__nav">
+        <a class="drawer__link" href="dashboard.html"
           ><span class="ico">🏠</span> Início</a
         >
-        <a class="menu-lateral-link" href="produtos-lista.html"
+        <a class="drawer__link" href="produtos-lista.html"
           ><span class="ico">🥐</span> Produtos</a
         >
-        <a class="menu-lateral-link is-active" href="estoque.html"
+        <a class="drawer__link is-active" href="estoque.html"
           ><span class="ico">📦</span> Controle de estoque</a
         >
-        <a class="menu-lateral-link" href="pedidos.html"
+        <a class="drawer__link" href="pedidos.html"
           ><span class="ico">🧺</span> Pedidos</a
         >
-        <a class="menu-lateral-link" href="saldo-diario.html"
+        <a class="drawer__link" href="saldo-diario.html"
           ><span class="ico">💰</span> Saldo diário</a
         >
-        <a class="menu-lateral-link" href="lotes.html"
+        <a class="drawer__link" href="lotes.html"
           ><span class="ico">📅</span> Lotes e validade</a
         >
       </nav>
-      <div class="menu-lateral-rodape">
+      <div class="drawer__footer">
         <button class="menu-lateral-sair">↩ Sair da Conta</button>
       </div>
     </aside>
 
     <main class="page">
-      <a class="voltar-link" href="estoque.html">← Voltar</a>
+      <a class="back-link" href="estoque.html">← Voltar</a>
       <div class="page-head">
         <h1>Saída de Produtos</h1>
         <p>Registre a venda ou perda de produtos no estoque.</p>
@@ -82,8 +82,8 @@
         <div class="form-grid">
           <div class="grupo-campo">
             <label for="produto2">Produto *</label>
-            <select class="input" id="produto2">
-              <option>Selecione um produto</option>
+            <select class="input" id="produto2" required>
+              <option value="">Selecione um produto</option>
               <option>Bolo de Chocolate</option>
               <option>Croissant Tradicional</option>
               <option>Pão Francês</option>
@@ -92,8 +92,8 @@
 
           <div class="grupo-campo">
             <label for="motivo">Motivo da Saída *</label>
-            <select class="input" id="motivo">
-              <option>Selecione o motivo</option>
+            <select class="input" id="motivo" required>
+              <option value="">Selecione o motivo</option>
               <option>Venda</option>
               <option>Perda / Validade vencida</option>
               <option>Doação</option>
@@ -103,25 +103,30 @@
 
           <div class="grupo-campo">
             <label for="qtd2">Quantidade *</label>
-            <div class="contador-qtd" data-stepper>
+            <div class="stepper" data-stepper>
               <button
                 type="button"
-                class="contador-qtd-btn"
+                class="stepper__btn"
                 aria-label="Diminuir"
                 data-stepper-minus
               >
                 −
               </button>
               <input
-                class="contador-qtd-valor"
+                class="stepper__value"
                 id="qtd2"
-                type="text"
+                type="number"
                 value="1"
+                min="1"
+                step="1"
+                inputmode="numeric"
+                required
+                aria-label="Quantidade da saída"
                 data-stepper-value
               />
               <button
                 type="button"
-                class="contador-qtd-btn"
+                class="stepper__btn"
                 aria-label="Aumentar"
                 data-stepper-plus
               >
