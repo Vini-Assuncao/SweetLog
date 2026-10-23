@@ -407,6 +407,7 @@ document.addEventListener('DOMContentLoaded', function () {
   initTopbarSearch();
   initPlaceholderLinks();
   initProductDetailEdit();
+  initSalesEditing();
   initLoginForm();
   initRecuperarSenha();
   initVerificarCodigo();
@@ -500,6 +501,318 @@ function initProductDetailEdit() {
     setEditing(false);
     showToast('Alterações do produto salvas com sucesso!', 'success');
   });
+}
+
+function initSalesEditing() {
+  var cards = Array.prototype.slice.call(document.querySelectorAll('[data-sale-card]'));
+  if (!cards.length) return;
+
+  var storageKey = 'sweetlog-vendas';
+  var fields = ['status', 'buyer', 'quantity', 'amount', 'orderDate', 'deliveryDate'];
+  var invoiceDataBySale = {};
+  var statusClasses = {
+    'Em preparo': 'badge--purple',
+    'Aguardando coleta': 'badge--blue',
+    Entregue: 'badge--success',
+    Cancelado: 'badge--danger'
+  };
+
+  function formatDate(value) {
+    var date = new Date(value + 'T00:00:00');
+    return date.toLocaleDateString('pt-BR');
+  }
+
+  function getValues(card) {
+    var values = {};
+    fields.forEach(function (field) {
+      values[field] = card.querySelector('[data-sale-input="' + field + '"]').value;
+    });
+    return values;
+  }
+
+  function isValidSale(values) {
+    var quantity = Number(values.quantity);
+    var amount = Number(values.amount);
+    return Number.isInteger(quantity) && quantity > 0 &&
+      values.quantity.trim() !== '' && values.amount.trim() !== '' &&
+      values.buyer.trim() !== '' &&
+      Number.isFinite(amount) && amount >= 0 &&
+      !!statusClasses[values.status] &&
+      /^\d{4}-\d{2}-\d{2}$/.test(values.orderDate) &&
+      (!values.deliveryDate ||
+        (/^\d{4}-\d{2}-\d{2}$/.test(values.deliveryDate) &&
+          values.deliveryDate >= values.orderDate));
+  }
+
+  function applyValues(card, values) {
+    fields.forEach(function (field) {
+      var input = card.querySelector('[data-sale-input="' + field + '"]');
+      var output = card.querySelector('[data-sale-value="' + field + '"]');
+      input.value = values[field];
+
+      if (field === 'quantity') output.textContent = values[field] + ' un';
+      else if (field === 'buyer') output.textContent = values[field];
+      else if (field === 'amount') {
+        output.textContent = new Intl.NumberFormat('pt-BR', {
+          style: 'currency',
+          currency: 'BRL'
+        }).format(Number(values[field]));
+      } else if (field === 'orderDate' || field === 'deliveryDate') {
+        output.textContent = values[field] ? formatDate(values[field]) : '';
+        if (field === 'deliveryDate') {
+          output.closest('[data-sale-delivery]').style.display =
+            values[field] ? '' : 'none';
+        }
+      } else {
+        output.textContent = values[field];
+        Object.keys(statusClasses).forEach(function (status) {
+          output.classList.remove(statusClasses[status]);
+        });
+        output.classList.add(statusClasses[values[field]]);
+      }
+    });
+  }
+
+  function makeInvoicePdf(card, values) {
+    function pdfText(value) {
+      return String(value).normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^\x20-\x7E]/g, '').replace(/([\\()])/g, '\\$1');
+    }
+    var lines = [
+      'NOTA FISCAL - DEMONSTRACAO, SEM VALOR FISCAL',
+      'SweetLog - Resumo de venda',
+      'Pedido: ' + card.dataset.numero,
+      'Comprador: ' + values.buyer,
+      'Quantidade: ' + values.quantity + ' unidades',
+      'Valor total: R$ ' + Number(values.amount).toFixed(2),
+      'Data do pedido: ' + formatDate(values.orderDate),
+      'Data de entrega: ' + (values.deliveryDate ? formatDate(values.deliveryDate) : 'Nao informada')
+    ];
+    var commands = ['BT', '/F1 12 Tf', '50 750 Td'];
+    lines.forEach(function (line, index) {
+      if (index) commands.push('0 -24 Td');
+      commands.push('(' + pdfText(line) + ') Tj');
+    });
+    commands.push('ET');
+
+    var stream = commands.join('\n');
+    var objects = [
+      '<< /Type /Catalog /Pages 2 0 R >>',
+      '<< /Type /Pages /Kids [3 0 R] /Count 1 >>',
+      '<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 4 0 R >> >> /Contents 5 0 R >>',
+      '<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>',
+      '<< /Length ' + stream.length + ' >>\nstream\n' + stream + '\nendstream'
+    ];
+    var pdf = '%PDF-1.4\n';
+    var offsets = [0];
+    objects.forEach(function (object, index) {
+      offsets.push(pdf.length);
+      pdf += (index + 1) + ' 0 obj\n' + object + '\nendobj\n';
+    });
+    var xrefOffset = pdf.length;
+    pdf += 'xref\n0 ' + (objects.length + 1) + '\n0000000000 65535 f \n';
+    offsets.slice(1).forEach(function (offset) {
+      pdf += String(offset).padStart(10, '0') + ' 00000 n \n';
+    });
+    pdf += 'trailer\n<< /Size ' + (objects.length + 1) + ' /Root 1 0 R >>\nstartxref\n' +
+      xrefOffset + '\n%%EOF';
+    return new Blob([pdf], { type: 'application/pdf' });
+  }
+
+  function downloadInvoice(card) {
+    var values = getValues(card);
+    var invoiceData = invoiceDataBySale[card.dataset.numero];
+    var blob;
+
+    if (invoiceData) {
+      var parts = invoiceData.split(',');
+      var binary = atob(parts[1]);
+      var bytes = new Uint8Array(binary.length);
+      for (var i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+      blob = new Blob([bytes], { type: 'application/pdf' });
+    } else {
+      blob = makeInvoicePdf(card, values);
+    }
+
+    var url = URL.createObjectURL(blob);
+    var link = document.createElement('a');
+    link.href = url;
+    link.download = (invoiceData ? 'nota-fiscal-' : 'nota-fiscal-demonstracao-') +
+      card.dataset.numero + '.pdf';
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+  }
+
+  function setEditing(card, isEditing) {
+    var deliveryInput = card.querySelector('[data-sale-input="deliveryDate"]');
+    var deliveryContainer = card.querySelector('[data-sale-delivery]');
+    deliveryContainer.style.display = isEditing || deliveryInput.value ? '' : 'none';
+    card.querySelectorAll('[data-sale-input]').forEach(function (input) {
+      input.disabled = !isEditing;
+      input.style.display = isEditing ? '' : 'none';
+    });
+    var invoiceInput = card.querySelector('[data-sale-invoice]');
+    invoiceInput.disabled = !isEditing;
+    invoiceInput.required = isEditing;
+    invoiceInput.style.display = isEditing ? '' : 'none';
+    card.querySelector('[data-sale-download]').style.display = isEditing ? 'none' : '';
+    card.querySelector('[data-sale-invoice-name]').style.display = isEditing ? '' : 'none';
+    card.querySelectorAll('[data-sale-value]').forEach(function (value) {
+      value.style.display = isEditing ? 'none' : '';
+    });
+    card.querySelector('[data-sale-actions]').style.display = isEditing ? 'flex' : 'none';
+    card.querySelector('[data-sale-edit]').style.display = isEditing ? 'none' : '';
+  }
+
+  function updateActiveCount() {
+    var count = cards.filter(function (card) {
+      var status = card.querySelector('[data-sale-value="status"]').textContent;
+      return status !== 'Entregue' && status !== 'Cancelado';
+    }).length;
+    var countBadge = document.querySelector('[data-sales-count]');
+    if (countBadge) countBadge.textContent = '🧺 ' + count + ' Ativas';
+  }
+
+  try {
+    var stored = localStorage.getItem(storageKey);
+    if (stored) {
+      var savedSales = JSON.parse(stored);
+      if (!savedSales || typeof savedSales !== 'object' || Array.isArray(savedSales)) {
+        throw new Error('Os dados salvos das vendas são inválidos.');
+      }
+      cards.forEach(function (card) {
+        var sale = savedSales[card.dataset.numero];
+        if (!sale) return;
+        var defaults = getValues(card);
+        var migratedSale = Object.assign({}, defaults, sale);
+        var validSale = fields.every(function (field) {
+          return typeof migratedSale[field] === 'string';
+        }) && isValidSale(migratedSale) &&
+          (!sale.invoiceDataUrl || /^data:application\/pdf;base64,/.test(sale.invoiceDataUrl));
+        if (!validSale) {
+          showToast('Há alterações salvas inválidas na venda ' + card.dataset.numero + '.', 'error');
+          return;
+        }
+        applyValues(card, migratedSale);
+        if (sale.invoiceDataUrl) invoiceDataBySale[card.dataset.numero] = sale.invoiceDataUrl;
+      });
+    }
+  } catch (error) {
+    showToast('Não foi possível carregar as alterações salvas das vendas.', 'error');
+  }
+
+  cards.forEach(function (card) {
+    var editButton = card.querySelector('[data-sale-edit]');
+    var cancelButton = card.querySelector('[data-sale-cancel]');
+    var originalValues;
+    var invoiceInput = card.querySelector('[data-sale-invoice]');
+    var invoiceName = card.querySelector('[data-sale-invoice-name]');
+
+    setEditing(card, false);
+    invoiceName.style.display = 'none';
+
+    invoiceInput.addEventListener('change', function () {
+      var file = invoiceInput.files[0];
+      if (!file) return;
+      if (!/\.pdf$/i.test(file.name) || (file.type && file.type !== 'application/pdf')) {
+        showToast('Selecione uma nota fiscal em formato PDF.', 'error');
+        invoiceInput.value = '';
+        invoiceName.textContent = '';
+        return;
+      }
+      if (file.size > 2 * 1024 * 1024) {
+        showToast('A nota fiscal deve ter no máximo 2MB.', 'error');
+        invoiceInput.value = '';
+        invoiceName.textContent = '';
+        return;
+      }
+      invoiceName.textContent = file.name;
+    });
+
+    card.querySelector('[data-sale-download]').addEventListener('click', function (event) {
+      event.preventDefault();
+      downloadInvoice(card);
+    });
+
+    editButton.addEventListener('click', function () {
+      originalValues = getValues(card);
+      invoiceInput.value = '';
+      invoiceName.textContent = '';
+      setEditing(card, true);
+    });
+
+    cancelButton.addEventListener('click', function () {
+      applyValues(card, originalValues);
+      invoiceInput.value = '';
+      invoiceName.textContent = '';
+      setEditing(card, false);
+    });
+
+    card.addEventListener('submit', function (event) {
+      event.preventDefault();
+      var values = getValues(card);
+      var invoiceFile = invoiceInput.files[0];
+      if (!values.buyer.trim()) {
+        showToast('Informe o comprador da venda.', 'error');
+        card.querySelector('[data-sale-input="buyer"]').focus();
+        return;
+      }
+      if (!invoiceFile) {
+        showToast('Anexe a nota fiscal em PDF antes de salvar.', 'error');
+        invoiceInput.focus();
+        return;
+      }
+      if (!isValidSale(values)) {
+        showToast('Confira a quantidade, o valor, o status e as datas da venda.', 'error');
+        return;
+      }
+
+      var reader = new FileReader();
+      reader.onerror = function () {
+        showToast('Não foi possível verificar a nota fiscal selecionada.', 'error');
+      };
+      reader.onload = function () {
+        var signature = new Uint8Array(reader.result);
+        if (signature.length < 5 || signature[0] !== 37 || signature[1] !== 80 ||
+            signature[2] !== 68 || signature[3] !== 70 || signature[4] !== 45) {
+          showToast('O arquivo selecionado não contém um documento PDF válido.', 'error');
+          return;
+        }
+
+        var dataReader = new FileReader();
+        dataReader.onerror = function () {
+          showToast('Não foi possível ler a nota fiscal selecionada.', 'error');
+        };
+        dataReader.onload = function () {
+          var invoiceDataUrl = dataReader.result;
+          try {
+            var savedSales = JSON.parse(localStorage.getItem(storageKey) || '{}');
+            savedSales[card.dataset.numero] = Object.assign({}, values, {
+              invoiceDataUrl: invoiceDataUrl
+            });
+            localStorage.setItem(storageKey, JSON.stringify(savedSales));
+          } catch (error) {
+            showToast('Não foi possível salvar os dados e a nota fiscal desta venda.', 'error');
+            return;
+          }
+
+          invoiceDataBySale[card.dataset.numero] = invoiceDataUrl;
+          applyValues(card, values);
+          invoiceInput.value = '';
+          invoiceName.textContent = '';
+          setEditing(card, false);
+          updateActiveCount();
+          showToast('Venda ' + card.dataset.numero + ' atualizada com sucesso!', 'success');
+        };
+        dataReader.readAsDataURL(invoiceFile);
+      };
+      reader.readAsArrayBuffer(invoiceFile.slice(0, 5));
+    });
+  });
+
+  updateActiveCount();
 }
 
 // produto-cadastrar.js
