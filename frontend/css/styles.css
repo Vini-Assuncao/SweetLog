@@ -203,7 +203,8 @@
 
   /* ---------- profile popover ---------- */
   .profile-pop {
-    @apply absolute w-[260px] bg-card border border-border rounded shadow-lg p-[18px] z-[70] hidden;
+    @apply absolute bg-card border border-border rounded shadow-lg p-[18px] z-[70] hidden;
+    width: min(300px, calc(100vw - 32px));
     top: 62px;
     right: 32px;
   }
@@ -228,6 +229,27 @@
   .profile-pop__logout {
     @apply w-full border-0 bg-danger-soft text-danger font-semibold rounded-[10px] cursor-pointer text-[0.85rem] flex gap-2 items-center justify-center font-sans;
     padding: 9px;
+  }
+  .profile-pop__edit,
+  .profile-pop__link {
+    @apply w-full border-0 bg-transparent text-primary font-semibold rounded-[10px] cursor-pointer text-[0.85rem] flex gap-2 items-center font-sans no-underline;
+    padding: 9px;
+  }
+  .profile-pop__edit:hover,
+  .profile-pop__link:hover {
+    @apply bg-primary-soft;
+  }
+  .profile-edit {
+    @apply grid gap-2.5 mb-3;
+  }
+  .profile-edit[hidden] {
+    display: none;
+  }
+  .profile-edit__field {
+    @apply grid gap-1 text-[0.8rem] font-medium text-ink-muted;
+  }
+  .profile-edit .input {
+    @apply w-full;
   }
 
   /* ---------- page header / back link ---------- */

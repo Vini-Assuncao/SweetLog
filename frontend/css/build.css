@@ -1003,7 +1003,7 @@ a{
   position: absolute;
   z-index: 70;
   display: none;
-  width: 260px;
+  width: min(300px, calc(100vw - 32px));
   border-radius: 14px;
   border-width: 1px;
   --tw-border-opacity: 1;
@@ -1086,6 +1086,54 @@ a{
   --tw-text-opacity: 1;
   color: rgb(220 38 38 / var(--tw-text-opacity, 1));
   padding: 9px;
+}
+
+.profile-pop__edit,
+.profile-pop__link{
+  display: flex;
+  width: 100%;
+  cursor: pointer;
+  align-items: center;
+  gap: 0.5rem;
+  border-width: 0px;
+  border-radius: 10px;
+  background-color: transparent;
+  padding: 9px;
+  font-family: Inter, system-ui, sans-serif;
+  font-size: 0.85rem;
+  font-weight: 600;
+  --tw-text-opacity: 1;
+  color: rgb(124 58 237 / var(--tw-text-opacity, 1));
+  text-decoration-line: none;
+}
+
+.profile-pop__edit:hover,
+.profile-pop__link:hover{
+  --tw-bg-opacity: 1;
+  background-color: rgb(245 243 255 / var(--tw-bg-opacity, 1));
+}
+
+.profile-edit{
+  margin-bottom: 0.75rem;
+  display: grid;
+  gap: 0.625rem;
+}
+
+.profile-edit[hidden]{
+  display: none;
+}
+
+.profile-edit__field{
+  display: grid;
+  gap: 0.25rem;
+  font-size: 0.8rem;
+  font-weight: 500;
+  --tw-text-opacity: 1;
+  color: rgb(113 113 127 / var(--tw-text-opacity, 1));
+}
+
+.profile-edit .input{
+  width: 100%;
 }
 
 /* ---------- page header / back link ---------- */

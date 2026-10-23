@@ -101,7 +101,7 @@ function clearErrorOnInput(field) {
   });
 }
 
-// ---------- navegação global: menu lateral, perfil, sair, ícones do topo ----------
+// ---------- navegação global: menu lateral, perfil e sair ----------
 function initGlobalNav() {
   var openMenuBtn = document.querySelector('[data-open-menu]');
   var closeMenuBtn = document.querySelector('[data-close-menu]');
@@ -127,6 +127,158 @@ function initGlobalNav() {
   var profileBtn = document.querySelector('[data-open-profile]');
   var profilePop = document.querySelector('[data-profile-pop]');
   if (profileBtn && profilePop) {
+    var profileStorageKey = 'sweetlog-profile';
+    var profileName = profilePop.querySelector('.profile-pop__info strong');
+    var profileDetails = profilePop.querySelector('.profile-pop__info p');
+    var profileAvatar = profilePop.querySelector('.profile-pop__avatar');
+    var profileRow = profilePop.querySelector('.profile-pop__row');
+    var logoutButton = profilePop.querySelector('.profile-pop__logout');
+    var detailsLines = [];
+    if (profileDetails) {
+      var currentLine = '';
+      Array.prototype.forEach.call(profileDetails.childNodes, function (node) {
+        if (node.nodeName === 'BR') {
+          detailsLines.push(currentLine.trim());
+          currentLine = '';
+        } else {
+          currentLine += node.textContent;
+        }
+      });
+      if (currentLine.trim()) detailsLines.push(currentLine.trim());
+    }
+    var initialProfile = {
+      name: profileName ? profileName.textContent.trim() : '',
+      phone: ''
+    };
+    var detailsText = detailsLines.join('\n');
+    var phoneMatch = detailsText.match(/Telefone:\s*([\s\S]*)/);
+    if (phoneMatch) initialProfile.phone = phoneMatch[1].trim();
+
+    var profile = initialProfile;
+    try {
+      var savedProfile = localStorage.getItem(profileStorageKey);
+      if (savedProfile) {
+        var parsedProfile = JSON.parse(savedProfile);
+        if (parsedProfile && typeof parsedProfile.name === 'string' &&
+            typeof parsedProfile.phone === 'string') {
+          profile = parsedProfile;
+        } else {
+          throw new Error('Dados de perfil inválidos.');
+        }
+      }
+    } catch (error) {
+      showToast('Não foi possível carregar os dados do perfil salvos neste navegador.', 'error');
+    }
+
+    function getInitials(name) {
+      var parts = name.trim().split(/\s+/);
+      if (!parts[0]) return '';
+      return parts.length > 1
+        ? (parts[0].charAt(0) + parts[parts.length - 1].charAt(0)).toLocaleUpperCase('pt-BR')
+        : parts[0].charAt(0).toLocaleUpperCase('pt-BR');
+    }
+
+    function renderProfile() {
+      var initials = getInitials(profile.name);
+      if (profileName) profileName.textContent = profile.name;
+      if (profileAvatar) profileAvatar.textContent = initials;
+      profileBtn.textContent = initials;
+      profileBtn.setAttribute('aria-label', 'Abrir perfil de ' + profile.name);
+      if (profileDetails) {
+        var enrollmentMatch = detailsText.match(/Matrícula:\s*([^\n]+)/);
+        var departmentMatch = detailsText.match(/Setor:\s*([^\n]+)/);
+        var enrollment = enrollmentMatch ? enrollmentMatch[1].trim() : '';
+        var department = departmentMatch ? departmentMatch[1].trim() : '';
+        var phoneLine = document.createTextNode('Telefone: ' + profile.phone);
+        profileDetails.replaceChildren(
+          document.createTextNode('Matrícula: ' + enrollment),
+          document.createElement('br'),
+          document.createTextNode('Setor: ' + department),
+          document.createElement('br'),
+          phoneLine
+        );
+      }
+    }
+
+    var editButton = document.createElement('button');
+    editButton.type = 'button';
+    editButton.className = 'profile-pop__edit';
+    editButton.textContent = 'Editar perfil';
+    var passwordLink = document.createElement('a');
+    passwordLink.className = 'profile-pop__link';
+    passwordLink.href = 'recuperar-senha.html';
+    passwordLink.textContent = '🔒 Mudar senha';
+
+    var editForm = document.createElement('form');
+    editForm.className = 'profile-edit';
+    editForm.hidden = true;
+    editForm.innerHTML =
+      '<label class="profile-edit__field">Nome completo' +
+      '<input class="input" name="name" type="text" autocomplete="name" required></label>' +
+      '<label class="profile-edit__field">Telefone' +
+      '<input class="input" name="phone" type="tel" autocomplete="tel" placeholder="(11) 90000-0000" required></label>' +
+      '<button class="btn btn--primary btn--block" type="submit">Salvar alterações</button>' +
+      '<button class="btn btn--outline btn--block" type="button" data-profile-cancel>Cancelar</button>';
+    profilePop.insertBefore(editForm, logoutButton);
+    profilePop.insertBefore(editButton, logoutButton);
+    profilePop.insertBefore(passwordLink, logoutButton);
+    var nameInput = editForm.elements.namedItem('name');
+    var phoneInput = editForm.elements.namedItem('phone');
+    clearErrorOnInput(nameInput);
+    clearErrorOnInput(phoneInput);
+
+    function closeProfileEditor() {
+      editForm.hidden = true;
+      profileRow.hidden = false;
+      editButton.hidden = false;
+      passwordLink.hidden = false;
+      logoutButton.hidden = false;
+    }
+
+    renderProfile();
+    editButton.addEventListener('click', function () {
+      nameInput.value = profile.name;
+      phoneInput.value = profile.phone;
+      profileRow.hidden = true;
+      editButton.hidden = true;
+      passwordLink.hidden = true;
+      logoutButton.hidden = true;
+      editForm.hidden = false;
+      nameInput.focus();
+    });
+    editForm.querySelector('[data-profile-cancel]').addEventListener('click', closeProfileEditor);
+    phoneInput.addEventListener('input', function () {
+      phoneInput.value = formatPhone(phoneInput.value.replace(/\D/g, ''));
+    });
+    editForm.addEventListener('submit', function (event) {
+      event.preventDefault();
+      var name = nameInput.value.trim().replace(/\s+/g, ' ');
+      var digits = phoneInput.value.replace(/\D/g, '');
+      if (!name) {
+        nameInput.classList.add('is-invalid');
+        showToast('Informe o nome do perfil.', 'error');
+        return;
+      }
+      if (digits.length < 10 || digits.length > 11) {
+        phoneInput.classList.add('is-invalid');
+        showToast('Informe um telefone válido com DDD.', 'error');
+        return;
+      }
+
+      var updatedProfile = { name: name, phone: formatPhone(digits) };
+      try {
+        localStorage.setItem(profileStorageKey, JSON.stringify(updatedProfile));
+      } catch (error) {
+        showToast('Não foi possível salvar o perfil neste navegador.', 'error');
+        return;
+      }
+      profile = updatedProfile;
+      renderProfile();
+      closeProfileEditor();
+      profilePop.classList.remove('is-open');
+      showToast('Perfil atualizado com sucesso.', 'success');
+    });
+
     profileBtn.addEventListener('click', function (e) {
       e.stopPropagation();
       profilePop.classList.toggle('is-open');
@@ -149,17 +301,6 @@ function initGlobalNav() {
     });
   });
 
-  // ícones de notificações e configurações do topo
-  document.querySelectorAll('.icon-btn[aria-label="Notificações"]').forEach(function (btn) {
-    btn.addEventListener('click', function () {
-      showToast('Você não tem novas notificações.', 'info');
-    });
-  });
-  document.querySelectorAll('.icon-btn[aria-label="Configurações"]').forEach(function (btn) {
-    btn.addEventListener('click', function () {
-      showToast('Configurações em desenvolvimento.', 'info');
-    });
-  });
 }
 
 // ---------- menu: garante o item "Funcionários e Matrículas" em todas as páginas ----------
