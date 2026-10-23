@@ -139,7 +139,9 @@ function initGlobalNav() {
   }
 
   // sair da conta (drawer e popover de perfil)
-  document.querySelectorAll('.profile-pop__logout, .menu-lateral-sair').forEach(function (btn) {
+  document.querySelectorAll(
+    '.profile-pop__logout, .perfil-pop-sair, .menu-lateral-sair, .drawer__logout'
+  ).forEach(function (btn) {
     btn.addEventListener('click', function () {
       if (confirm('Deseja realmente sair da sua conta?')) {
         window.location.href = 'login.html';
