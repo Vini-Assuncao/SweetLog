@@ -29,6 +29,35 @@ class EstoqueService {
         }
     }
 
+    async diminuirQuantidade(id, quantidade) {
+        if (!id || !Number.isInteger(Number(id)) || Number(id) <= 0) {
+            throw { status: 400, mensagem: "ID inválido" }
+        }
+
+        const quantidadeNumerica = Number(quantidade)
+        if (!Number.isInteger(quantidadeNumerica) || quantidadeNumerica <= 0) {
+            throw { status: 400, mensagem: "Quantidade deve ser um número inteiro positivo" }
+        }
+
+        const estoque = await EstoqueRepository.selectById(id)
+        if (!estoque) {
+            throw { status: 404, mensagem: "Estoque não encontrado" }
+        }
+        if (estoque.quantidade < quantidadeNumerica) {
+            throw { status: 409, mensagem: "Quantidade solicitada maior que o estoque disponível" }
+        }
+
+        const linhasAtualizadas = await EstoqueRepository.decreaseQuantity(id, quantidadeNumerica)
+        if (linhasAtualizadas === 0) {
+            throw { status: 409, mensagem: "Quantidade solicitada maior que o estoque disponível" }
+        }
+        return {
+            sucesso: true,
+            mensagem: "Quantidade do estoque diminuída com sucesso",
+            estoque: await EstoqueRepository.selectById(id)
+        }
+    }
+
     async cadastrar(estoqueData) {
         let { lote_producao, quantidade, inspecionado, data_validade, id_produto, file } = estoqueData
 
@@ -82,7 +111,7 @@ class EstoqueService {
             inspecionado: inspecionado,
             data_validade: data_validade,
             id_produto: id_produto,
-            nota_fiscal: file ? `backend/public/uploads/notas_fiscais/${file.filename}` : null,
+            nota_fiscal: file ? `backend/public/uploads/notas_fiscais/entrada/${file.filename}` : null,
         }
 
         const id = await EstoqueRepository.insert(estoque)
@@ -171,7 +200,7 @@ class EstoqueService {
         }
 
         if (file) {
-            estoqueAtualizado.nota_fiscal = `backend/public/uploads/notas_fiscais/${file.filename}`;
+            estoqueAtualizado.nota_fiscal = `backend/public/uploads/notas_fiscais/entrada/${file.filename}`;
             if (estoqueExistente.nota_fiscal) {
                 const caminhoAntigo = path.join(__dirname, '..', '..', '..', estoqueExistente.nota_fiscal);
                 try {
@@ -203,6 +232,10 @@ class EstoqueService {
         const estoque = await EstoqueRepository.selectById(id)
         if (!estoque) {
             throw { status: 404, mensagem: "Estoque não encontrado" }
+        }
+
+        if (await EstoqueRepository.hasSalesItems(id)) {
+            throw { status: 409, mensagem: "Não é possível excluir um lote vinculado a uma venda" }
         }
 
         if (estoque.nota_fiscal) {

@@ -117,7 +117,7 @@ class MatriculaService {
 
         const matricula = await MatriculaRepository.selectById(id)
         if (!matricula) {
-            throw { status: 400, mensagem: "Matrícula não encontrada" }
+            throw { status: 404, mensagem: "Matrícula não encontrada" }
         }
 
         const funcionario = await FuncionarioRepository.selectById(id)

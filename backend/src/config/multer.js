@@ -9,12 +9,12 @@ if (!fs.existsSync(uploadDir)) {
     fs.mkdirSync(uploadDir, { recursive: true });
 }
 
-const storage = multer.diskStorage({
+const criarStorage = (tipoNotaFiscal) => multer.diskStorage({
     destination: function (req, file, cb) {
         let destino;
 
         if (file.mimetype === 'application/pdf') {
-            destino = path.join(uploadDir, 'notas_fiscais');
+            destino = path.join(uploadDir, 'notas_fiscais', tipoNotaFiscal);
         } else {
             destino = path.join(uploadDir, 'produtos');
         }
@@ -44,7 +44,7 @@ const fileFilterProdutos = (req, file, cb) => {
 };
 
 const uploadProduto = multer({
-    storage: storage,
+    storage: criarStorage('entrada'),
     fileFilter: fileFilterProdutos,
     limits: {
         fileSize: 5 * 1024 * 1024 // 5MB
@@ -61,12 +61,20 @@ const fileFilterEstoque = (req, file, cb) => {
     }
 };
 
-const uploadEstoque = multer({
-    storage: storage,
+const uploadEstoqueEntrada = multer({
+    storage: criarStorage('entrada'),
     fileFilter: fileFilterEstoque,
     limits: {
         fileSize: 5 * 1024 * 1024 // 5MB
     }
 });
 
-module.exports = { uploadProduto, uploadEstoque };
+const uploadEstoqueSaida = multer({
+    storage: criarStorage('saida'),
+    fileFilter: fileFilterEstoque,
+    limits: {
+        fileSize: 5 * 1024 * 1024 // 5MB
+    }
+});
+
+module.exports = { uploadProduto, uploadEstoqueEntrada, uploadEstoqueSaida };

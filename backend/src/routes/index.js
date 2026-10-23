@@ -5,6 +5,7 @@ const matriculaRoutes = require('./matriculaRoutes')
 const funcionarioRoutes = require('./funcionarioRoutes')
 const produtoRoutes = require('./produtoRoutes')
 const estoqueRoutes = require('./estoqueRoutes')
+const vendaRoutes = require('./vendaRoutes')
 
 router.get('/', (req, res) => {
     res.json({
@@ -17,5 +18,6 @@ router.use('/matriculas', matriculaRoutes)
 router.use('/funcionarios', funcionarioRoutes)
 router.use('/produtos', produtoRoutes)
 router.use('/estoques', estoqueRoutes)
+router.use('/vendas', vendaRoutes)
 
 module.exports = router

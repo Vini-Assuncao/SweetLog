@@ -35,6 +35,22 @@ class EstoqueRepository {
         return result.affectedRows;
     }
 
+    async decreaseQuantity(id, quantidade) {
+        const [result] = await pool.query(
+            'UPDATE tbl_estoques SET quantidade = quantidade - ? WHERE id_estoque = ? AND quantidade >= ?',
+            [quantidade, id, quantidade]
+        )
+        return result.affectedRows
+    }
+
+    async hasSalesItems(id) {
+        const [rows] = await pool.query(
+            'SELECT id_venda_item FROM tbl_vendas_itens WHERE id_estoque = ? LIMIT 1',
+            [id]
+        )
+        return rows.length > 0
+    }
+
     async delete(id) {
         const [result] = await pool.query('DELETE FROM tbl_estoques WHERE id_estoque = ?', [id])
         return result.affectedRows

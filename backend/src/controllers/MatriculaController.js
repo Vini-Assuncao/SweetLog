@@ -43,7 +43,7 @@ class MatriculaController {
 
     async atualizar(req, res) {
         try {
-            const resultado = await MatriculaService.atualizar(req.params, req.body)
+            const resultado = await MatriculaService.atualizar(req.params.id, req.body)
             res.json(resultado)
         } catch (error) {
             res.status(error.status || 500).json({

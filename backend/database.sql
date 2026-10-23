@@ -49,6 +49,7 @@ CREATE TABLE IF NOT EXISTS tbl_vendas (
     comprador VARCHAR(100) NOT NULL,
     data_pedido DATE NOT NULL,
     data_entrega DATE,
+    nota_fiscal VARCHAR(255) NOT NULL,
     numero_matricula INT,
 	CONSTRAINT FK_numero_matricula_vendas
 		FOREIGN KEY (numero_matricula) REFERENCES tbl_funcionarios(numero_matricula)
@@ -59,11 +60,11 @@ CREATE TABLE IF NOT EXISTS tbl_vendas_itens (
     quantidade_venda_item INT NOT NULL,
     preco_unitario FLOAT NOT NULL,
     id_venda INT NOT NULL,
-    id_produto INT NOT NULL,
+    id_estoque INT NOT NULL,
     CONSTRAINT FK_id_venda_vi
         FOREIGN KEY (id_venda) REFERENCES tbl_vendas(id_venda),
-    CONSTRAINT FK_id_produto_vi
-        FOREIGN KEY (id_produto) REFERENCES tbl_produtos(id_produto)
+    CONSTRAINT FK_id_estoque_vi
+        FOREIGN KEY (id_estoque) REFERENCES tbl_estoques(id_estoque)
 );
 
 CREATE TABLE IF NOT EXISTS tbl_alertas (
@@ -261,7 +262,57 @@ INSERT INTO tbl_estoques (
     false,
 	CURDATE(),
     '2026-12-15',
-    'backend/public/uploads/notas_fiscais/1786729031225-359000192.pdf',
+    'backend/public/uploads/notas_fiscais/entrada/1786729031225-359000192.pdf',
     1,
     1001
 );
+
+/*
+EXEMPLO DE VENDA
+*/
+
+START TRANSACTION;
+
+SET @id_estoque_venda_exemplo = (
+    SELECT id_estoque
+    FROM tbl_estoques
+    WHERE lote_producao = 'S-100'
+      AND id_produto = 1
+    ORDER BY id_estoque
+    LIMIT 1
+);
+
+INSERT INTO tbl_vendas (
+    comprador,
+    data_pedido,
+    data_entrega,
+    nota_fiscal,
+    numero_matricula
+) VALUES (
+    'Mercado Exemplo',
+    CURDATE(),
+    DATE_ADD(CURDATE(), INTERVAL 2 DAY),
+    'backend/public/uploads/notas_fiscais/saida/1786729031225-359000192.pdf',
+    1001
+);
+
+SET @id_venda_exemplo = LAST_INSERT_ID();
+
+UPDATE tbl_estoques
+SET quantidade = quantidade - 5
+WHERE id_estoque = @id_estoque_venda_exemplo
+  AND quantidade >= 5;
+
+INSERT INTO tbl_vendas_itens (
+    quantidade_venda_item,
+    preco_unitario,
+    id_venda,
+    id_estoque
+) VALUES (
+    5,
+    2.50,
+    @id_venda_exemplo,
+    @id_estoque_venda_exemplo
+);
+
+COMMIT;

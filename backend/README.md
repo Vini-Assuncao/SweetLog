@@ -59,7 +59,7 @@ Todas as rotas estão montadas na raiz da API. A rota `GET /` retorna uma mensag
 | Matrículas | `GET /matriculas` | Lista matrículas |
 | Matrículas | `GET /matriculas/:id` | Busca uma matrícula pelo número |
 | Matrículas | `POST /matriculas` | Cadastra matrícula |
-| Matrículas | `PUT /matriculas/:id` | Atualiza matrícula — atualmente com problema; veja abaixo |
+| Matrículas | `PUT /matriculas/:id` | Atualiza matrícula |
 | Matrículas | `DELETE /matriculas/:id` | Exclui matrícula, desde que não esteja vinculada a um funcionário |
 | Funcionários | `GET /funcionarios` | Lista funcionários |
 | Funcionários | `GET /funcionarios/:id` | Busca funcionário pelo número da matrícula |
@@ -77,6 +77,12 @@ Todas as rotas estão montadas na raiz da API. A rota `GET /` retorna uma mensag
 | Estoques | `POST /estoques` | Cadastra registro de estoque |
 | Estoques | `PUT /estoques/:id` | Atualiza registro de estoque |
 | Estoques | `DELETE /estoques/:id` | Exclui registro de estoque |
+| Estoques | `POST /estoques/:id/saida` | Diminui a quantidade de um lote |
+| Vendas | `GET /vendas` | Lista vendas e seus itens |
+| Vendas | `GET /vendas/:id` | Busca uma venda e seus itens |
+| Vendas | `POST /vendas` | Cadastra uma venda e baixa as quantidades dos lotes |
+| Vendas | `PUT /vendas/:id` | Atualiza dados da venda e, opcionalmente, seus itens |
+| Vendas | `DELETE /vendas/:id` | Exclui a venda e devolve as quantidades aos lotes |
 
 ### 💡Exemplos de requisição
 
@@ -90,6 +96,36 @@ Cadastro de matrícula (`Content-Type: application/json`):
 ```
 
 Os setores atualmente aceitos pela validação da API são `RH`, `Administrativo`, `Logística`, `Compras` e `Almoxarifado`.
+
+Cadastro de venda (`multipart/form-data`, com `itens` enviado como texto JSON):
+
+```json
+{
+  "comprador": "Cliente de Exemplo",
+  "data_pedido": "2026-10-23",
+  "data_entrega": "2026-10-25",
+  "numero_matricula": 2001,
+  "itens": [
+    {
+      "id_estoque": 1,
+      "quantidade_venda_item": 5,
+      "preco_unitario": 2.5
+    }
+  ]
+}
+```
+
+Envie também o arquivo PDF no campo `nota_fiscal`. Cada item referencia um lote pelo `id_estoque`; a criação baixa as quantidades em uma transação. Ao substituir os itens, as quantidades anteriores são devolvidas e as novas são baixadas na mesma transação. Ao excluir a venda, as quantidades são devolvidas aos lotes. O campo `numero_matricula` é opcional.
+
+Para registrar uma saída avulsa de um lote, use `POST /estoques/:id/saida` com JSON:
+
+```json
+{
+  "quantidade": 5
+}
+```
+
+O endpoint rejeita saídas maiores que o saldo disponível e não cria uma venda.
 
 Cadastro de funcionário (`Content-Type: application/json`):
 
@@ -106,12 +142,14 @@ O telefone é opcional. A senha é armazenada com hash. O login retorna confirma
 
 ### 📄Envio de arquivos
 
-As rotas de criação e atualização de produtos e estoques recebem `multipart/form-data`:
+As rotas de criação e atualização de produtos, estoques e vendas recebem `multipart/form-data`:
 
 - Produtos: campo de arquivo `imagem`; são aceitos JPEG/JPG e PNG, até 5 MB.
-- Estoques: campo de arquivo `nota_fiscal`; são aceitos PDFs, até 5 MB.
+- Estoques e vendas: campo de arquivo `nota_fiscal`; são aceitos PDFs, até 5 MB.
 
-Os dados textuais do formulário são enviados junto com o arquivo. Os arquivos ficam sob `public/uploads/produtos` ou `public/uploads/notas_fiscais` e são servidos estaticamente pelo prefixo `/public`.
+Os dados textuais do formulário são enviados junto com o arquivo. Os arquivos ficam sob `public/uploads/produtos`, `public/uploads/notas_fiscais/entrada` (estoques) ou `public/uploads/notas_fiscais/saida` (vendas) e são servidos estaticamente pelo prefixo `/public`. Arquivos já enviados para o diretório antigo `public/uploads/notas_fiscais` permanecem no local original; novos uploads usam os diretórios separados.
+
+Em bancos já existentes, `CREATE TABLE IF NOT EXISTS` não altera tabelas existentes. Antes de usar vendas, adicione a coluna `nota_fiscal` obrigatória em `tbl_vendas` e migre manualmente `tbl_vendas_itens`: os itens agora apontam para lotes (`id_estoque`) em vez de produtos (`id_produto`), e não é seguro converter esses IDs automaticamente.
 
 ## 🗃️   Como o projeto está organizado
 
@@ -131,23 +169,27 @@ backend/
     │   ├── EstoqueController.js
     │   ├── FuncionarioController.js
     │   ├── MatriculaController.js
-    │   └── ProdutoController.js
+    │   ├── ProdutoController.js
+    │   └── VendaController.js
     ├── repositories/
     │   ├── EstoqueRepository.js
     │   ├── FuncionarioRepository.js
     │   ├── MatriculaRepository.js
-    │   └── ProdutoRepository.js
+    │   ├── ProdutoRepository.js
+    │   └── VendaRepository.js
     ├── routes/
     │   ├── estoqueRoutes.js
     │   ├── funcionarioRoutes.js
     │   ├── index.js
     │   ├── matriculaRoutes.js
-    │   └── produtoRoutes.js
+    │   ├── produtoRoutes.js
+    │   └── vendaRoutes.js
     └── services/
         ├── EstoqueService.js
         ├── FuncionarioService.js
-        ├── matriculaService.js
-        └── ProdutoService.js
+        ├── MatriculaService.js
+        ├── ProdutoService.js
+        └── VendaService.js
 ```
 
 - **`server.js`**: verifica a conexão com o MySQL e inicia o servidor.
