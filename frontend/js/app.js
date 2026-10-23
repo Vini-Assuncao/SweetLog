@@ -1411,6 +1411,221 @@ function initFuncionariosLista() {
     return tbody ? Array.prototype.slice.call(tbody.querySelectorAll('tr')) : [];
   }
 
+  var storageKey = 'sweetlog-funcionarios-matriculas';
+  var records = { funcionarios: {}, matriculas: {} };
+
+  function fieldsFor(name) {
+    return name === 'funcionarios'
+      ? ['matricula', 'nome', 'setor', 'telefone']
+      : ['numero', 'setor'];
+  }
+
+  function getRowValues(row, name) {
+    var cells = row.cells;
+    if (name === 'funcionarios') {
+      var person = cells[1].querySelector('.person');
+      var avatar = person && person.querySelector('.mini-avatar');
+      return {
+        matricula: cells[0].textContent.trim(),
+        nome: person ? person.textContent.replace(avatar ? avatar.textContent : '', '').trim() : cells[1].textContent.trim(),
+        setor: cells[2].textContent.trim(),
+        telefone: cells[3].textContent.trim()
+      };
+    }
+    return {
+      numero: cells[0].textContent.trim(),
+      setor: cells[1].textContent.trim()
+    };
+  }
+
+  function getStorageKey(row, name) {
+    if (!row.dataset.recordKey) {
+      row.dataset.recordKey = name + '-' + row.dataset.id;
+    }
+    return row.dataset.recordKey;
+  }
+
+  function setPersonCell(cell, name) {
+    var person = document.createElement('div');
+    person.className = 'person';
+    var avatar = document.createElement('span');
+    avatar.className = 'mini-avatar';
+    avatar.setAttribute('aria-hidden', 'true');
+    avatar.textContent = name.trim().split(/\s+/).map(function (part) {
+      return part.charAt(0);
+    }).join('').slice(0, 2).toUpperCase();
+    person.appendChild(avatar);
+    person.appendChild(document.createTextNode(name));
+    cell.replaceChildren(person);
+  }
+
+  function renderRow(row, name, values) {
+    if (name === 'funcionarios') {
+      row.cells[0].textContent = values.matricula;
+      setPersonCell(row.cells[1], values.nome);
+      row.cells[2].textContent = values.setor;
+      row.cells[3].textContent = values.telefone;
+      row.dataset.id = values.matricula;
+    } else {
+      row.cells[0].textContent = values.numero;
+      row.cells[1].textContent = values.setor;
+      row.dataset.id = values.numero;
+    }
+  }
+
+  try {
+    var storedRecords = localStorage.getItem(storageKey);
+    if (storedRecords) {
+      var parsedRecords = JSON.parse(storedRecords);
+      if (!parsedRecords || typeof parsedRecords !== 'object' ||
+          !parsedRecords.funcionarios || !parsedRecords.matriculas) {
+        throw new Error('Os dados salvos de funcionários e matrículas são inválidos.');
+      }
+      records = parsedRecords;
+    }
+  } catch (error) {
+    showToast('Não foi possível carregar as alterações salvas de funcionários e matrículas.', 'error');
+  }
+
+  ['funcionarios', 'matriculas'].forEach(function (name) {
+    rowsOf(name).forEach(function (row) {
+      var key = getStorageKey(row, name);
+      var values = records[name][key];
+      if (values && fieldsFor(name).every(function (field) {
+        return typeof values[field] === 'string';
+      })) {
+        renderRow(row, name, values);
+      }
+    });
+  });
+
+  function beginRowEdit(row, name) {
+    var originalValues = getRowValues(row, name);
+    var fields = fieldsFor(name);
+    var columnIndexes = name === 'funcionarios' ? [0, 1, 2, 3] : [0, 1];
+    fields.forEach(function (field, index) {
+      var input = document.createElement('input');
+      input.className = 'input';
+      input.type = 'text';
+      input.name = field;
+      input.value = originalValues[field];
+      input.required = true;
+      input.setAttribute('aria-label', field === 'matricula' || field === 'numero'
+        ? 'Número da matrícula'
+        : field === 'nome' ? 'Nome do funcionário'
+          : field === 'telefone' ? 'Telefone do funcionário' : 'Setor');
+      row.cells[columnIndexes[index]].replaceChildren(input);
+    });
+
+    var actions = row.querySelector('.row-actions');
+    actions.replaceChildren();
+    var saveButton = document.createElement('button');
+    saveButton.type = 'button';
+    saveButton.className = 'btn btn--primary';
+    saveButton.textContent = 'Salvar';
+    saveButton.setAttribute('data-row-save', '');
+    var cancelButton = document.createElement('button');
+    cancelButton.type = 'button';
+    cancelButton.className = 'btn btn--outline';
+    cancelButton.textContent = 'Cancelar';
+    cancelButton.setAttribute('data-row-cancel', '');
+    actions.appendChild(saveButton);
+    actions.appendChild(cancelButton);
+
+    cancelButton.addEventListener('click', function () {
+      renderRow(row, name, originalValues);
+      restoreRowActions(row, name);
+    });
+
+    saveButton.addEventListener('click', function () {
+      var values = {};
+      var valid = true;
+      fields.forEach(function (field, index) {
+        var input = row.cells[columnIndexes[index]].querySelector('input');
+        values[field] = input.value.trim();
+        if (!values[field]) {
+          input.classList.add('is-invalid');
+          valid = false;
+        }
+      });
+      if (!valid) {
+        showToast('Preencha todos os campos antes de salvar.', 'error');
+        return;
+      }
+
+      var primaryField = name === 'funcionarios' ? 'matricula' : 'numero';
+      var duplicate = rowsOf(name).some(function (otherRow) {
+        if (otherRow === row) return false;
+        var otherValues = getRowValues(otherRow, name);
+        return otherValues[primaryField].toLowerCase() === values[primaryField].toLowerCase();
+      });
+      if (duplicate) {
+        row.cells[columnIndexes[0]].querySelector('input').classList.add('is-invalid');
+        showToast('Já existe um registro com esse número de matrícula.', 'error');
+        return;
+      }
+
+      var updatedRecords = {
+        funcionarios: Object.assign({}, records.funcionarios),
+        matriculas: Object.assign({}, records.matriculas)
+      };
+      var key = getStorageKey(row, name);
+      updatedRecords[name][key] = values;
+
+      var relatedName = name === 'funcionarios' ? 'matriculas' : 'funcionarios';
+      var identity = key.slice(name.length + 1);
+      var relatedKey = relatedName + '-' + identity;
+      var relatedRow = document.querySelector('[data-rows="' + relatedName + '"] [data-record-key="' + relatedKey + '"]');
+      if (relatedRow) {
+        var relatedValues = getRowValues(relatedRow, relatedName);
+        if (name === 'funcionarios') {
+          relatedValues.numero = values.matricula;
+          relatedValues.setor = values.setor;
+        } else {
+          relatedValues.matricula = values.numero;
+          relatedValues.setor = values.setor;
+        }
+        updatedRecords[relatedName][relatedKey] = relatedValues;
+      }
+
+      try {
+        localStorage.setItem(storageKey, JSON.stringify(updatedRecords));
+      } catch (error) {
+        showToast('Não foi possível salvar as alterações. Verifique o armazenamento do navegador.', 'error');
+        return;
+      }
+
+      records = updatedRecords;
+      renderRow(row, name, values);
+      restoreRowActions(row, name);
+      if (relatedRow) renderRow(relatedRow, relatedName, updatedRecords[relatedName][relatedKey]);
+      refresh('funcionarios');
+      refresh('matriculas');
+      showToast(name === 'funcionarios'
+        ? 'Informações do funcionário atualizadas.'
+        : 'Informações da matrícula atualizadas.', 'success');
+    });
+  }
+
+  function restoreRowActions(row, name) {
+    var actions = row.querySelector('.row-actions');
+    var editButton = document.createElement('button');
+    editButton.type = 'button';
+    editButton.className = 'icon-btn';
+    editButton.setAttribute('aria-label', name === 'funcionarios' ? 'Editar funcionário' : 'Editar matrícula');
+    editButton.setAttribute('data-action', 'editar');
+    editButton.textContent = '✏️';
+
+    var deleteButton = document.createElement('button');
+    deleteButton.type = 'button';
+    deleteButton.className = 'icon-btn icon-btn--danger';
+    deleteButton.setAttribute('aria-label', 'Excluir ' + (name === 'funcionarios' ? 'funcionário' : 'matrícula'));
+    deleteButton.setAttribute('data-action', 'excluir');
+    deleteButton.setAttribute('data-tipo', name === 'funcionarios' ? 'funcionario' : 'matricula');
+    deleteButton.textContent = '🗑️';
+    actions.replaceChildren(editButton, deleteButton);
+  }
+
   // atualiza contador da aba, rodapé e estado vazio
   function refresh(name) {
     var rows = rowsOf(name);
@@ -1443,12 +1658,20 @@ function initFuncionariosLista() {
     });
   });
 
-  // ---------- ver / editar / excluir (demonstração) ----------
+  // ---------- editar / excluir ----------
   document.addEventListener('click', function (e) {
     var btn = e.target.closest('[data-action]');
     if (!btn) return;
     var action = btn.getAttribute('data-action');
     var row = btn.closest('tr');
+    var tbody = row.parentNode;
+    var name = tbody.getAttribute('data-rows');
+
+    if (action === 'editar') {
+      if (btn.closest('.row-actions').querySelector('[data-row-save]')) return;
+      beginRowEdit(row, name);
+      return;
+    }
 
     if (action === 'excluir') {
       var id = row.getAttribute('data-id');
@@ -1457,13 +1680,21 @@ function initFuncionariosLista() {
         ? 'Excluir a matrícula ' + id + '?'
         : 'Excluir o funcionário da matrícula ' + id + '?';
       if (!confirm(texto)) return;
-      var tbody = row.parentNode;
-      var name = tbody.getAttribute('data-rows');
+      var updatedRecords = {
+        funcionarios: Object.assign({}, records.funcionarios),
+        matriculas: Object.assign({}, records.matriculas)
+      };
+      delete updatedRecords[name][getStorageKey(row, name)];
+      try {
+        localStorage.setItem(storageKey, JSON.stringify(updatedRecords));
+      } catch (error) {
+        showToast('Não foi possível excluir o registro. Verifique o armazenamento do navegador.', 'error');
+        return;
+      }
+      records = updatedRecords;
       row.remove();
       refresh(name);
       showToast(tipo === 'matricula' ? 'Matrícula excluída.' : 'Funcionário excluído.', 'success');
-    } else {
-      showToast('Esta ação ainda está em desenvolvimento.', 'info');
     }
   });
 
