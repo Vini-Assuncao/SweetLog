@@ -8,7 +8,7 @@ class EstoqueController {
         } catch (error) {
             res.status(error.status || 500).json({
                 sucesso: false,
-                mensagem: error.message || "Erro interno do servidor",
+                mensagem: error.mensagem || error.message || "Erro interno do servidor",
                 erro: error.stack || error
             })
         }
@@ -21,7 +21,7 @@ class EstoqueController {
         } catch (error) {
             res.status(error.status || 500).json({
                 sucesso: false,
-                mensagem: error.message || "Erro interno do servidor",
+                mensagem: error.mensagem || error.message || "Erro interno do servidor",
                 erro: error.stack || error
             })
         }
@@ -48,7 +48,7 @@ class EstoqueController {
         } catch (error) {
             res.status(error.status || 500).json({
                 sucesso: false,
-                mensagem: error.message || "Erro interno do servidor",
+                mensagem: error.mensagem || error.message || "Erro interno do servidor",
                 erro: error.stack || error
             })
         }
@@ -62,7 +62,7 @@ class EstoqueController {
         } catch (error) {
             res.status(error.status || 500).json({
                 sucesso: false,
-                mensagem: error.message || "Erro interno do servidor",
+                mensagem: error.mensagem || error.message || "Erro interno do servidor",
                 erro: error.stack || error
             })
         }
@@ -75,7 +75,7 @@ class EstoqueController {
         } catch (error) {
             res.status(error.status || 500).json({
                 sucesso: false,
-                mensagem: error.message || "Erro interno do servidor",
+                mensagem: error.mensagem || error.message || "Erro interno do servidor",
                 erro: error.stack || error
             })
         }

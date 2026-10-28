@@ -41,6 +41,8 @@ API REST do SweetLog, construída com Node.js, Express e MySQL. O sistema está 
    `PORT` é opcional; quando não informado, o servidor usa a porta `3000`. As demais variáveis são usadas para conectar ao banco.
 
 3. Prepare o schema usando `database.sql`, se apropriado para o seu ambiente.
+   Para uma base já existente, faça backup e execute `migrations/alertas.sql`
+   uma única vez para aplicar a estrutura e os eventos novos de alertas.
 
 4. Inicie a API:
 
@@ -48,7 +50,9 @@ API REST do SweetLog, construída com Node.js, Express e MySQL. O sistema está 
    npm start
    ```
 
-   O servidor testa a conexão com o MySQL antes de começar a escutar. A base padrão é `http://localhost:3000`.
+   O servidor testa a conexão e reconcilia os alertas antes de começar a
+   escutar. Se uma base antiga ainda não tiver a migration aplicada, a
+   inicialização falha explicitamente. A base padrão é `http://localhost:3000`.
 
 ## 🔌Rotas disponíveis
 
@@ -83,6 +87,33 @@ Todas as rotas estão montadas na raiz da API. A rota `GET /` retorna uma mensag
 | Vendas | `POST /vendas` | Cadastra uma venda e baixa as quantidades dos lotes |
 | Vendas | `PUT /vendas/:id` | Atualiza dados da venda e, opcionalmente, seus itens |
 | Vendas | `DELETE /vendas/:id` | Exclui a venda e devolve as quantidades aos lotes |
+| Alertas | `GET /alertas` | Lista alertas, incluindo os dados associados de produto e lote quando disponíveis |
+| Alertas | `GET /alertas/:id` | Busca um alerta pelo ID |
+
+### 🔔Funcionamento dos alertas
+
+- O sistema mantém até um alerta ativo por tipo e lote/produto. Ao resolver uma
+  condição, marca o alerta como inativo e registra `resolvido_em`; ocorrências
+  futuras criam uma nova linha, preservando o histórico.
+- A validade próxima é sinalizada quando restam de 0 a 30 dias, e o alerta de
+  vencimento quando a data já passou. Ambos só ficam ativos enquanto o lote
+  tem quantidade disponível.
+- Estoque baixo significa até 20 unidades disponíveis por produto, somando
+  lotes ainda válidos. Um produto passa a ser monitorado após registrar seu
+  primeiro lote; se todos os lotes estiverem vencidos ou zerados, o alerta de
+  estoque baixo fica ativo.
+- Criação, edição, baixa de estoque e operações de venda atualizam alertas na
+  mesma transação que altera o saldo. Na inicialização, a API reconcilia todos
+  os produtos e lotes. Um evento diário do MySQL serve como reconciliação extra.
+- O histórico de alertas é preservado. Por isso, a API impede excluir produtos
+  ou lotes que tenham alertas associados.
+
+O Event Scheduler do MySQL precisa estar habilitado e o usuário que executa o
+schema/migration precisa ter permissão para criar eventos e habilitar o
+scheduler. `SET GLOBAL event_scheduler = ON` vale até o próximo reinício do
+MySQL; configure também `event_scheduler=ON` no arquivo de configuração do
+servidor ou use `SET PERSIST event_scheduler = ON` quando suportado. A API
+atualiza os alertas transacionalmente mesmo sem o evento diário.
 
 ### 💡Exemplos de requisição
 
@@ -151,11 +182,18 @@ Os dados textuais do formulário são enviados junto com o arquivo. Os arquivos 
 
 Em bancos já existentes, `CREATE TABLE IF NOT EXISTS` não altera tabelas existentes. Antes de usar vendas, adicione a coluna `nota_fiscal` obrigatória em `tbl_vendas` e migre manualmente `tbl_vendas_itens`: os itens agora apontam para lotes (`id_estoque`) em vez de produtos (`id_produto`), e não é seguro converter esses IDs automaticamente.
 
+Para instalações anteriores às mudanças de alertas, aplique `migrations/alertas.sql`
+uma única vez, após backup. A migration remove duplicatas ativas antigas,
+adiciona timestamps de criação/resolução e índices únicos para impedir alertas
+ativos duplicados. Não reaplique essa migration depois de concluída.
+
 ## 🗃️   Como o projeto está organizado
 
 ```text
 backend/
 ├── database.sql
+├── migrations/
+│   └── alertas.sql
 ├── package.json
 ├── public/
 │   └── uploads/
@@ -166,18 +204,21 @@ backend/
     │   ├── database.js
     │   └── multer.js
     ├── controllers/
+    │   ├── AlertaController.js
     │   ├── EstoqueController.js
     │   ├── FuncionarioController.js
     │   ├── MatriculaController.js
     │   ├── ProdutoController.js
     │   └── VendaController.js
     ├── repositories/
+    │   ├── AlertaRepository.js
     │   ├── EstoqueRepository.js
     │   ├── FuncionarioRepository.js
     │   ├── MatriculaRepository.js
     │   ├── ProdutoRepository.js
     │   └── VendaRepository.js
     ├── routes/
+    │   ├── alertaRoutes.js
     │   ├── estoqueRoutes.js
     │   ├── funcionarioRoutes.js
     │   ├── index.js
@@ -185,6 +226,7 @@ backend/
     │   ├── produtoRoutes.js
     │   └── vendaRoutes.js
     └── services/
+        ├── AlertaService.js
         ├── EstoqueService.js
         ├── FuncionarioService.js
         ├── MatriculaService.js

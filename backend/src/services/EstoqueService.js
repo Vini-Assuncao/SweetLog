@@ -238,6 +238,12 @@ class EstoqueService {
             throw { status: 409, mensagem: "Não é possível excluir um lote vinculado a uma venda" }
         }
 
+        if (await EstoqueRepository.hasAlerts(id)) {
+            throw { status: 409, mensagem: "Não é possível excluir um lote com histórico de alertas associado" }
+        }
+
+        await EstoqueRepository.delete(id)
+
         if (estoque.nota_fiscal) {
             try {
                 await fs.unlink(estoque.nota_fiscal);
@@ -245,8 +251,6 @@ class EstoqueService {
                 console.error("Erro ao apagar nota fiscal antiga:", err);
             }
         }
-
-        await EstoqueRepository.delete(id)
 
         return {
             sucesso: true,

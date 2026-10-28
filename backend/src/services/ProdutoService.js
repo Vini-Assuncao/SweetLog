@@ -157,6 +157,12 @@ class ProdutoService {
             throw { status: 404, mensagem: "Produto não encontrado" }
         }
 
+        if (await ProdutoRepository.hasAlerts(id)) {
+            throw { status: 409, mensagem: "Não é possível excluir um produto com histórico de alertas associado" }
+        }
+
+        await ProdutoRepository.delete(id)
+
         if (produto.imagem) {
             try {
                 await fs.unlink(produto.imagem);
@@ -164,8 +170,6 @@ class ProdutoService {
                 console.error("Erro ao apagar imagem antiga:", err);
             }
         }
-
-        await ProdutoRepository.delete(id)
 
         return {
             sucesso: true,

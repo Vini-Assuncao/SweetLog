@@ -1,4 +1,5 @@
 const pool = require('../config/database')
+const AlertaRepository = require('./AlertaRepository')
 
 class VendaRepository {
     async selectAll() {
@@ -71,6 +72,7 @@ class VendaRepository {
                         'UPDATE tbl_estoques SET quantidade = quantidade + ? WHERE id_estoque = ?',
                         [item.quantidade_venda_item, item.id_estoque]
                     )
+                    await AlertaRepository.sincronizarEstoque(connection, item.id_estoque)
                 }
                 await connection.query('DELETE FROM tbl_vendas_itens WHERE id_venda = ?', [id])
                 await this.inserirItens(connection, id, itens)
@@ -119,6 +121,7 @@ class VendaRepository {
                     'UPDATE tbl_estoques SET quantidade = quantidade + ? WHERE id_estoque = ?',
                     [item.quantidade_venda_item, item.id_estoque]
                 )
+                await AlertaRepository.sincronizarEstoque(connection, item.id_estoque)
             }
 
             await connection.query('DELETE FROM tbl_vendas_itens WHERE id_venda = ?', [id])
@@ -153,6 +156,7 @@ class VendaRepository {
                  VALUES (?, ?, ?, ?)`,
                 [item.quantidade_venda_item, item.preco_unitario, idVenda, item.id_estoque]
             )
+            await AlertaRepository.sincronizarEstoque(connection, item.id_estoque)
         }
     }
 

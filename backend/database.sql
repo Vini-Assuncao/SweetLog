@@ -71,9 +71,19 @@ CREATE TABLE IF NOT EXISTS tbl_alertas (
     id_alerta INT AUTO_INCREMENT PRIMARY KEY,
     tipo VARCHAR(50) NOT NULL,
     data_alerta DATE NOT NULL,
-    ativo BOOLEAN NOT NULL DEFAULT true, 
+    ativo BOOLEAN NOT NULL DEFAULT true,
+    criado_em DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    resolvido_em DATETIME NULL,
     id_estoque INT,
-	id_produto INT,
+    id_produto INT,
+    alerta_estoque_ativo INT GENERATED ALWAYS AS (
+        CASE WHEN ativo = TRUE THEN id_estoque ELSE NULL END
+    ) STORED,
+    alerta_produto_ativo INT GENERATED ALWAYS AS (
+        CASE WHEN ativo = TRUE THEN id_produto ELSE NULL END
+    ) STORED,
+    UNIQUE KEY uq_alerta_estoque_ativo (tipo, alerta_estoque_ativo),
+    UNIQUE KEY uq_alerta_produto_ativo (tipo, alerta_produto_ativo),
     CONSTRAINT FK_id_produto_alertas
         FOREIGN KEY (id_produto) REFERENCES tbl_produtos(id_produto),
     CONSTRAINT FK_id_estoque_alertas
@@ -98,111 +108,90 @@ SELECT
 FROM tbl_vendas v;
 
 /*
-EVENTS PARA O TBL_ALERTAS -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+Reconcilia diariamente os alertas como proteção adicional às atualizações
+transacionais feitas pela API. O histórico resolvido é preservado.
 */
+
+DROP EVENT IF EXISTS evt_alerta_validade_proxima;
+DROP EVENT IF EXISTS evt_alerta_estoque_vencido;
+DROP EVENT IF EXISTS evt_alerta_estoque_baixo;
+DROP EVENT IF EXISTS evt_limpar_alertas_antigos;
+DROP EVENT IF EXISTS evt_reconciliar_alertas;
 
 DELIMITER $$
 
-CREATE EVENT evt_alerta_validade_proxima
+CREATE EVENT evt_reconciliar_alertas
 ON SCHEDULE EVERY 1 DAY
 DO
 BEGIN
-    -- Cria o alerta quando faltarem entre 0 e 30 dias
-    INSERT INTO tbl_alertas (
-        tipo,
-        data_alerta,
-        id_estoque
-    )
-    SELECT
-        'Validade próxima',
-        CURDATE(),
-        e.id_estoque
-    FROM tbl_estoques e
-    WHERE DATEDIFF(e.data_validade, CURDATE()) BETWEEN 0 AND 30
-      AND NOT EXISTS (
-          SELECT 1
-          FROM tbl_alertas a
-          WHERE a.id_estoque = e.id_estoque
-            AND a.tipo = 'Validade próxima'
-      );
-END$$
-
-
-CREATE EVENT evt_alerta_estoque_vencido
-ON SCHEDULE EVERY 1 DAY
-DO
-BEGIN
-    -- Desativa o alerta de validade próxima
     UPDATE tbl_alertas a
-    JOIN tbl_estoques e ON a.id_estoque = e.id_estoque
-    SET a.ativo = FALSE
+    JOIN tbl_estoques e ON e.id_estoque = a.id_estoque
+    SET a.ativo = FALSE,
+        a.resolvido_em = CURRENT_TIMESTAMP
     WHERE a.tipo = 'Validade próxima'
       AND a.ativo = TRUE
-      AND e.data_validade < CURDATE();
-
-    -- Cria o alerta de estoque vencido
-    INSERT INTO tbl_alertas (tipo, data_alerta, id_estoque)
-    SELECT
-        'Estoque vencido',
-        CURDATE(),
-        e.id_estoque
-    FROM tbl_estoques e
-    WHERE e.data_validade < CURDATE()
-      AND NOT EXISTS (
-          SELECT 1
-          FROM tbl_alertas a
-          WHERE a.id_estoque = e.id_estoque
-            AND a.tipo = 'Estoque vencido'
+      AND (
+          e.quantidade <= 0
+          OR DATEDIFF(e.data_validade, CURDATE()) < 0
+          OR DATEDIFF(e.data_validade, CURDATE()) > 30
       );
-END$$
 
+    INSERT INTO tbl_alertas (tipo, data_alerta, ativo, id_estoque)
+    SELECT 'Validade próxima', CURDATE(), TRUE, e.id_estoque
+    FROM tbl_estoques e
+    WHERE e.quantidade > 0
+      AND DATEDIFF(e.data_validade, CURDATE()) BETWEEN 0 AND 30
+    ON DUPLICATE KEY UPDATE id_alerta = id_alerta;
 
-CREATE EVENT evt_alerta_estoque_baixo
-ON SCHEDULE EVERY 1 DAY
-DO
-BEGIN
-    -- Desativa os alertas ativos quando o produto deixa de estar com estoque baixo
     UPDATE tbl_alertas a
-    JOIN (
-        SELECT id_produto
+    JOIN tbl_estoques e ON e.id_estoque = a.id_estoque
+    SET a.ativo = FALSE,
+        a.resolvido_em = CURRENT_TIMESTAMP
+    WHERE a.tipo = 'Estoque vencido'
+      AND a.ativo = TRUE
+      AND (e.quantidade <= 0 OR e.data_validade >= CURDATE());
+
+    INSERT INTO tbl_alertas (tipo, data_alerta, ativo, id_estoque)
+    SELECT 'Estoque vencido', CURDATE(), TRUE, e.id_estoque
+    FROM tbl_estoques e
+    WHERE e.quantidade > 0
+      AND e.data_validade < CURDATE()
+    ON DUPLICATE KEY UPDATE id_alerta = id_alerta;
+
+    UPDATE tbl_alertas a
+    JOIN tbl_produtos p ON p.id_produto = a.id_produto
+    LEFT JOIN (
+        SELECT id_produto,
+               COUNT(*) AS lotes_registrados,
+               SUM(CASE WHEN data_validade >= CURDATE() THEN quantidade ELSE 0 END) AS quantidade_disponivel
         FROM tbl_estoques
         GROUP BY id_produto
-        HAVING SUM(quantidade) > 20
-    ) p ON a.id_produto = p.id_produto
-    SET a.ativo = FALSE
+    ) e ON e.id_produto = p.id_produto
+    SET a.ativo = FALSE,
+        a.resolvido_em = CURRENT_TIMESTAMP
     WHERE a.tipo = 'Estoque baixo'
-      AND a.ativo = TRUE;
+      AND a.ativo = TRUE
+      AND (
+          COALESCE(e.lotes_registrados, 0) = 0
+          OR COALESCE(e.quantidade_disponivel, 0) > 20
+      );
 
-    -- Cria o alerta de estoque baixo
-    INSERT INTO tbl_alertas (
-        tipo,
-        data_alerta,
-        id_produto
-    )
-    SELECT
-        'Estoque baixo',
-        CURDATE(),
-        e.id_produto
-    FROM tbl_estoques e
-    GROUP BY e.id_produto
-    HAVING SUM(e.quantidade) <= 20
-       AND NOT EXISTS (
-           SELECT 1
-           FROM tbl_alertas a
-           WHERE a.id_produto = e.id_produto
-             AND a.tipo = 'Estoque baixo'
-             AND a.ativo = TRUE
-       );
+    INSERT INTO tbl_alertas (tipo, data_alerta, ativo, id_produto)
+    SELECT 'Estoque baixo', CURDATE(), TRUE, p.id_produto
+    FROM tbl_produtos p
+    LEFT JOIN (
+        SELECT id_produto,
+               COUNT(*) AS lotes_registrados,
+               SUM(CASE WHEN data_validade >= CURDATE() THEN quantidade ELSE 0 END) AS quantidade_disponivel
+        FROM tbl_estoques
+        GROUP BY id_produto
+    ) e ON e.id_produto = p.id_produto
+    WHERE COALESCE(e.lotes_registrados, 0) > 0
+      AND COALESCE(e.quantidade_disponivel, 0) <= 20
+    ON DUPLICATE KEY UPDATE id_alerta = id_alerta;
 END$$
 
 DELIMITER ;
-
-CREATE EVENT evt_limpar_alertas_antigos
-ON SCHEDULE EVERY 1 DAY
-DO
-DELETE FROM tbl_alertas
-WHERE ativo = FALSE
-  AND DATEDIFF(CURDATE(), data_alerta) > 40;
 
 
 /*
