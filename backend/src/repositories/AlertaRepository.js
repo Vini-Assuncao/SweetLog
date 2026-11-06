@@ -106,7 +106,31 @@ class AlertaRepository {
         `, [tipo, idAlvo])
     }
 
-    async selectAll() {
+    async selectAll(filtros = {}) {
+        const condicoes = []
+        const valores = []
+        if (filtros.ativo !== undefined) {
+            condicoes.push('a.ativo = ?')
+            valores.push(filtros.ativo)
+        }
+        if (filtros.tipo) {
+            condicoes.push('a.tipo = ?')
+            valores.push(filtros.tipo)
+        }
+        if (filtros.data_inicio) {
+            condicoes.push('a.data_alerta >= ?')
+            valores.push(filtros.data_inicio)
+        }
+        if (filtros.data_fim) {
+            condicoes.push('a.data_alerta <= ?')
+            valores.push(filtros.data_fim)
+        }
+        const where = condicoes.length ? `WHERE ${condicoes.join(' AND ')}` : ''
+        let limite = ''
+        if (filtros.limit) {
+            limite = 'LIMIT ?'
+            valores.push(filtros.limit)
+        }
         const [rows] = await pool.query(`
             SELECT a.*,
                    p.nome AS nome_produto,
@@ -116,8 +140,10 @@ class AlertaRepository {
             FROM tbl_alertas a
             LEFT JOIN tbl_estoques e ON e.id_estoque = a.id_estoque
             LEFT JOIN tbl_produtos p ON p.id_produto = COALESCE(a.id_produto, e.id_produto)
+            ${where}
             ORDER BY a.ativo DESC, a.data_alerta DESC, a.id_alerta DESC
-        `)
+            ${limite}
+        `, valores)
         return rows
     }
 

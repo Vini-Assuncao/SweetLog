@@ -1,4 +1,3 @@
-# DROP DATABASE IF EXISTS sweetlog;
 CREATE DATABASE IF NOT EXISTS sweetlog;
 USE sweetlog;
 SET GLOBAL event_scheduler = ON;
@@ -41,7 +40,8 @@ CREATE TABLE IF NOT EXISTS tbl_estoques (
     CONSTRAINT FK_id_produto_estoques
         FOREIGN KEY (id_produto) REFERENCES tbl_produtos(id_produto),
 	CONSTRAINT FK_numero_matricula_estoques
-		FOREIGN KEY (numero_matricula) REFERENCES tbl_funcionarios(numero_matricula)
+		FOREIGN KEY (numero_matricula) REFERENCES tbl_funcionarios(numero_matricula),
+    CONSTRAINT chk_estoques_quantidade CHECK (quantidade >= 0)
 );
 
 CREATE TABLE IF NOT EXISTS tbl_vendas (
@@ -58,13 +58,15 @@ CREATE TABLE IF NOT EXISTS tbl_vendas (
 CREATE TABLE IF NOT EXISTS tbl_vendas_itens (
     id_venda_item INT AUTO_INCREMENT PRIMARY KEY,
     quantidade_venda_item INT NOT NULL,
-    preco_unitario FLOAT NOT NULL,
+    preco_unitario DECIMAL(10,2) NOT NULL,
     id_venda INT NOT NULL,
     id_estoque INT NOT NULL,
     CONSTRAINT FK_id_venda_vi
         FOREIGN KEY (id_venda) REFERENCES tbl_vendas(id_venda),
     CONSTRAINT FK_id_estoque_vi
-        FOREIGN KEY (id_estoque) REFERENCES tbl_estoques(id_estoque)
+        FOREIGN KEY (id_estoque) REFERENCES tbl_estoques(id_estoque),
+    CONSTRAINT chk_venda_item_quantidade CHECK (quantidade_venda_item > 0),
+    CONSTRAINT chk_venda_item_preco CHECK (preco_unitario >= 0)
 );
 
 CREATE TABLE IF NOT EXISTS tbl_alertas (
@@ -90,22 +92,61 @@ CREATE TABLE IF NOT EXISTS tbl_alertas (
         FOREIGN KEY (id_estoque) REFERENCES tbl_estoques(id_estoque)
 );
 
+CREATE TABLE IF NOT EXISTS tbl_recuperacao_senha (
+    id_recuperacao BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    numero_matricula INT NOT NULL,
+    codigo_hash VARCHAR(255) NOT NULL,
+    token_hash CHAR(64) NULL,
+    tentativas TINYINT UNSIGNED NOT NULL DEFAULT 0,
+    criado_em DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    expira_em DATETIME NOT NULL,
+    verificado_em DATETIME NULL,
+    usado_em DATETIME NULL,
+    INDEX idx_recuperacao_funcionario_status (numero_matricula, usado_em, expira_em),
+    CONSTRAINT fk_recuperacao_funcionario
+        FOREIGN KEY (numero_matricula)
+        REFERENCES tbl_funcionarios(numero_matricula)
+        ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS tbl_movimentacoes_estoque (
+    id_movimentacao BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    id_estoque INT NULL,
+    id_produto INT NULL,
+    id_venda INT NULL,
+    numero_matricula INT NULL,
+    tipo ENUM('Entrada', 'Baixa', 'Venda', 'Estorno', 'Ajuste') NOT NULL,
+    quantidade INT NOT NULL,
+    saldo_anterior INT NULL,
+    saldo_posterior INT NULL,
+    motivo VARCHAR(255) NULL,
+    lote_producao VARCHAR(100) NULL,
+    nome_produto VARCHAR(100) NULL,
+    criado_em DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_movimentacoes_data (criado_em),
+    INDEX idx_movimentacoes_estoque (id_estoque, criado_em),
+    INDEX idx_movimentacoes_produto (id_produto, criado_em),
+    INDEX idx_movimentacoes_venda (id_venda),
+    INDEX idx_movimentacoes_responsavel (numero_matricula, criado_em),
+    CONSTRAINT chk_movimentacao_quantidade CHECK (quantidade > 0),
+    CONSTRAINT fk_movimentacao_estoque
+        FOREIGN KEY (id_estoque) REFERENCES tbl_estoques(id_estoque) ON DELETE SET NULL,
+    CONSTRAINT fk_movimentacao_produto
+        FOREIGN KEY (id_produto) REFERENCES tbl_produtos(id_produto) ON DELETE SET NULL,
+    CONSTRAINT fk_movimentacao_venda
+        FOREIGN KEY (id_venda) REFERENCES tbl_vendas(id_venda) ON DELETE SET NULL,
+    CONSTRAINT fk_movimentacao_funcionario
+        FOREIGN KEY (numero_matricula) REFERENCES tbl_funcionarios(numero_matricula) ON DELETE SET NULL
+);
+
 CREATE OR REPLACE VIEW vw_movimentacoes AS
 SELECT
-    'Entrada' AS tipo,
-    e.id_estoque,
-    NULL AS id_venda,
-    e.numero_matricula,
-    e.data_entrada AS data_movimentacao
-FROM tbl_estoques e
-UNION ALL
-SELECT
-    'Saída' AS tipo,
-    NULL AS id_estoque,
-    v.id_venda,
-    v.numero_matricula,
-    v.data_pedido AS data_movimentacao
-FROM tbl_vendas v;
+    m.tipo,
+    m.id_estoque,
+    m.id_venda,
+    m.numero_matricula,
+    DATE(m.criado_em) AS data_movimentacao
+FROM tbl_movimentacoes_estoque m;
 
 /*
 Reconcilia diariamente os alertas como proteção adicional às atualizações
@@ -192,116 +233,3 @@ BEGIN
 END$$
 
 DELIMITER ;
-
-
-/*
-EXEMPLOS DE INSERÇÕES -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-*/
-
-INSERT INTO tbl_matriculas (
-	numero_matricula,
-    setor
-) VALUES (
-	1001,
-    'Administrativo'
-);
-
-INSERT INTO tbl_funcionarios (
-    numero_matricula,
-    senha,
-    nome,
-    telefone
-) VALUES (
-    1001,
-    'senha123',
-    'Joao da Silva',
-    '11953898096'
-);
-
-INSERT INTO tbl_produtos (
-    nome,
-    necessidade_refrigeracao,
-    cnpj_fabricante,
-    marca,
-    tamanho,
-    descricao,
-    imagem
-) VALUES (
-    'Iogurte de Morango',
-    true,
-    '12345678901234',
-    'Nestlé',
-    '170g',
-    'Iogurte de morango da Nestlé de 170g',
-    'backend/public/uploads/produtos/1786728996727-641206759.jpg'
-);
-
-INSERT INTO tbl_estoques (
-    lote_producao,
-    quantidade,
-    inspecionado,
-    data_entrada,
-    data_validade,
-    nota_fiscal,
-    id_produto,
-    numero_matricula
-) VALUES (
-    'S-100',
-    400,
-    false,
-	CURDATE(),
-    '2026-12-15',
-    'backend/public/uploads/notas_fiscais/entrada/1786729031225-359000192.pdf',
-    1,
-    1001
-);
-
-/*
-EXEMPLO DE VENDA
-*/
-
-START TRANSACTION;
-
-SET @id_estoque_venda_exemplo = (
-    SELECT id_estoque
-    FROM tbl_estoques
-    WHERE lote_producao = 'S-100'
-      AND id_produto = 1
-    ORDER BY id_estoque
-    LIMIT 1
-);
-
-INSERT INTO tbl_vendas (
-    comprador,
-    data_pedido,
-    data_entrega,
-    nota_fiscal,
-    numero_matricula
-) VALUES (
-    'Mercado Exemplo',
-    CURDATE(),
-    DATE_ADD(CURDATE(), INTERVAL 2 DAY),
-    'backend/public/uploads/notas_fiscais/saida/1786729031225-359000192.pdf',
-    1001
-);
-
-SET @id_venda_exemplo = LAST_INSERT_ID();
-
-UPDATE tbl_estoques
-SET quantidade = quantidade - 5
-WHERE id_estoque = @id_estoque_venda_exemplo
-  AND quantidade >= 5;
-
-INSERT INTO tbl_vendas_itens (
-    quantidade_venda_item,
-    preco_unitario,
-    id_venda,
-    id_estoque
-) VALUES (
-    5,
-    2.50,
-    @id_venda_exemplo,
-    @id_estoque_venda_exemplo
-);
-
-COMMIT;

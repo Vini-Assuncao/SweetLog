@@ -1,136 +1,67 @@
 const MatriculaRepository = require('../repositories/MatriculaRepository')
 const FuncionarioRepository = require('../repositories/FuncionarioRepository')
+const { validarId } = require('../utils/validacao')
+
+const setoresPermitidos = ['Administrador', 'RH', 'Administrativo', 'Logística', 'Compras', 'Almoxarifado']
 
 class MatriculaService {
     async listar() {
         const matriculas = await MatriculaRepository.selectAll()
-
-        return {
-            sucesso: true,
-            matriculas: matriculas,
-            total: matriculas.length
-        }
+        return { sucesso: true, matriculas, total: matriculas.length }
     }
 
     async buscarPorId(id) {
-        if (!id || isNaN(id) || id <= 0) {
-            throw { status: 400, mensagem: "Número de matrícula inválido" }
+        const numero = validarId(id, 'Número de matrícula')
+        const matricula = await MatriculaRepository.selectById(numero)
+        if (!matricula) throw { status: 404, mensagem: 'Matrícula não encontrada' }
+        return { sucesso: true, matricula }
+    }
+
+    async cadastrar(dados) {
+        const numero = validarId(dados.numero_matricula, 'Número de matrícula')
+        const setor = this.validarSetor(dados.setor)
+        if (await MatriculaRepository.selectById(numero)) {
+            throw { status: 409, mensagem: 'Número de matrícula já cadastrado' }
         }
-
-        const matricula = await MatriculaRepository.selectById(id)
-
-        if (!matricula) {
-            throw { status: 404, mensagem: "Matrícula não encontrada" }
-        }
-
+        await MatriculaRepository.insert({ numero_matricula: numero, setor })
         return {
             sucesso: true,
-            matricula
+            mensagem: 'Matrícula cadastrada com sucesso',
+            matricula: await MatriculaRepository.selectById(numero)
         }
     }
 
-    async cadastrar(matriculaData) {
-        let { numero_matricula, setor } = matriculaData
+    async atualizar(id, dados) {
+        const numero = validarId(id, 'Número de matrícula')
+        const existente = await MatriculaRepository.selectById(numero)
+        if (!existente) throw { status: 404, mensagem: 'Matrícula não encontrada' }
+        if (dados.setor === undefined) throw { status: 400, mensagem: 'Nenhum dado a atualizar' }
 
-        if (!numero_matricula || !setor) {
-            throw { status: 400, mensagem: "Número de matrícula e setor são obrigatórios" }
-        }
-
-        if (isNaN(numero_matricula) || numero_matricula <= 0) {
-            throw { status: 400, mensagem: "Número de matrícula deve ser um número positivo" }
-        }
-
-        const setoresPermitidos = ['RH', 'Administrativo', 'Logística', 'Compras', 'Almoxarifado']
-        let setorValido = false
-        setoresPermitidos.forEach(setorPermitido => {
-            if (setorPermitido.toLowerCase() === setor.trim().toLowerCase()) {
-                setor = setorPermitido
-                setorValido = true
-            }
-        })
-        if (!setorValido) {
-            throw { status: 400, mensagem: "Setor inválido" }
-        }
-
-        const matriculaExistente = await MatriculaRepository.selectById(numero_matricula)
-        if (matriculaExistente) {
-            throw { status: 400, mensagem: "Número de matrícula já cadastrado" }
-        }
-
-        const matricula = {
-            numero_matricula,
-            setor
-        }
-
-        await MatriculaRepository.insert(matricula)
-
+        const setor = this.validarSetor(dados.setor)
+        await MatriculaRepository.set(numero, { setor })
         return {
             sucesso: true,
-            matricula
-        }
-    }
-
-    async atualizar(numero_matricula, matriculaData) {
-        if (!numero_matricula || isNaN(numero_matricula) || numero_matricula <= 0) {
-            throw { status: 400, mensagem: "Número de matrícula inválido" };
-        }
-
-        const matriculaExistente = await MatriculaRepository.selectById(numero_matricula);
-        if (!matriculaExistente) {
-            throw { status: 404, mensagem: "Matrícula não encontrada" };
-        }
-
-        const matriculaAtualizada = {}
-        const { setor } = matriculaData
-
-        if (setor !== undefined) {
-            const setoresPermitidos = ['RH', 'Administrativo', 'Logística', 'Compras', 'Almoxarifado']
-            let setorValido = false
-            setoresPermitidos.forEach(setorPermitido => {
-                if (setorPermitido.toLowerCase() === setor.trim().toLowerCase()) {
-                    matriculaAtualizada.setor = setorPermitido
-                    setorValido = true
-                }
-            })
-            if (!setorValido) {
-                throw { status: 400, mensagem: "Setor inválido" }
-            }
-        }
-
-        if (Object.keys(matriculaAtualizada).length == 0) {
-            throw { status: 400, mensagem: "Nenhum dado a atualizar" }
-        }
-        
-        await MatriculaRepository.set(numero_matricula, matriculaAtualizada)
-
-        return {
-            sucesso: true,
-            mensagem: "Matrícula atualizada com sucesso",
-            novaMatricula: await MatriculaRepository.selectById(numero_matricula)
+            mensagem: 'Matrícula atualizada com sucesso',
+            novaMatricula: await MatriculaRepository.selectById(numero)
         }
     }
 
     async deletar(id) {
-        if (!id || isNaN(id) || id <= 0) {
-            throw { status: 400, mensagem: "Número de matrícula inválido" }
+        const numero = validarId(id, 'Número de matrícula')
+        const matricula = await MatriculaRepository.selectById(numero)
+        if (!matricula) throw { status: 404, mensagem: 'Matrícula não encontrada' }
+        if (await FuncionarioRepository.selectById(numero)) {
+            throw { status: 409, mensagem: 'Existe um funcionário vinculado a esta matrícula' }
         }
+        await MatriculaRepository.delete(numero)
+        return { sucesso: true, mensagem: 'Matrícula excluída com sucesso', matriculaDeletada: matricula }
+    }
 
-        const matricula = await MatriculaRepository.selectById(id)
-        if (!matricula) {
-            throw { status: 404, mensagem: "Matrícula não encontrada" }
-        }
-
-        const funcionario = await FuncionarioRepository.selectById(id)
-        if (funcionario) {
-            throw { status: 404, mensagem: "Existe um funcionário dependente desta matrícula" }
-        }
-
-        await MatriculaRepository.delete(id)
-
-        return {
-            sucesso: true,
-            mensagem: "Matrícula deletada com sucesso"
-        }
+    validarSetor(valor) {
+        if (typeof valor !== 'string') throw { status: 400, mensagem: 'Setor inválido' }
+        const setor = setoresPermitidos.find(opcao => opcao.toLowerCase() === valor.trim().toLowerCase())
+        if (!setor) throw { status: 400, mensagem: 'Setor inválido' }
+        return setor
     }
 }
 

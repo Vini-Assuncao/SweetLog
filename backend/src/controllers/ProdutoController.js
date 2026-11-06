@@ -1,72 +1,16 @@
 const ProdutoService = require('../services/ProdutoService')
+const { executar } = require('./controle')
 
 class ProdutoController {
-    async listar(req, res) {
-        try {
-            const resultado = await ProdutoService.listar()
-            res.json(resultado)
-        } catch (error) {
-            res.status(error.status || 500).json({
-                sucesso: false,
-                mensagem: error.mensagem || error.message || "Erro interno do servidor",
-                erro: error.stack || error
-            })
-        }
+    listar(req, res) { return executar(res, () => ProdutoService.listar(req.query)) }
+    buscarPorId(req, res) { return executar(res, () => ProdutoService.buscarPorId(req.params.id)) }
+    cadastrar(req, res) {
+        return executar(res, () => ProdutoService.cadastrar({ ...req.body, file: req.file }))
     }
-
-    async buscarPorId(req, res) {
-        try {
-            const resultado = await ProdutoService.buscarPorId(req.params.id)
-            res.json(resultado)
-        } catch (error) {
-            res.status(error.status || 500).json({
-                sucesso: false,
-                mensagem: error.mensagem || error.message || "Erro interno do servidor",
-                erro: error.stack || error
-            })
-        }
+    atualizar(req, res) {
+        return executar(res, () => ProdutoService.atualizar(req.params.id, { ...req.body, file: req.file }))
     }
-
-    async cadastrar(req, res) {
-        try {
-            const dados = { ...req.body, file: req.file }
-            const resultado = await ProdutoService.cadastrar(dados)
-            res.json(resultado)
-        } catch (error) {
-            res.status(error.status || 500).json({
-                sucesso: false,
-                mensagem: error.mensagem || error.message || "Erro interno do servidor",
-                erro: error.stack || error
-            })
-        }
-    }
-
-    async atualizar(req, res) {
-        try {
-            const dados = { ...req.body, file: req.file }
-            const resultado = await ProdutoService.atualizar(req.params.id, dados)  
-            res.json(resultado)
-        } catch (error) {
-            res.status(error.status || 500).json({
-                sucesso: false,
-                mensagem: error.mensagem || error.message || "Erro interno do servidor",
-                erro: error.stack || error
-            })
-        }
-    }
-
-    async deletar(req, res) {
-        try {
-            const resultado = await ProdutoService.deletar(req.params.id)
-            res.json(resultado)
-        } catch (error) {
-            res.status(error.status || 500).json({
-                sucesso: false,
-                mensagem: error.mensagem || error.message || "Erro interno do servidor",
-                erro: error.stack || error
-            })
-        }
-    }
+    deletar(req, res) { return executar(res, () => ProdutoService.deletar(req.params.id)) }
 }
 
 module.exports = new ProdutoController()

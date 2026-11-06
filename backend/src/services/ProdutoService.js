@@ -1,191 +1,140 @@
 const ProdutoRepository = require('../repositories/ProdutoRepository')
-const fs = require('fs').promises;
-const path = require('path');
+const { caminhoPublico, normalizarUrlPublica, validarAssinaturaArquivo, removerUpload, removerArquivoSalvo } = require('../utils/arquivos')
+const { validarId, normalizarBooleano, opcionalTexto } = require('../utils/validacao')
+const { validarCnpj } = require('../utils/cadastro')
 
 class ProdutoService {
-    async listar() {
-        const produtos = await ProdutoRepository.selectAll()
-
-        return {
-            sucesso: true,
-            produtos: produtos,
-            total: produtos.length
-        }
+    async listar(filtros = {}) {
+        const produtos = await ProdutoRepository.selectAll({ buscar: filtros.buscar })
+        return { sucesso: true, produtos: produtos.map(produto => this.normalizarProduto(produto)), total: produtos.length }
     }
 
     async buscarPorId(id) {
-        if (!id || isNaN(id) || id <= 0) {
-            throw { status: 400, mensagem: "ID inválido" };
-        }
+        const produto = await ProdutoRepository.selectById(validarId(id))
+        if (!produto) throw { status: 404, mensagem: 'Produto não encontrado' }
+        return { sucesso: true, produto: this.normalizarProduto(produto) }
+    }
 
-        const produto = await ProdutoRepository.selectById(id)
-        if (!produto) {
-            throw { status: 404, mensagem: "Produto não encontrado" }
-        }
+    async cadastrar(dados) {
+        const { file } = dados
+        try {
+            if (file) await validarAssinaturaArquivo(file, 'imagem')
+            const nome = this.validarTextoObrigatorio(dados.nome, 'Nome', 100)
+            const cnpj = this.normalizarCnpj(dados.cnpj_fabricante)
+            const refrigeracao = normalizarBooleano(dados.necessidade_refrigeracao, 'Necessidade de refrigeração')
 
-        return {
-            sucesso: true,
-            produto: produto
+            const produto = {
+                nome,
+                necessidade_refrigeracao: refrigeracao,
+                cnpj_fabricante: cnpj,
+                marca: this.validarTextoOpcional(dados.marca, 'Marca', 100),
+                tamanho: this.validarTextoOpcional(dados.tamanho, 'Tamanho', 20),
+                descricao: this.validarTextoOpcional(dados.descricao, 'Descrição', 200),
+                imagem: file ? caminhoPublico('produtos', file.filename) : null
+            }
+
+            const id = await ProdutoRepository.insert(produto)
+            return {
+                sucesso: true,
+                mensagem: 'Produto cadastrado com sucesso',
+                id,
+                produto: this.normalizarProduto(await ProdutoRepository.selectById(id))
+            }
+        } catch (error) {
+            await removerUpload(file)
+            throw error
         }
     }
 
-    async cadastrar(produtoData) {
-        let { nome, necessidade_refrigeracao, cnpj_fabricante, marca, tamanho, descricao, file } = produtoData
-        if (!nome || necessidade_refrigeracao === undefined || necessidade_refrigeracao === null || !cnpj_fabricante) {
-            await this.deletarImagem(produtoData, "Nome, necessidade de refrigeração e CNPJ do fabricante são obrigatórios")
-            throw { status: 400, mensagem: "Nome, necessidade de refrigeração e CNPJ do fabricante são obrigatórios" }
-        }
+    async atualizar(id, dados) {
+        const { file } = dados
+        let produtoExistente
+        try {
+            if (file) await validarAssinaturaArquivo(file, 'imagem')
+            const idValidado = validarId(id)
+            produtoExistente = await ProdutoRepository.selectById(idValidado)
+            if (!produtoExistente) throw { status: 404, mensagem: 'Produto não encontrado' }
 
-        if (necessidade_refrigeracao == true || necessidade_refrigeracao == 'true') necessidade_refrigeracao = true
-        else if (necessidade_refrigeracao == false || necessidade_refrigeracao == 'false') necessidade_refrigeracao = false
-        else{
-            await this.deletarImagem(produtoData, "Necessidade de refrigeração inválida")
-            throw { status: 400, mensagem: "Necessidade de refrigeração inválida" }
-        }
-
-        let numeros_cnpj = cnpj_fabricante.replace(/\D/g, '')
-        if (!/^\d{14}$/.test(numeros_cnpj)) {
-            await this.deletarImagem(produtoData, "CNPJ do fabricante inválido")
-            throw { status: 400, mensagem: "CNPJ do fabricante inválido" }
-        }
-
-        const produto = {
-            nome: nome.trim(),
-            necessidade_refrigeracao: necessidade_refrigeracao,
-            cnpj_fabricante: numeros_cnpj,
-            marca: marca ? marca.trim() : null,
-            tamanho: tamanho ? tamanho.trim() : null,
-            descricao: descricao ? descricao.trim() : null,
-            imagem: file ? `backend/public/uploads/produtos/${file.filename}` : null,
-        }
-
-        const id = await ProdutoRepository.insert(produto)
-
-        return {
-            sucesso: true,
-            mensagem: "Produto cadastrado com sucesso",
-            id,
-            produto: produto
-        }
-    }
-
-    async atualizar(id, produtoData) {
-        if (!id || isNaN(id) || id <= 0) {
-            await this.deletarImagem(produtoData, "ID inválido")
-            throw { status: 400, mensagem: "ID inválido" };
-        }
-
-        const produtoExistente = await ProdutoRepository.selectById(id);
-        if (!produtoExistente) {
-            await this.deletarImagem(produtoData, "Produto não encontrado")
-            throw { status: 404, mensagem: "Produto não encontrado" };
-        }
-
-        const produtoAtualizado = {}
-        let { nome, necessidade_refrigeracao, cnpj_fabricante, marca, tamanho, descricao, file } = produtoData
-
-        if (nome !== undefined) {
-            if (nome === null || nome.trim() === '') {
-                await this.deletarImagem(produtoData, "Nome não pode ser vazio")
-                throw { status: 400, mensagem: "Nome não pode ser vazio" }
+            const atualizado = {}
+            if (dados.nome !== undefined) atualizado.nome = this.validarTextoObrigatorio(dados.nome, 'Nome', 100)
+            if (dados.necessidade_refrigeracao !== undefined) {
+                atualizado.necessidade_refrigeracao = normalizarBooleano(
+                    dados.necessidade_refrigeracao, 'Necessidade de refrigeração'
+                )
             }
-            produtoAtualizado.nome = nome.trim()
-        }
+            if (dados.cnpj_fabricante !== undefined) atualizado.cnpj_fabricante = this.normalizarCnpj(dados.cnpj_fabricante)
+            if (dados.marca !== undefined) atualizado.marca = this.validarTextoOpcional(dados.marca, 'Marca', 100)
+            if (dados.tamanho !== undefined) atualizado.tamanho = this.validarTextoOpcional(dados.tamanho, 'Tamanho', 20)
+            if (dados.descricao !== undefined) atualizado.descricao = this.validarTextoOpcional(dados.descricao, 'Descrição', 200)
+            if (file) atualizado.imagem = caminhoPublico('produtos', file.filename)
 
-        if (necessidade_refrigeracao !== undefined) {
-            if (necessidade_refrigeracao === true || necessidade_refrigeracao === 'true') {
-                necessidade_refrigeracao = true
-            } else if (necessidade_refrigeracao === false || necessidade_refrigeracao === 'false') {
-                necessidade_refrigeracao = false
-            } else {
-                await this.deletarImagem(produtoData, "Necessidade de refrigeração inválida")
-                throw { status: 400, mensagem: "Necessidade de refrigeração inválida" }
+            if (Object.keys(atualizado).length === 0) {
+                throw { status: 400, mensagem: 'Nenhum dado a atualizar' }
             }
-            produtoAtualizado.necessidade_refrigeracao = necessidade_refrigeracao
-        }
 
-        if (cnpj_fabricante !== undefined) {
-            if (cnpj_fabricante === null || cnpj_fabricante.trim() === '') {
-                await this.deletarImagem(produtoData, "CNPJ do fabricante é obrigatório")
-                throw { status: 400, mensagem: "CNPJ do fabricante é obrigatório" }
+            await ProdutoRepository.set(idValidado, atualizado)
+            if (file && produtoExistente.imagem) await removerArquivoSalvo(produtoExistente.imagem)
+
+            return {
+                sucesso: true,
+                mensagem: 'Produto atualizado com sucesso',
+                novoProduto: this.normalizarProduto(await ProdutoRepository.selectById(idValidado))
             }
-            let numeros_cnpj = cnpj_fabricante.replace(/\D/g, '')
-            if (!/^\d{14}$/.test(numeros_cnpj)) {
-                await this.deletarImagem(produtoData, "CNPJ do fabricante inválido")
-                throw { status: 400, mensagem: "CNPJ do fabricante inválido" }
-            }
-            produtoAtualizado.cnpj_fabricante = numeros_cnpj
-        }
-
-        if (marca !== undefined) produtoAtualizado.marca = marca.trim()
-        if (tamanho !== undefined) produtoAtualizado.tamanho = tamanho.trim()
-        if (descricao !== undefined) produtoAtualizado.descricao = descricao.trim()
-
-        if (file) {
-            produtoAtualizado.imagem = `backend/public/uploads/produtos/${file.filename}`;
-            if (produtoExistente.imagem) {
-                const caminhoAntigo = path.join(__dirname, '..', '..', '..', produtoExistente.imagem);
-                try {
-                    await fs.unlink(caminhoAntigo);
-                } catch (err) {
-                    await this.deletarImagem(produtoData, "Erro ao apagar imagem antiga")
-                    console.error("Erro ao apagar imagem antiga", err);
-                }
-            }
-        }
-
-        if (Object.keys(produtoAtualizado).length == 0) {
-            throw { status: 400, mensagem: "Nenhum dado a atualizar" }
-        }
-
-        await ProdutoRepository.set(id, produtoAtualizado)
-
-        return {
-            sucesso: true,
-            mensagem: "Produto atualizado com sucesso",
-            novoProduto: await ProdutoRepository.selectById(id)
+        } catch (error) {
+            await removerUpload(file)
+            throw error
         }
     }
 
     async deletar(id) {
-        if (!id || isNaN(id) || id <= 0) {
-            throw { status: 400, mensagem: "ID inválido" };
+        const idValidado = validarId(id)
+        const produto = await ProdutoRepository.selectById(idValidado)
+        if (!produto) throw { status: 404, mensagem: 'Produto não encontrado' }
+
+        if (await ProdutoRepository.hasStocks(idValidado)) {
+            throw { status: 409, mensagem: 'Não é possível excluir um produto que possui lotes de estoque associados' }
+        }
+        if (await ProdutoRepository.hasAlerts(idValidado)) {
+            throw { status: 409, mensagem: 'Não é possível excluir um produto com histórico de alertas associado' }
         }
 
-        const produto = await ProdutoRepository.selectById(id)
-        if (!produto) {
-            throw { status: 404, mensagem: "Produto não encontrado" }
-        }
-
-        if (await ProdutoRepository.hasAlerts(id)) {
-            throw { status: 409, mensagem: "Não é possível excluir um produto com histórico de alertas associado" }
-        }
-
-        await ProdutoRepository.delete(id)
-
-        if (produto.imagem) {
-            try {
-                await fs.unlink(produto.imagem);
-            } catch (err) {
-                console.error("Erro ao apagar imagem antiga:", err);
-            }
-        }
-
+        const excluido = await ProdutoRepository.delete(idValidado)
+        if (!excluido) throw { status: 404, mensagem: 'Produto não encontrado' }
+        await removerArquivoSalvo(produto.imagem)
         return {
             sucesso: true,
-            mensagem: "Produto deletado com sucesso",
-            produtoDeletado: produto
+            mensagem: 'Produto deletado com sucesso',
+            produtoDeletado: this.normalizarProduto(produto)
         }
     }
 
-    async deletarImagem(dados, mensagem) {
-        if (dados.file) {
-            try {
-                await fs.unlink(dados.file.path);
-            } catch (err) {
-                console.error(`${mensagem} e erro ao apagar imagem enviada`, err);
-            }
+    normalizarProduto(produto) {
+        if (!produto) return produto
+        return { ...produto, imagem: normalizarUrlPublica(produto.imagem) }
+    }
+
+    validarTextoObrigatorio(valor, campo, tamanhoMaximo) {
+        if (typeof valor !== 'string' || !valor.trim()) {
+            throw { status: 400, mensagem: `${campo} é obrigatório` }
         }
+        const texto = valor.trim()
+        if (texto.length > tamanhoMaximo) {
+            throw { status: 400, mensagem: `${campo} deve ter no máximo ${tamanhoMaximo} caracteres` }
+        }
+        return texto
+    }
+
+    validarTextoOpcional(valor, campo, tamanhoMaximo) {
+        if (valor === undefined) return null
+        const texto = opcionalTexto(valor)
+        if (texto && texto.length > tamanhoMaximo) {
+            throw { status: 400, mensagem: `${campo} deve ter no máximo ${tamanhoMaximo} caracteres` }
+        }
+        return texto
+    }
+
+    normalizarCnpj(valor) {
+        return validarCnpj(valor)
     }
 }
 

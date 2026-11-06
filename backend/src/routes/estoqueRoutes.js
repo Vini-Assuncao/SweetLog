@@ -1,13 +1,23 @@
 const express = require('express')
 const router = express.Router()
 const EstoqueController = require('../controllers/EstoqueController')
-const { uploadEstoqueEntrada } = require('../config/multer');
+const MovimentacaoEstoqueController = require('../controllers/MovimentacaoEstoqueController')
+const { uploadEstoqueEntrada } = require('../config/multer')
+const { autenticar, autorizar, CARGOS } = require('../middlewares/auth')
 
-router.get('/', EstoqueController.listar)
-router.get('/:id', EstoqueController.buscarPorId)
-router.post('/:id/saida', EstoqueController.diminuirQuantidade)
-router.post('/', uploadEstoqueEntrada.single('nota_fiscal'), EstoqueController.cadastrar)
-router.put('/:id', uploadEstoqueEntrada.single('nota_fiscal'), EstoqueController.atualizar)
-router.delete('/:id', EstoqueController.deletar)
+const leitura = [CARGOS.ADMINISTRADOR, CARGOS.ALMOXARIFADO, CARGOS.LOGISTICA, CARGOS.COMPRAS]
+const escrita = [CARGOS.ADMINISTRADOR, CARGOS.ALMOXARIFADO, CARGOS.LOGISTICA]
+
+router.use(autenticar)
+router.get('/movimentacoes', autorizar(...leitura), MovimentacaoEstoqueController.listar)
+router.get('/resumo', autorizar(...leitura), EstoqueController.resumo)
+router.get('/produto/:idProduto', autorizar(...leitura), EstoqueController.listarPorProduto)
+router.get('/', autorizar(...leitura), EstoqueController.listar)
+router.get('/:id/movimentacoes', autorizar(...leitura), MovimentacaoEstoqueController.listarPorEstoque)
+router.get('/:id', autorizar(...leitura), EstoqueController.buscarPorId)
+router.post('/:id/saida', autorizar(...escrita), EstoqueController.diminuirQuantidade)
+router.post('/', autorizar(...escrita), uploadEstoqueEntrada.single('nota_fiscal'), EstoqueController.cadastrar)
+router.put('/:id', autorizar(...escrita), uploadEstoqueEntrada.single('nota_fiscal'), EstoqueController.atualizar)
+router.delete('/:id', autorizar(...escrita), EstoqueController.deletar)
 
 module.exports = router

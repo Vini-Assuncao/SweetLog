@@ -1,83 +1,26 @@
 const FuncionarioService = require('../services/FuncionarioService')
+const RecuperacaoSenhaService = require('../services/RecuperacaoSenhaService')
+const { executar } = require('./controle')
+const { responderErro } = require('../utils/resposta')
 
 class FuncionarioController {
-    async listar(req, res) {
-        try {
-            const resultado = await FuncionarioService.listar()
-            res.json(resultado)
-        } catch (error) {
-            res.status(error.status || 500).json({
-                sucesso: false,
-                mensagem: error.message || "Erro interno do servidor",
-                erro: error.stack || error
-            })
-        }
-    }
-
-    async buscarPorId(req, res) {
-        try {
-            const resultado = await FuncionarioService.buscarPorId(req.params.id)
-            res.json(resultado)
-        } catch (error) {
-            res.status(error.status || 500).json({
-                sucesso: false,
-                mensagem: error.message || "Erro interno do servidor",
-                erro: error.stack || error
-            })
-        }
-    }
-
-    async cadastrar(req, res) {
-        try {
-            const resultado = await FuncionarioService.cadastrar(req.body)
-            res.json(resultado)
-        } catch (error) {
-            res.status(error.status || 500).json({
-                sucesso: false,
-                mensagem: error.message || "Erro interno do servidor",
-                erro: error.stack || error
-            })
-        }
-    }
-
-    async atualizar(req, res) {
-        try {
-            const resultado = await FuncionarioService.atualizar(req.params.id, req.body)
-            res.json(resultado)
-        } catch (error) {
-            res.status(error.status || 500).json({
-                sucesso: false,
-                mensagem: error.message || "Erro interno do servidor",
-                erro: error.stack || error
-            })
-        }
-    }
-
+    listar(req, res) { return executar(res, () => FuncionarioService.listar()) }
+    buscarPorId(req, res) { return executar(res, () => FuncionarioService.buscarPorId(req.params.id)) }
+    cadastrar(req, res) { return executar(res, () => FuncionarioService.cadastrar(req.body || {})) }
+    atualizar(req, res) { return executar(res, () => FuncionarioService.atualizar(req.params.id, req.body || {})) }
     async login(req, res) {
         try {
-            const resultado = await FuncionarioService.login(req.body)
-            res.json(resultado)
+            const resultado = await FuncionarioService.login(req.body || {})
+            if (typeof req.limparTentativasLogin === 'function') req.limparTentativasLogin()
+            return res.json(resultado)
         } catch (error) {
-            res.status(error.status || 500).json({
-                sucesso: false,
-                mensagem: error.message || "Erro interno do servidor",
-                erro: error.stack || error
-            })
+            return responderErro(res, error)
         }
     }
-
-    async deletar(req, res) {
-        try {
-            const resultado = await FuncionarioService.deletar(req.params.id)
-            res.json(resultado)
-        } catch (error) {
-            res.status(error.status || 500).json({
-                sucesso: false,
-                mensagem: error.message || "Erro interno do servidor",
-                erro: error.stack || error
-            })
-        }
-    }
+    recuperarSenha(req, res) { return executar(res, () => RecuperacaoSenhaService.solicitar(req.body || {})) }
+    verificarCodigo(req, res) { return executar(res, () => RecuperacaoSenhaService.verificar(req.body || {})) }
+    redefinirSenha(req, res) { return executar(res, () => RecuperacaoSenhaService.redefinir(req.body || {})) }
+    deletar(req, res) { return executar(res, () => FuncionarioService.deletar(req.params.id)) }
 }
 
 module.exports = new FuncionarioController()

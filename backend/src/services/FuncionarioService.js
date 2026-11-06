@@ -1,181 +1,131 @@
 const FuncionarioRepository = require('../repositories/FuncionarioRepository')
 const MatriculaRepository = require('../repositories/MatriculaRepository')
-const bcrypt = require('bcryptjs');
+const bcrypt = require('bcryptjs')
+const crypto = require('crypto')
+const { validarId } = require('../utils/validacao')
+const { gerarTokenFuncionario } = require('../utils/jwt')
+const { normalizarTelefone: validarTelefone } = require('../utils/cadastro')
 
 class FuncionarioService {
     async listar() {
         const funcionarios = await FuncionarioRepository.selectAll()
+        return { sucesso: true, funcionarios, total: funcionarios.length }
+    }
 
+    async buscarPorId(numeroMatricula) {
+        const numero = validarId(numeroMatricula, 'Número de matrícula')
+        const funcionario = await FuncionarioRepository.selectById(numero)
+        if (!funcionario) throw { status: 404, mensagem: 'Funcionário não encontrado' }
+        return { sucesso: true, funcionario }
+    }
+
+    async cadastrar(dados) {
+        const numero = validarId(dados.numero_matricula, 'Número de matrícula')
+        const nome = this.validarNome(dados.nome)
+        const senha = this.validarSenha(dados.senha)
+        if (!await MatriculaRepository.selectById(numero)) {
+            throw { status: 404, mensagem: 'Número da matrícula não encontrado' }
+        }
+        if (await FuncionarioRepository.selectById(numero)) {
+            throw { status: 409, mensagem: 'Funcionário já cadastrado para esta matrícula' }
+        }
+
+        const telefone = this.normalizarTelefone(dados.telefone)
+        const senhaHash = await bcrypt.hash(senha, 10)
+        await FuncionarioRepository.insert({ numero_matricula: numero, senha: senhaHash, nome, telefone })
         return {
             sucesso: true,
-            funcionarios: funcionarios,
-            total: funcionarios.length
+            mensagem: 'Funcionário cadastrado com sucesso',
+            funcionario: await FuncionarioRepository.selectById(numero)
         }
     }
 
-    async buscarPorId(numero_matricula) {
-        if (!numero_matricula || isNaN(numero_matricula) || numero_matricula <= 0) {
-            throw { status: 400, mensagem: "Número de matrícula inválido" };
+    async atualizar(numeroMatricula, dados) {
+        const numero = validarId(numeroMatricula, 'Número de matrícula')
+        if (!await FuncionarioRepository.selectById(numero)) {
+            throw { status: 404, mensagem: 'Funcionário não encontrado' }
         }
 
-        const funcionario = await FuncionarioRepository.selectById(numero_matricula)
-        if (!funcionario) {
-            throw { status: 404, mensagem: "Funcionário não encontrado" }
-        }
+        const atualizado = {}
+        if (dados.nome !== undefined) atualizado.nome = this.validarNome(dados.nome)
+        if (dados.senha !== undefined) atualizado.senha = await bcrypt.hash(this.validarSenha(dados.senha), 10)
+        if (dados.telefone !== undefined) atualizado.telefone = this.normalizarTelefone(dados.telefone)
+        if (Object.keys(atualizado).length === 0) throw { status: 400, mensagem: 'Nenhum dado a atualizar' }
 
+        await FuncionarioRepository.set(numero, atualizado)
         return {
             sucesso: true,
-            funcionario: funcionario
+            mensagem: 'Funcionário atualizado com sucesso',
+            novoFuncionario: await FuncionarioRepository.selectById(numero)
         }
     }
 
-    async cadastrar(funcionarioData) {
-        const { numero_matricula, senha, nome, telefone } = funcionarioData
-
-        if (!numero_matricula || !senha || !nome) {
-            throw { status: 400, mensagem: "Número da matrícula, senha e nome são obrigarórios" }
+    async login(dados) {
+        const numero = validarId(dados.numero_matricula, 'Número de matrícula')
+        if (typeof dados.senha !== 'string' || !dados.senha) {
+            throw { status: 400, mensagem: 'Senha é obrigatória' }
+        }
+        if (Buffer.byteLength(dados.senha, 'utf8') > 72) {
+            throw { status: 401, mensagem: 'Matrícula ou senha incorreta' }
         }
 
-        if (isNaN(numero_matricula) || numero_matricula <= 0) {
-            throw { status: 400, mensagem: "Número da matrícula deve ser um número positivo" }
-        }
+        const registroSenha = await FuncionarioRepository.selectSenha(numero)
+        if (!registroSenha) throw { status: 401, mensagem: 'Matrícula ou senha incorreta' }
 
-        const matriculaExistente = await MatriculaRepository.selectById(numero_matricula)
-        const funcionarioExistente = await FuncionarioRepository.selectById(numero_matricula)
-        if (!matriculaExistente) {
-            throw { status: 404, mensagem: "Número da matrícula não encontrado" }
-        } else if (funcionarioExistente) {
-            throw { status: 400, mensagem: "Funcionário já cadastrado" }
-        }
-
-        if (senha.trim().length < 8 ) {
-            throw { status: 400, mensagem: "Senha deve ter no mínimo 8 caracteres" }
-        }
-
-        const salt = await bcrypt.genSalt(10);
-        const senhaHash = await bcrypt.hash(senha.trim(), salt);
-
-        let numeros_telefone = null
-        if (telefone) {
-            numeros_telefone = telefone.replace(/\D/g, '')
-            if (!/^\d{11}$/.test(numeros_telefone)) {
-                throw { status: 400, mensagem: 'Telefone inválido' }
+        let senhaValida = false
+        if (/^\$2[aby]\$/.test(registroSenha.senha)) {
+            senhaValida = await bcrypt.compare(dados.senha, registroSenha.senha)
+        } else {
+            // Compatibilidade temporária com cadastros antigos gravados sem hash.
+            const informada = Buffer.from(dados.senha)
+            const armazenada = Buffer.from(String(registroSenha.senha))
+            senhaValida = informada.length === armazenada.length && crypto.timingSafeEqual(informada, armazenada)
+            if (senhaValida) {
+                await FuncionarioRepository.set(numero, { senha: await bcrypt.hash(dados.senha, 10) })
             }
         }
 
-        const funcionario = {
-            numero_matricula: Number(numero_matricula),
-            senha: senhaHash,
-            nome: nome.trim(),
-            telefone: numeros_telefone,
-        }
-
-        await FuncionarioRepository.insert(funcionario)
-
+        if (!senhaValida) throw { status: 401, mensagem: 'Matrícula ou senha incorreta' }
+        const funcionario = await FuncionarioRepository.selectById(numero)
+        const token = gerarTokenFuncionario(funcionario)
         return {
             sucesso: true,
-            mensagem: "Funcionário cadastrado com sucesso",
-            funcionario: await FuncionarioRepository.selectById(numero_matricula)
+            mensagem: 'Login realizado com sucesso',
+            token,
+            tipo_token: 'Bearer',
+            expira_em_segundos: 8 * 60 * 60,
+            funcionario
         }
     }
 
-    async atualizar(numero_matricula, funcionarioData) {
-        if (!numero_matricula || isNaN(numero_matricula) || numero_matricula <= 0) {
-            throw { status: 400, mensagem: "Número de matrícula inválido" };
+    async deletar(numeroMatricula) {
+        const numero = validarId(numeroMatricula, 'Número de matrícula')
+        const funcionario = await FuncionarioRepository.selectById(numero)
+        if (!funcionario) throw { status: 404, mensagem: 'Funcionário não encontrado' }
+        if (await FuncionarioRepository.hasMovimentacoes(numero)) {
+            throw { status: 409, mensagem: 'Não é possível excluir um funcionário vinculado a entradas de estoque ou vendas' }
         }
-
-        const funcionarioExistente = await FuncionarioRepository.selectById(numero_matricula);
-        if (!funcionarioExistente) {
-            throw { status: 404, mensagem: "Funcionário não encontrado" };
-        }
-
-        const funcionarioAtualizado = {}
-        const { senha, nome, telefone } = funcionarioData
-
-        if (nome !== undefined) {
-            if (nome === null || nome.trim() === '') {
-                throw { status: 400, mensagem: "Nome não pode ser vazio" }
-            }
-            funcionarioAtualizado.nome = nome.trim()
-        }
-        if (senha !== undefined) {
-            if (senha === null || senha.trim() === '') {
-                throw { status: 400, mensagem: "Senha não pode ser vazia" }
-            }
-            if (senha.trim().length < 8) {
-                throw { status: 400, mensagem: "Senha deve ter no mínimo 8 caracteres" }
-            }
-            
-            const salt = await bcrypt.genSalt(10);
-            const senhaHash = await bcrypt.hash(senha.trim(), salt);
-            funcionarioAtualizado.senha = senhaHash
-        }
-        if (telefone !== undefined ) {
-            if (telefone === null || telefone === '') {
-                funcionarioAtualizado.telefone = null
-            }
-            else {
-                const numeros_telefone = telefone.replace(/\D/g, '')
-                if (!/^\d{11}$/.test(numeros_telefone)) {
-                    throw { status: 400, mensagem: 'Telefone inválido' }
-                }
-                funcionarioAtualizado.telefone = numeros_telefone
-            }
-        }
-
-        if (Object.keys(funcionarioAtualizado).length == 0) {
-            throw { status: 400, mensagem: "Nenhum dado a atualizar" }
-        }
-
-        await FuncionarioRepository.set(numero_matricula, funcionarioAtualizado)
-
-        return {
-            sucesso: true,
-            mensagem: "Funcionário atualizado com sucesso",
-            novoFuncionario: await FuncionarioRepository.selectById(numero_matricula)
-        }
+        await FuncionarioRepository.delete(numero)
+        return { sucesso: true, mensagem: 'Funcionário excluído com sucesso', funcionarioDeletado: funcionario }
     }
 
-    async login(funcionarioData) {
-        const { numero_matricula, senha } = funcionarioData;
-        if (!numero_matricula || isNaN(numero_matricula) || numero_matricula <= 0) {
-            throw { status: 400, mensagem: "Número de matrícula inválido" };
-        }
-
-        const funcionario = await FuncionarioRepository.selectSenha(numero_matricula)
-        if (!funcionario) {
-            throw { status: 404, mensagem: "Funcionário não encontrado" }
-        }
-
-        const senhaValida = await bcrypt.compare(senha, funcionario.senha)
-        if (!senhaValida) {
-            throw { status: 401, mensagem: "Senha incorreta" }
-        }
-
-        return {
-            sucesso: true,
-            mensagem: "Login realizado com sucesso",
-            numero_matricula: numero_matricula
-        }
+    validarNome(valor) {
+        if (typeof valor !== 'string' || !valor.trim()) throw { status: 400, mensagem: 'Nome é obrigatório' }
+        const nome = valor.trim()
+        if (nome.length > 100) throw { status: 400, mensagem: 'Nome deve ter no máximo 100 caracteres' }
+        return nome
     }
 
-    async deletar(numero_matricula) {
-        if (!numero_matricula || isNaN(numero_matricula) || numero_matricula <= 0) {
-            throw { status: 400, mensagem: "Número de matrícula inválido" };
+    validarSenha(valor) {
+        if (typeof valor !== 'string' || valor.trim().length < 8) {
+            throw { status: 400, mensagem: 'Senha deve ter no mínimo 8 caracteres' }
         }
+        if (Buffer.byteLength(valor.trim(), 'utf8') > 72) throw { status: 400, mensagem: 'Senha deve ter no máximo 72 bytes em UTF-8' }
+        return valor.trim()
+    }
 
-        const funcionarioExistente = await FuncionarioRepository.selectById(numero_matricula)
-        if (!funcionarioExistente) {
-            throw { status: 404, mensagem: "Funcionário não encontrado" }
-        }
-
-        await FuncionarioRepository.delete(numero_matricula)
-
-        return {
-            sucesso: true,
-            mensagem: "Funcionário deletado com sucesso",
-            funcionarioDeletado: funcionarioExistente
-        }
+    normalizarTelefone(valor) {
+        return validarTelefone(valor)
     }
 }
 

@@ -1,71 +1,12 @@
-const MatriculaService = require('../services/MatriculaService')
+const MatriculaService = require('../services/matriculaService')
+const { executar } = require('./controle')
 
 class MatriculaController {
-    async listar(req, res) {
-        try {
-            const resultado = await MatriculaService.listar()
-            res.json(resultado)
-        } catch (error) {
-            res.status(error.status || 500).json({
-                sucesso: false,
-                mensagem: error.message || "Erro interno do servidor",
-                erro: error.stack || error
-            })
-        }
-    }
-
-    async buscarPorId(req, res) {
-        try {
-            const { id } = req.params
-            const resultado = await MatriculaService.buscarPorId(id)
-            res.json(resultado)
-        } catch (error) {
-            res.status(error.status || 500).json({
-                sucesso: false,
-                mensagem: error.message || "Erro interno do servidor",
-                erro: error.stack || error
-            })
-        }
-    }
-
-    async cadastrar(req, res) {
-        try {
-            const resultado = await MatriculaService.cadastrar(req.body)
-            res.json(resultado)
-        } catch (error) {
-            res.status(error.status || 500).json({
-                sucesso: false,
-                mensagem: error.message || "Erro interno do servidor",
-                erro: error.stack || error
-            })
-        }
-    }
-
-    async atualizar(req, res) {
-        try {
-            const resultado = await MatriculaService.atualizar(req.params.id, req.body)
-            res.json(resultado)
-        } catch (error) {
-            res.status(error.status || 500).json({
-                sucesso: false,
-                mensagem: error.message || "Erro interno do servidor",
-                erro: error.stack || error
-            })
-        }
-    }
-
-    async deletar(req, res) {
-        try {
-            const resultado = await MatriculaService.deletar(req.params.id)
-            res.json(resultado)
-        } catch (error) {
-            res.status(error.status || 500).json({
-                sucesso: false,
-                mensagem: error.message || "Erro interno do servidor",
-                erro: error.stack || error
-            })
-        }
-    }
+    listar(req, res) { return executar(res, () => MatriculaService.listar()) }
+    buscarPorId(req, res) { return executar(res, () => MatriculaService.buscarPorId(req.params.id)) }
+    cadastrar(req, res) { return executar(res, () => MatriculaService.cadastrar(req.body || {})) }
+    atualizar(req, res) { return executar(res, () => MatriculaService.atualizar(req.params.id, req.body || {})) }
+    deletar(req, res) { return executar(res, () => MatriculaService.deletar(req.params.id)) }
 }
 
 module.exports = new MatriculaController()

@@ -2,12 +2,19 @@ const pool = require('../config/database')
 
 class MatriculaRepository {
     async selectAll() {
-        const [rows] = await pool.query('SELECT * FROM tbl_matriculas')
+        const [rows] = await pool.query(`
+            SELECT m.*, f.nome AS nome_funcionario, f.telefone
+            FROM tbl_matriculas m
+            LEFT JOIN tbl_funcionarios f ON f.numero_matricula = m.numero_matricula
+            ORDER BY m.numero_matricula ASC
+        `)
         return rows
     }
 
     async selectById(id) {
-        const [rows] = await pool.query('SELECT * FROM tbl_matriculas WHERE numero_matricula = ?', [id])
+        const [rows] = await pool.query(
+            'SELECT * FROM tbl_matriculas WHERE numero_matricula = ?', [id]
+        )
         return rows[0]
     }
 
@@ -21,22 +28,18 @@ class MatriculaRepository {
     }
 
     async set(numero_matricula, matriculaData) {
-        const fields = []
-        const values = []
-        for (const [key, value] of Object.entries(matriculaData)) {
-            fields.push(`${key} = ?`)
-            values.push(value)
-        }
-        if (fields.length === 0) return null
-
-        values.push(numero_matricula)
-        const query = `UPDATE tbl_matriculas SET ${fields.join(', ')} WHERE numero_matricula = ?`
-        const [result] = await pool.query(query, values)
+        if (!Object.keys(matriculaData).every(campo => campo === 'setor')) return 0
+        const [result] = await pool.query(
+            'UPDATE tbl_matriculas SET setor = ? WHERE numero_matricula = ?',
+            [matriculaData.setor, numero_matricula]
+        )
         return result.affectedRows
     }
 
     async delete(numero_matricula) {
-        const [result] = await pool.query('DELETE FROM tbl_matriculas WHERE numero_matricula = ?', [numero_matricula])
+        const [result] = await pool.query(
+            'DELETE FROM tbl_matriculas WHERE numero_matricula = ?', [numero_matricula]
+        )
         return result.affectedRows
     }
 }

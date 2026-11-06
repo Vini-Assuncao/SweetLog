@@ -1,6 +1,9 @@
 const express = require('express')
 const router = express.Router()
 
+const dashboardRoutes = require('./dashboardRoutes')
+const saldoDiarioRoutes = require('./saldoDiarioRoutes')
+const loteRoutes = require('./loteRoutes')
 const matriculaRoutes = require('./matriculaRoutes')
 const funcionarioRoutes = require('./funcionarioRoutes')
 const produtoRoutes = require('./produtoRoutes')
@@ -10,11 +13,18 @@ const alertaRoutes = require('./alertaRoutes')
 
 router.get('/', (req, res) => {
     res.json({
-        mensagem: "🍪 API SweetLog funcionando",
-        versao: "1.0.0",
+        sucesso: true,
+        mensagem: '🍪 API SweetLog funcionando',
+        recursos: [
+            'dashboard', 'saldo-diario', 'matriculas', 'funcionarios',
+            'produtos', 'estoques', 'lotes', 'vendas', 'alertas'
+        ]
     })
 })
 
+router.use('/dashboard', dashboardRoutes)
+router.use('/saldo-diario', saldoDiarioRoutes)
+router.use('/lotes', loteRoutes)
 router.use('/matriculas', matriculaRoutes)
 router.use('/funcionarios', funcionarioRoutes)
 router.use('/produtos', produtoRoutes)
