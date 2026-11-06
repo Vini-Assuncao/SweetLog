@@ -14,7 +14,6 @@ async function startServer() {
         connection.release()
 
         await AlertaRepository.sincronizarTudo()
-        console.log('🔔 Alertas sincronizados com o estoque atual')
 
         servidor = app.listen(PORT, () => {
             console.log(`🖥️ Servidor rodando na porta ${PORT}`)
