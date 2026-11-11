@@ -264,7 +264,7 @@ export async function initLotsPage() {
   const table = document.querySelector('[data-lotes-table]');
   if (!table) return;
   const tbody = table.querySelector('tbody');
-  const canEdit = roleCanWriteStock();
+  const canEdit = hasPermission('manage-stock', getSession()?.funcionario?.setor);
   const actionsHeading = document.querySelector('[data-lote-actions-heading]');
   if (actionsHeading) actionsHeading.hidden = !canEdit;
   const empty = document.querySelector('[data-lote-empty]');

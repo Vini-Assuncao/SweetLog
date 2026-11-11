@@ -3,7 +3,7 @@ const pool = require('../config/database')
 class MatriculaRepository {
     async selectAll() {
         const [rows] = await pool.query(`
-            SELECT m.*, f.nome AS nome_funcionario, f.telefone
+            SELECT m.*, f.nome AS nome_funcionario, f.email
             FROM tbl_matriculas m
             LEFT JOIN tbl_funcionarios f ON f.numero_matricula = m.numero_matricula
             ORDER BY m.numero_matricula ASC

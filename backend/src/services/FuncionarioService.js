@@ -4,7 +4,7 @@ const bcrypt = require('bcryptjs')
 const crypto = require('crypto')
 const { validarId } = require('../utils/validacao')
 const { gerarTokenFuncionario } = require('../utils/jwt')
-const { normalizarTelefone: validarTelefone } = require('../utils/cadastro')
+const { validarEmail: validarEmailCadastro } = require('../utils/cadastro')
 
 class FuncionarioService {
     async listar() {
@@ -30,9 +30,12 @@ class FuncionarioService {
             throw { status: 409, mensagem: 'Funcionário já cadastrado para esta matrícula' }
         }
 
-        const telefone = this.normalizarTelefone(dados.telefone)
+        const email = this.validarEmail(dados.email)
+        if (await FuncionarioRepository.selectByEmail(email)) {
+            throw { status: 409, mensagem: 'Este e-mail já está em uso por outro funcionário' }
+        }
         const senhaHash = await bcrypt.hash(senha, 10)
-        await FuncionarioRepository.insert({ numero_matricula: numero, senha: senhaHash, nome, telefone })
+        await FuncionarioRepository.insert({ numero_matricula: numero, senha: senhaHash, nome, email })
         return {
             sucesso: true,
             mensagem: 'Funcionário cadastrado com sucesso',
@@ -49,7 +52,13 @@ class FuncionarioService {
         const atualizado = {}
         if (dados.nome !== undefined) atualizado.nome = this.validarNome(dados.nome)
         if (dados.senha !== undefined) atualizado.senha = await bcrypt.hash(this.validarSenha(dados.senha), 10)
-        if (dados.telefone !== undefined) atualizado.telefone = this.normalizarTelefone(dados.telefone)
+        if (dados.email !== undefined) {
+            atualizado.email = this.validarEmail(dados.email)
+            const outro = await FuncionarioRepository.selectByEmail(atualizado.email)
+            if (outro && Number(outro.numero_matricula) !== numero) {
+                throw { status: 409, mensagem: 'Este e-mail já está em uso por outro funcionário' }
+            }
+        }
         if (Object.keys(atualizado).length === 0) throw { status: 400, mensagem: 'Nenhum dado a atualizar' }
 
         await FuncionarioRepository.set(numero, atualizado)
@@ -124,8 +133,8 @@ class FuncionarioService {
         return valor.trim()
     }
 
-    normalizarTelefone(valor) {
-        return validarTelefone(valor)
+    validarEmail(valor) {
+        return validarEmailCadastro(valor)
     }
 }
 

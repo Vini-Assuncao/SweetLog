@@ -33,7 +33,7 @@ API REST do SweetLog, desenvolvida com Node.js, Express 5 e MySQL. A aplicação
 
 3. Prepare o banco:
    - Para uma instalação nova, execute `database.sql` em uma instância MySQL. O arquivo cria o banco, as tabelas, a view e o evento de reconciliação de alertas, além de inserir registros de exemplo.
-   - Para uma instalação existente, faça backup antes de aplicar as migrations. Execute `migrations/alertas.sql` somente se a estrutura nova de alertas ainda não tiver sido aplicada. Execute `migrations/recuperacao_senha.sql` para criar a tabela usada pela recuperação de senha.
+   - Para uma instalação existente, faça backup antes de aplicar as migrations. Execute `migrations/alertas.sql` somente se a estrutura nova de alertas ainda não tiver sido aplicada. Execute `migrations/recuperacao_senha.sql` para criar a tabela usada pela recuperação de senha. Se a tabela já existir com o telefone do funcionário, execute também `migrations/recuperacao_senha_email.sql`.
    - A estrutura de vendas esperada utiliza `tbl_vendas.nota_fiscal` e `tbl_vendas_itens.id_estoque`. Bancos antigos que ainda armazenam itens por `id_produto` precisam de migração de dados planejada; não há conversão automática porque não é possível inferir com segurança qual lote originou cada item vendido.
 
 4. Inicie a API:
@@ -50,17 +50,20 @@ API REST do SweetLog, desenvolvida com Node.js, Express 5 e MySQL. A aplicação
    npm test
    ```
 
-## Configuração opcional de SMS
+## Configuração de e-mail para recuperação de senha
 
-A recuperação de senha envia códigos por SMS usando Twilio. Para habilitar esse fluxo, configure no `.env`:
+A recuperação de senha envia o código de 6 dígitos por e-mail usando o [Resend](https://resend.com). Configure no `.env`:
 
 ```env
-SMS_TWILIO_ACCOUNT_SID=seu_account_sid
-SMS_TWILIO_AUTH_TOKEN=seu_auth_token
-SMS_TWILIO_FROM=+15005550006
+RESEND_API_KEY=re_xxxxxxxxx
+RESEND_FROM=SweetLog <no-reply@seudominio.com.br>
 ```
 
-`SMS_TWILIO_FROM` deve ser um número habilitado na sua conta Twilio. Sem as três variáveis, somente `POST /funcionarios/recuperar-senha` responde com HTTP 503; a verificação e a redefinição de um desafio já enviado continuam funcionando. O restante da API não depende da integração SMS.
+`RESEND_FROM` precisa usar um domínio verificado em [resend.com/domains](https://resend.com/domains). Para testes, o Resend aceita `onboarding@resend.dev`, mas nesse caso o envio só chega ao e-mail da própria conta Resend. Sem `RESEND_API_KEY` e `RESEND_FROM`, somente `POST /funcionarios/recuperar-senha` responde com HTTP 503; a verificação e a redefinição de um desafio já enviado continuam funcionando. O restante da API não depende do envio de e-mails.
+
+O e-mail é o único dado de contato do funcionário: não há mais cadastro de telefone. Cada funcionário precisa de um e-mail único para recuperar a senha.
+
+Para uma instalação existente, execute `migrations/recuperacao_senha_email.sql` após fazer backup. A migração adiciona a coluna `email` e remove `telefone`. Os telefones existentes são descartados e os funcionários já cadastrados ficam sem e-mail até que o RH ou o Administrador o informe via `PUT /funcionarios/:id`.
 
 ## Rotas principais
 
@@ -71,7 +74,7 @@ Todas as rotas são montadas na raiz. `GET /` informa a versão e os recursos di
 | Dashboard | `GET /dashboard`, `GET /dashboard/resumo` |
 | Saldo diário | `GET /saldo-diario`, `GET /saldo-diario/resumo`, `GET /saldo-diario/historico`, `GET /saldo-diario/exportar` |
 | Matrículas | `GET/POST /matriculas`, `GET/PUT/DELETE /matriculas/:id` |
-| Funcionários | `POST /funcionarios/cadastro` (matrícula pré-cadastrada, sem autenticação), `GET/POST /funcionarios`, `GET/PUT/DELETE /funcionarios/:id`, `POST /funcionarios/login` |
+| Funcionários | `POST /funcionarios/cadastro` (matrícula pré-cadastrada, sem autenticação, exige e-mail), `GET/POST /funcionarios`, `GET/PUT/DELETE /funcionarios/:id`, `POST /funcionarios/login` |
 | Recuperação de senha | `POST /funcionarios/recuperar-senha`, `POST /funcionarios/verificar-codigo`, `POST /funcionarios/redefinir-senha` |
 | Produtos | `GET/POST /produtos`, `GET/PUT/DELETE /produtos/:id` |
 | Estoques | `GET/POST /estoques`, `GET/PUT/DELETE /estoques/:id`, `POST /estoques/:id/saida`, `GET /estoques/resumo`, `GET /estoques/produto/:idProduto` |

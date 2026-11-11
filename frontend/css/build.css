@@ -972,7 +972,7 @@ a{
   position: fixed;
   z-index: 70;
   display: none;
-  width: min(300px, calc(100vw - 32px));
+  width: min(360px, calc(100vw - 32px));
   border-radius: 14px;
   border-width: 1px;
   --tw-border-opacity: 1;
@@ -1035,6 +1035,17 @@ a{
   line-height: 1.55;
   --tw-text-opacity: 1;
   color: rgb(113 113 127 / var(--tw-text-opacity, 1));
+}
+
+.profile-pop__email{
+  white-space: nowrap;
+}
+
+@media (max-width: 380px) {
+  .profile-pop__email{
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
 }
 
 .profile-pop__info strong{

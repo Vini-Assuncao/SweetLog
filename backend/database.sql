@@ -11,7 +11,8 @@ CREATE TABLE IF NOT EXISTS tbl_funcionarios (
     numero_matricula INT PRIMARY KEY,
     senha VARCHAR(255) NOT NULL,
     nome VARCHAR(100) NOT NULL,
-    telefone VARCHAR(15),
+    email VARCHAR(254) NOT NULL,
+    CONSTRAINT uq_funcionarios_email UNIQUE (email),
     CONSTRAINT FK_numero_matricula_funcionarios
         FOREIGN KEY (numero_matricula) REFERENCES tbl_matriculas(numero_matricula)
 );

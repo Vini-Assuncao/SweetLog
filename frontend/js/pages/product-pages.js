@@ -115,6 +115,7 @@ export async function initProductDetailPage() {
   const editButton = document.querySelector('[data-edit-product]');
   const actions = document.querySelector('[data-detail-actions]');
   const canEdit = hasPermission('manage-products', getSession()?.funcionario?.setor);
+  const canDelete = hasPermission('delete-products', getSession()?.funcionario?.setor);
   if (!canEdit && editButton) editButton.hidden = true;
   let product;
   let imagePreviewUrl = null;
@@ -194,7 +195,7 @@ export async function initProductDetailPage() {
     const nextBadge = document.querySelector('.stat-box .badge');
     if (nextValidity) nextValidity.textContent = nearest ? formatDate(nearest.data_validade) : '—';
     if (nextBadge) nextBadge.textContent = nearest ? (Number(nearest.dias_para_validade) === 0 ? 'Vence hoje' : `Faltam ${nearest.dias_para_validade} dias`) : 'Sem lotes ativos';
-    if (!canEdit) return;
+    if (!canDelete) return;
     if (!document.querySelector('[data-delete-product]')) {
       const deleteButton = document.createElement('button');
       deleteButton.type = 'button';

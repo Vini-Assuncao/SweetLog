@@ -3,7 +3,7 @@ const pool = require('../config/database')
 class FuncionarioRepository {
     async selectAll() {
         const [rows] = await pool.query(`
-            SELECT f.numero_matricula, f.nome, f.telefone, m.setor
+            SELECT f.numero_matricula, f.nome, f.email, m.setor
             FROM tbl_funcionarios f
             INNER JOIN tbl_matriculas m ON m.numero_matricula = f.numero_matricula
             ORDER BY f.nome ASC
@@ -13,11 +13,18 @@ class FuncionarioRepository {
 
     async selectById(numero_matricula) {
         const [rows] = await pool.query(`
-            SELECT f.numero_matricula, f.nome, f.telefone, m.setor
+            SELECT f.numero_matricula, f.nome, f.email, m.setor
             FROM tbl_funcionarios f
             INNER JOIN tbl_matriculas m ON m.numero_matricula = f.numero_matricula
             WHERE f.numero_matricula = ?
         `, [numero_matricula])
+        return rows[0]
+    }
+
+    async selectByEmail(email) {
+        const [rows] = await pool.query(
+            'SELECT numero_matricula FROM tbl_funcionarios WHERE email = ?', [email]
+        )
         return rows[0]
     }
 
@@ -29,16 +36,16 @@ class FuncionarioRepository {
     }
 
     async insert(funcionarioData) {
-        const { numero_matricula, senha, nome, telefone } = funcionarioData
+        const { numero_matricula, senha, nome, email } = funcionarioData
         const [result] = await pool.query(
-            'INSERT INTO tbl_funcionarios (numero_matricula, senha, nome, telefone) VALUES (?, ?, ?, ?)',
-            [numero_matricula, senha, nome, telefone]
+            'INSERT INTO tbl_funcionarios (numero_matricula, senha, nome, email) VALUES (?, ?, ?, ?)',
+            [numero_matricula, senha, nome, email]
         )
         return result.affectedRows
     }
 
     async set(numero_matricula, funcionarioData) {
-        const camposPermitidos = ['senha', 'nome', 'telefone']
+        const camposPermitidos = ['senha', 'nome', 'email']
         const campos = Object.entries(funcionarioData).filter(([campo]) => camposPermitidos.includes(campo))
         if (campos.length === 0) return 0
         const atribuicoes = campos.map(([campo]) => `${campo} = ?`).join(', ')

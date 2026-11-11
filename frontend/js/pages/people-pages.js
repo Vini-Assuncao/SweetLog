@@ -1,6 +1,8 @@
 import { api } from '../core/api.js';
 import { getSession } from '../core/session.js';
-import { toast, escapeHtml, initials, formatPhone, setButtonLoading, hasPermission } from '../core/ui.js';
+import { toast, escapeHtml, initials, setButtonLoading, hasPermission } from '../core/ui.js';
+
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 
 const SECTORS = ['Administrador', 'RH', 'Administrativo', 'Logística', 'Compras', 'Almoxarifado'];
 
@@ -16,16 +18,12 @@ function ensureEmployeeModal() {
       <div class="stack gap-16">
         <div class="grupo-campo" data-employee-registration-wrap><label for="employee-registration">Matrícula</label><select class="input" id="employee-registration" name="numero_matricula" required></select></div>
         <div class="grupo-campo"><label for="employee-name">Nome completo</label><input class="input" id="employee-name" name="nome" maxlength="100" required></div>
-        <div class="grupo-campo"><label for="employee-phone">Telefone (DDD + número)</label><input class="input" id="employee-phone" name="telefone" type="tel" maxlength="16" placeholder="11900000000" required></div>
+        <div class="grupo-campo"><label for="employee-email">E-mail</label><input class="input" id="employee-email" name="email" type="email" maxlength="254" placeholder="nome@empresa.com.br" autocomplete="off" required></div>
         <div class="grupo-campo" data-employee-password-wrap><label for="employee-password">Senha inicial</label><input class="input" id="employee-password" name="senha" type="password" minlength="8" autocomplete="new-password"></div>
       </div>
       <div class="form-actions" style="justify-content:flex-end;margin-top:20px"><button class="btn btn--outline" type="button" data-dialog-close>Cancelar</button><button class="btn btn--primary" type="submit">Salvar</button></div>
     </form>`;
   document.body.append(dialog);
-  const phoneInput = dialog.querySelector('[name="telefone"]');
-  phoneInput.addEventListener('blur', () => {
-    phoneInput.value = formatPhone(phoneInput.value);
-  });
   dialog.querySelector('[data-dialog-close]').addEventListener('click', () => dialog.close());
   return dialog;
 }
@@ -87,12 +85,12 @@ export async function initEmployeesPage() {
 
   const renderEmployees = () => {
     const term = (employeeSearch?.value || '').toLocaleLowerCase('pt-BR');
-    const rows = employees.filter(item => `${item.numero_matricula} ${item.nome} ${item.setor} ${item.telefone || ''}`.toLocaleLowerCase('pt-BR').includes(term));
+    const rows = employees.filter(item => `${item.numero_matricula} ${item.nome} ${item.setor} ${item.email || ''}`.toLocaleLowerCase('pt-BR').includes(term));
     employeesBody.innerHTML = rows.map(item => `<tr data-id="${item.numero_matricula}">
       <td class="cell-nowrap">${item.numero_matricula}</td>
       <td><div class="person"><span class="mini-avatar" aria-hidden="true">${initials(item.nome)}</span>${escapeHtml(item.nome)}</div></td>
       <td>${escapeHtml(item.setor || '—')}</td>
-      <td class="cell-nowrap">${escapeHtml(item.telefone ? formatPhone(item.telefone) : '—')}</td>
+      <td>${escapeHtml(item.email || '—')}</td>
       <td><div class="row-actions"><button type="button" class="icon-btn" aria-label="Editar funcionário" data-action="editar" data-tipo="funcionario">✏️</button><button type="button" class="icon-btn icon-btn--danger" aria-label="Excluir funcionário" data-action="excluir" data-tipo="funcionario">🗑️</button></div></td>
     </tr>`).join('');
     const empty = document.querySelector('#panel-funcionarios [data-empty]');
@@ -176,7 +174,7 @@ export async function initEmployeesPage() {
     dialogForm.dataset.mode = editing ? 'edit' : 'create';
     dialogForm.dataset.id = employee?.numero_matricula || '';
     dialogForm.elements.namedItem('nome').value = employee?.nome || '';
-    dialogForm.elements.namedItem('telefone').value = employee?.telefone ? formatPhone(employee.telefone) : '';
+    dialogForm.elements.namedItem('email').value = employee?.email || '';
     dialogForm.elements.namedItem('senha').value = '';
     dialogForm.elements.namedItem('senha').required = !editing;
     dialog.showModal();
@@ -188,7 +186,7 @@ export async function initEmployeesPage() {
     const mode = dialogForm.dataset.mode;
     const payload = {
       nome: dialogForm.elements.namedItem('nome').value.trim(),
-      telefone: dialogForm.elements.namedItem('telefone').value.replace(/\D/g, '')
+      email: dialogForm.elements.namedItem('email').value.trim().toLowerCase()
     };
     if (mode === 'create') {
       payload.numero_matricula = Number(dialogForm.elements.namedItem('numero_matricula').value);
@@ -196,8 +194,8 @@ export async function initEmployeesPage() {
     } else if (dialogForm.elements.namedItem('senha').value) {
       payload.senha = dialogForm.elements.namedItem('senha').value;
     }
-    if (payload.telefone && !/^[1-9]{2}\d{9}$/.test(payload.telefone)) {
-      toast('Informe um telefone celular válido com DDD e 11 dígitos.', 'error');
+    if (!payload.email || payload.email.length > 254 || !EMAIL_PATTERN.test(payload.email)) {
+      toast('Informe um e-mail válido.', 'error');
       return;
     }
     const button = dialogForm.querySelector('button[type="submit"]');

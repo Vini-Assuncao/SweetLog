@@ -18,7 +18,7 @@ router.get('/:id/movimentacoes', autorizar(...leitura), MovimentacaoEstoqueContr
 router.get('/:id', autorizar(...leitura), EstoqueController.buscarPorId)
 router.post('/:id/saida', autorizar(...escrita), EstoqueController.diminuirQuantidade)
 router.post('/', autorizar(...entrada), uploadEstoqueEntrada.single('nota_fiscal'), EstoqueController.cadastrar)
-router.put('/:id', autorizar(...escrita), uploadEstoqueEntrada.single('nota_fiscal'), EstoqueController.atualizar)
+router.put('/:id', autorizar(...entrada), uploadEstoqueEntrada.single('nota_fiscal'), EstoqueController.atualizar)
 router.delete('/:id', autorizar(...escrita), EstoqueController.deletar)
 
 module.exports = router

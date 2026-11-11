@@ -20,13 +20,15 @@ function validarCnpj(valor) {
     return numeros
 }
 
-function normalizarTelefone(valor) {
-    if (valor === undefined || valor === null || valor === '') return null
-    const numeros = String(valor).replace(/\D/g, '')
-    if (!/^[1-9]{2}\d{9}$/.test(numeros) || /^([0-9])\1+$/.test(numeros)) {
-        throw { status: 400, mensagem: 'Telefone inválido. Informe DDD e número de celular com 11 dígitos' }
+function validarEmail(valor) {
+    if (typeof valor !== 'string' || !valor.trim()) {
+        throw { status: 400, mensagem: 'E-mail é obrigatório' }
     }
-    return numeros
+    const email = valor.trim().toLowerCase()
+    if (email.length > 254 || !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) {
+        throw { status: 400, mensagem: 'E-mail inválido. Informe um endereço de e-mail válido' }
+    }
+    return email
 }
 
-module.exports = { validarCnpj, normalizarTelefone }
+module.exports = { validarCnpj, validarEmail }

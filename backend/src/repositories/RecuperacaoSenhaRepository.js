@@ -1,9 +1,9 @@
 const pool = require('../config/database')
 
 class RecuperacaoSenhaRepository {
-    async selectFuncionariosPorTelefone(telefone) {
+    async selectFuncionariosPorEmail(email) {
         const [rows] = await pool.query(
-            'SELECT numero_matricula FROM tbl_funcionarios WHERE telefone = ?', [telefone]
+            'SELECT numero_matricula FROM tbl_funcionarios WHERE email = ?', [email]
         )
         return rows
     }

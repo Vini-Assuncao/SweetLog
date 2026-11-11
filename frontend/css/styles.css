@@ -193,7 +193,7 @@
   /* ---------- profile popover ---------- */
   .profile-pop {
     @apply fixed bg-card border border-border rounded shadow-lg p-[18px] z-[70] hidden;
-    width: min(300px, calc(100vw - 32px));
+    width: min(360px, calc(100vw - 32px));
     top: 62px;
     right: 32px;
   }
@@ -217,6 +217,15 @@
   }
   .profile-pop__info p {
     @apply text-[0.82rem] text-ink-muted leading-[1.55];
+  }
+  .profile-pop__email {
+    white-space: nowrap;
+  }
+  @media (max-width: 380px) {
+    .profile-pop__email {
+      white-space: normal;
+      overflow-wrap: anywhere;
+    }
   }
   .profile-pop__info strong {
     @apply block text-ink text-[0.92rem];
