@@ -2,7 +2,7 @@ const EstoqueRepository = require('../repositories/EstoqueRepository')
 const ProdutoRepository = require('../repositories/ProdutoRepository')
 const FuncionarioRepository = require('../repositories/FuncionarioRepository')
 const { caminhoPublico, normalizarUrlPublica, validarAssinaturaArquivo, removerUpload, removerArquivoSalvo } = require('../utils/arquivos')
-const { validarId, validarData, normalizarBooleano } = require('../utils/validacao')
+const { validarId, validarInteiro, validarData, normalizarBooleano } = require('../utils/validacao')
 
 class EstoqueService {
     async listar(filtros = {}) {
@@ -33,10 +33,7 @@ class EstoqueService {
 
     async diminuirQuantidade(id, quantidade, numeroMatricula, motivo) {
         const idValidado = validarId(id)
-        const quantidadeNumerica = Number(quantidade)
-        if (!Number.isInteger(quantidadeNumerica) || quantidadeNumerica <= 0) {
-            throw { status: 400, mensagem: 'Quantidade deve ser um número inteiro positivo' }
-        }
+        const quantidadeNumerica = validarInteiro(quantidade, 'Quantidade', 1)
         const responsavel = await this.validarMatricula(numeroMatricula)
         const motivoValidado = motivo === undefined || motivo === null || String(motivo).trim() === ''
             ? 'Baixa manual de estoque'
@@ -62,10 +59,7 @@ class EstoqueService {
         try {
             if (file) await validarAssinaturaArquivo(file, 'pdf')
             const lote = this.validarTexto(dados.lote_producao, 'Lote de produção', 100)
-            const quantidade = Number(dados.quantidade)
-            if (!Number.isInteger(quantidade) || quantidade <= 0) {
-                throw { status: 400, mensagem: 'Quantidade deve ser um número inteiro positivo' }
-            }
+            const quantidade = validarInteiro(dados.quantidade, 'Quantidade', 1)
             if (!file) throw { status: 400, mensagem: 'Nota fiscal em PDF é obrigatória' }
 
             const inspecionado = normalizarBooleano(dados.inspecionado, 'Inspecionado')
@@ -114,10 +108,7 @@ class EstoqueService {
                 atualizado.lote_producao = this.validarTexto(dados.lote_producao, 'Lote de produção', 100)
             }
             if (dados.quantidade !== undefined) {
-                const quantidade = Number(dados.quantidade)
-                if (!Number.isInteger(quantidade) || quantidade < 0) {
-                    throw { status: 400, mensagem: 'Quantidade deve ser um número inteiro igual ou maior que zero' }
-                }
+                const quantidade = validarInteiro(dados.quantidade, 'Quantidade')
                 atualizado.quantidade = quantidade
             }
             if (dados.inspecionado !== undefined) {

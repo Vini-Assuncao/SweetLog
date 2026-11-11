@@ -125,14 +125,14 @@ export async function initProductDetailPage() {
     block.className = 'card info-card';
     block.innerHTML = `
       <h4>📝 Dados do produto</h4>
-      <div class="info-row"><span>Nome</span><strong data-detail-value="nome"></strong><input class="input" name="nome" data-detail-input="nome" aria-label="Nome do produto" style="display:none;flex:1;min-width:0;width:auto"></div>
-      <div class="info-row" style="align-items:flex-start"><span>Descrição</span><strong data-detail-value="descricao"></strong><textarea class="input" name="descricao" data-detail-input="descricao" aria-label="Descrição do produto" rows="3" style="display:none;flex:1;min-width:0;width:auto"></textarea></div>
+      <div class="info-row"><span>Nome</span><strong data-detail-value="nome"></strong><input class="input" name="nome" maxlength="100" data-detail-input="nome" aria-label="Nome do produto" style="display:none;flex:1;min-width:0;width:auto"></div>
+      <div class="info-row" style="align-items:flex-start"><span>Descrição</span><strong data-detail-value="descricao"></strong><textarea class="input" name="descricao" maxlength="200" data-detail-input="descricao" aria-label="Descrição do produto" rows="3" style="display:none;flex:1;min-width:0;width:auto"></textarea></div>
       <div class="grupo-campo" data-product-image-edit style="display:none">
         <label class="upload-box upload-box--sm" for="detail-product-image">
           <span class="upload-box__icon">📷</span>
           <span class="upload-box__text">Foto do produto · clique para trocar</span>
           <span class="upload-box__hint">JPG ou PNG. Máx. 5 MB.</span>
-          <input id="detail-product-image" class="visually-hidden" type="file" name="imagem" accept="image/jpeg,image/png" aria-label="Selecionar nova foto do produto" disabled />
+          <input id="detail-product-image" class="visually-hidden" type="file" name="imagem" accept="image/jpeg,image/png" data-max-mb="5" aria-label="Selecionar nova foto do produto" disabled />
         </label>
       </div>`;
     form.querySelector('.stack')?.insertBefore(block, card);
@@ -231,7 +231,7 @@ export async function initProductDetailPage() {
     const file = imageInput.files?.[0];
     if (!file) return;
     if (!['image/jpeg', 'image/png'].includes(file.type) || file.size > 5 * 1024 * 1024) {
-      toast('Selecione uma imagem JPG ou PNG de até 5 MB.', 'error');
+      toast('Selecione uma imagem JPG ou PNG de até 5 MB.', 'warning');
       imageInput.value = '';
       clearImagePreview();
       renderProductImage(product.imagem, product.nome);

@@ -64,7 +64,7 @@
           <div class="order-card__row">
             <span>👤 Comprador</span>
             <strong data-sale-value="buyer">Padaria Central</strong>
-            <input class="input" type="text" name="comprador" value="Padaria Central" data-sale-input="buyer" disabled style="display: none" aria-label="Comprador" required />
+            <input class="input" type="text" name="comprador" maxlength="100" value="Padaria Central" data-sale-input="buyer" disabled style="display: none" aria-label="Comprador" required />
           </div>
           <section class="stack" style="gap: 16px" aria-labelledby="sale-items-title">
             <div class="order-card__row">
@@ -79,12 +79,12 @@
           <div class="order-card__row">
             <span>🪪 Matrícula responsável (opcional)</span>
             <strong data-sale-value="employeeRegistration">10425</strong>
-            <input class="input" type="number" name="numero_matricula" min="1" step="1" value="10425" data-sale-input="employeeRegistration" disabled style="display: none" aria-label="Matrícula responsável (opcional)" />
+            <input class="input" type="number" name="numero_matricula" min="1" max="2147483647" step="1" value="10425" data-sale-input="employeeRegistration" disabled style="display: none" aria-label="Matrícula responsável (opcional)" />
           </div>
           <div class="order-card__row order-card__invoice">
             <span>🧾 Nota fiscal da venda completa</span>
             <a class="btn btn--outline" data-sale-download href="#" download="nota-fiscal-venda-1.pdf">⬇ Baixar nota fiscal da venda</a>
-            <input class="input" type="file" name="nota_fiscal" accept="application/pdf,.pdf" data-sale-invoice disabled style="display: none" aria-label="Nota fiscal PDF (opcional ao editar)" />
+            <input class="input" type="file" name="nota_fiscal" accept="application/pdf,.pdf" data-max-mb="5" data-upload-input data-sale-invoice disabled style="display: none" aria-label="Nota fiscal PDF (opcional ao editar)" />
             <small data-sale-invoice-name></small>
           </div>
           <div class="order-card__foot">
@@ -106,17 +106,17 @@
             <div class="order-card__row">
               <span>🏷️ ID do estoque</span>
               <strong data-sale-item-value="stockId">1</strong>
-              <input class="input" type="number" min="1" step="1" data-sale-item-input="stockId" disabled style="display: none" aria-label="ID do estoque" required />
+              <input class="input" type="number" min="1" max="2147483647" step="1" data-sale-item-input="stockId" disabled style="display: none" aria-label="ID do estoque" required />
             </div>
             <div class="order-card__row">
               <span>📦 Quantidade</span>
               <strong data-sale-item-value="quantity">145 un</strong>
-              <input class="input" type="number" min="1" step="1" data-sale-item-input="quantity" disabled style="display: none" aria-label="Quantidade" required />
+              <input class="input" type="number" min="1" max="2147483647" step="1" data-sale-item-input="quantity" disabled style="display: none" aria-label="Quantidade" required />
             </div>
             <div class="order-card__row">
               <span>💲 Preço unitário</span>
               <strong data-sale-item-value="unitPrice">R$ 8,62</strong>
-              <input class="input" type="number" min="0" step="0.01" data-sale-item-input="unitPrice" disabled style="display: none" aria-label="Preço unitário" required />
+              <input class="input" type="number" min="0" max="99999999.99" step="0.01" data-sale-item-input="unitPrice" disabled style="display: none" aria-label="Preço unitário" required />
             </div>
             <div class="order-card__row">
               <span>Subtotal</span>

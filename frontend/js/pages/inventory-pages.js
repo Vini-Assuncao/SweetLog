@@ -289,7 +289,7 @@ export async function initLotsPage() {
           <div class="grupo-campo"><label for="lot-edit-expiry">Data de validade</label><input class="input" id="lot-edit-expiry" name="data_validade" type="date" required></div>
         </div>
         <div class="form-grid">
-          <div class="grupo-campo"><label for="lot-edit-quantity">Quantidade disponível</label><input class="input" id="lot-edit-quantity" name="quantidade" type="number" min="0" step="1" required></div>
+          <div class="grupo-campo"><label for="lot-edit-quantity">Quantidade disponível</label><input class="input" id="lot-edit-quantity" name="quantidade" type="number" min="0" max="2147483647" step="1" required></div>
           <div class="grupo-campo"><label for="lot-edit-inspected">Inspeção de qualidade</label><select class="input" id="lot-edit-inspected" name="inspecionado"><option value="true">Inspecionado</option><option value="false">Não inspecionado</option></select></div>
         </div>
       </div>

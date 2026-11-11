@@ -16,7 +16,7 @@ function ensureEmployeeModal() {
       <div class="stack gap-16">
         <div class="grupo-campo" data-employee-registration-wrap><label for="employee-registration">Matrícula</label><select class="input" id="employee-registration" name="numero_matricula" required></select></div>
         <div class="grupo-campo"><label for="employee-name">Nome completo</label><input class="input" id="employee-name" name="nome" maxlength="100" required></div>
-        <div class="grupo-campo"><label for="employee-phone">Telefone (DDD + número)</label><input class="input" id="employee-phone" name="telefone" type="tel" placeholder="11900000000" required></div>
+        <div class="grupo-campo"><label for="employee-phone">Telefone (DDD + número)</label><input class="input" id="employee-phone" name="telefone" type="tel" maxlength="16" placeholder="11900000000" required></div>
         <div class="grupo-campo" data-employee-password-wrap><label for="employee-password">Senha inicial</label><input class="input" id="employee-password" name="senha" type="password" minlength="8" autocomplete="new-password"></div>
       </div>
       <div class="form-actions" style="justify-content:flex-end;margin-top:20px"><button class="btn btn--outline" type="button" data-dialog-close>Cancelar</button><button class="btn btn--primary" type="submit">Salvar</button></div>

@@ -2,7 +2,7 @@ const VendaRepository = require('../repositories/VendaRepository')
 const EstoqueRepository = require('../repositories/EstoqueRepository')
 const FuncionarioRepository = require('../repositories/FuncionarioRepository')
 const { caminhoPublico, normalizarUrlPublica, validarAssinaturaArquivo, removerUpload, removerArquivoSalvo } = require('../utils/arquivos')
-const { validarId, validarData } = require('../utils/validacao')
+const { validarId, validarInteiro, validarDecimal, validarData } = require('../utils/validacao')
 
 class VendaService {
     async listar(filtros = {}) {
@@ -138,21 +138,15 @@ class VendaService {
                 throw { status: 400, mensagem: 'Item da venda inválido' }
             }
             const idEstoque = validarId(item.id_estoque, 'ID do estoque')
-            const quantidade = Number(item.quantidade_venda_item)
+            const quantidade = validarInteiro(item.quantidade_venda_item, 'A quantidade de cada item', 1)
             if (item.preco_unitario === undefined || item.preco_unitario === null || String(item.preco_unitario).trim() === '') {
                 throw { status: 400, mensagem: 'Preço unitário é obrigatório em cada item' }
             }
-            const preco = Number(String(item.preco_unitario).replace(',', '.'))
-            if (!Number.isInteger(quantidade) || quantidade <= 0) {
-                throw { status: 400, mensagem: 'A quantidade de cada item deve ser um inteiro positivo' }
-            }
-            if (!Number.isFinite(preco) || preco < 0 || preco > 99999999) {
-                throw { status: 400, mensagem: 'Preço unitário inválido em um dos itens' }
-            }
+            const preco = validarDecimal(item.preco_unitario, 'Preço unitário')
             return {
                 id_estoque: idEstoque,
                 quantidade_venda_item: quantidade,
-                preco_unitario: Math.round(preco * 100) / 100
+                preco_unitario: preco
             }
         }).sort((a, b) => a.id_estoque - b.id_estoque)
     }

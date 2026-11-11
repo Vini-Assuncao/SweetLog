@@ -19,6 +19,19 @@ export function toast(message, type = 'info') {
   }, 3500);
 }
 
+function warnFieldLimit(input, message) {
+  if (input.dataset.limitWarning === message) return;
+  input.dataset.limitWarning = message;
+  toast(message, 'warning');
+  window.setTimeout(() => {
+    if (input.dataset.limitWarning === message) delete input.dataset.limitWarning;
+  }, 3500);
+}
+
+function fieldLabel(input) {
+  return input.labels?.[0]?.textContent.trim().replace(/\s*\*$/, '') || input.getAttribute('aria-label') || 'Este campo';
+}
+
 export function escapeHtml(value) {
   return String(value ?? '').replace(/[&<>"']/g, character => ({
     '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
@@ -217,6 +230,69 @@ export function initGlobalNavigation(session = getSession()) {
 }
 
 export function initCommonControls() {
+  document.addEventListener('input', event => {
+    const input = event.target;
+    if (!(input instanceof HTMLInputElement) || input.type !== 'number' || !input.value || !input.max) return;
+    if (input.valueAsNumber > Number(input.max)) {
+      warnFieldLimit(input, `${fieldLabel(input)} aceita no máximo ${Number(input.max).toLocaleString('pt-BR')}.`);
+    } else {
+      delete input.dataset.limitWarning;
+    }
+  });
+  document.addEventListener('beforeinput', event => {
+    const input = event.target;
+    if (!(input instanceof HTMLInputElement || input instanceof HTMLTextAreaElement) || input.maxLength < 0 || event.data === null) return;
+    const selectionLength = input.selectionEnd - input.selectionStart;
+    if (input.value.length - selectionLength + event.data.length > input.maxLength) {
+      warnFieldLimit(input, `${fieldLabel(input)} permite no máximo ${input.maxLength} caracteres.`);
+    }
+  });
+  document.addEventListener('paste', event => {
+    const input = event.target;
+    if (!(input instanceof HTMLInputElement || input instanceof HTMLTextAreaElement) || input.maxLength < 0) return;
+    const pastedText = event.clipboardData?.getData('text') || '';
+    const selectionLength = input.selectionEnd - input.selectionStart;
+    if (input.value.length - selectionLength + pastedText.length > input.maxLength) {
+      warnFieldLimit(input, `${fieldLabel(input)} permite no máximo ${input.maxLength} caracteres.`);
+    }
+  });
+  document.addEventListener('invalid', event => {
+    const input = event.target;
+    if (!(input instanceof HTMLInputElement || input instanceof HTMLTextAreaElement)) return;
+    if (input.validity.rangeOverflow && input.max) {
+      warnFieldLimit(input, `${fieldLabel(input)} aceita no máximo ${Number(input.max).toLocaleString('pt-BR')}.`);
+    } else if (input.validity.tooLong && input.maxLength >= 0) {
+      warnFieldLimit(input, `${fieldLabel(input)} permite no máximo ${input.maxLength} caracteres.`);
+    }
+  }, true);
+  document.addEventListener('submit', event => {
+    const fields = event.target.querySelectorAll('input:not(:disabled), textarea:not(:disabled)');
+    for (const input of fields) {
+      const max = input.type === 'number' && input.max ? Number(input.max) : null;
+      if (max !== null && input.value && input.valueAsNumber > max) {
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        warnFieldLimit(input, `${fieldLabel(input)} aceita no máximo ${max.toLocaleString('pt-BR')}.`);
+        input.focus();
+        return;
+      }
+      if (input.maxLength >= 0 && input.value.length > input.maxLength) {
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        warnFieldLimit(input, `${fieldLabel(input)} permite no máximo ${input.maxLength} caracteres.`);
+        input.focus();
+        return;
+      }
+      const maxMb = Number(input.dataset.maxMb || 0);
+      if (input.type === 'file' && input.files?.[0] && maxMb && input.files[0].size > maxMb * 1024 * 1024) {
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        warnFieldLimit(input, `O arquivo deve ter no máximo ${maxMb} MB.`);
+        input.focus();
+        return;
+      }
+    }
+  }, true);
   document.querySelectorAll('[data-stepper]').forEach(stepper => {
     const input = stepper.querySelector('[data-stepper-value]');
     stepper.querySelector('[data-stepper-minus]')?.addEventListener('click', () => {
@@ -244,7 +320,7 @@ export function initCommonControls() {
       if (file && maxMb && file.size > maxMb * 1024 * 1024) {
         input.value = '';
         if (text) text.textContent = 'Anexar arquivo ou arraste e solte';
-        toast(`O arquivo excede o limite de ${maxMb} MB.`, 'error');
+        toast(`O arquivo excede o limite de ${maxMb} MB.`, 'warning');
       }
     });
   });

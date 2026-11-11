@@ -290,6 +290,12 @@ export async function initSaleDetailPage() {
   });
 
   document.querySelector('[data-sale-save]')?.addEventListener('click', async event => {
+    const invalidInput = [...card.querySelectorAll('[data-sale-input], [data-sale-item-input]')]
+      .find(input => !input.disabled && !input.checkValidity());
+    if (invalidInput) {
+      invalidInput.reportValidity();
+      return;
+    }
     const buyer = card.querySelector('[data-sale-input="buyer"]')?.value.trim();
     const orderDate = card.querySelector('[data-sale-input="orderDate"]')?.value;
     const rows = [...itemsContainer.querySelectorAll('[data-sale-item]')];

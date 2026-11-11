@@ -1,11 +1,46 @@
+const LIMITE_INT = 2147483647
+
 function validarId(id, campo = 'ID') {
     const texto = typeof id === 'number' ? String(id) : String(id ?? '').trim()
     if (!/^\d+$/.test(texto)) throw { status: 400, mensagem: `${campo} inválido` }
     const numero = Number(texto)
-    if (!Number.isSafeInteger(numero) || numero <= 0 || numero > 2147483647) {
+    if (!Number.isSafeInteger(numero) || numero <= 0 || numero > LIMITE_INT) {
         throw { status: 400, mensagem: `${campo} inválido` }
     }
     return numero
+}
+
+function validarInteiro(valor, campo = 'Valor', minimo = 0) {
+    const texto = typeof valor === 'number' ? String(valor) : String(valor ?? '').trim()
+    if (!/^\d+$/.test(texto)) {
+        throw { status: 400, mensagem: `${campo} deve ser um número inteiro` }
+    }
+
+    const numero = BigInt(texto)
+    if (numero < BigInt(minimo)) {
+        throw { status: 400, mensagem: `${campo} deve ser um inteiro igual ou maior que ${minimo}` }
+    }
+    if (numero > BigInt(LIMITE_INT)) {
+        throw { status: 400, mensagem: `${campo} deve ser no máximo ${LIMITE_INT}` }
+    }
+    return Number(numero)
+}
+
+function validarDecimal(valor, campo = 'Valor', maximo = 99999999.99) {
+    const texto = String(valor ?? '').trim().replace(',', '.')
+    if (!/^\d+(?:\.\d+)?$/.test(texto)) {
+        throw { status: 400, mensagem: `${campo} deve ser um número não negativo` }
+    }
+    if ((texto.split('.')[1] || '').length > 2) {
+        throw { status: 400, mensagem: `${campo} deve ter no máximo 2 casas decimais` }
+    }
+
+    const numero = Number(texto)
+    if (!Number.isFinite(numero) || numero > maximo) {
+        const limite = maximo.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+        throw { status: 400, mensagem: `${campo} deve ser no máximo R$ ${limite}` }
+    }
+    return Math.round(numero * 100) / 100
 }
 
 function validarData(data, campo = 'Data', obrigatoria = true) {
@@ -46,6 +81,8 @@ function opcionalTexto(valor) {
 
 module.exports = {
     validarId,
+    validarInteiro,
+    validarDecimal,
     validarData,
     normalizarBooleano,
     opcionalTexto

@@ -486,6 +486,9 @@
   .toast--error {
     @apply bg-danger;
   }
+  .toast--warning {
+    @apply bg-warning;
+  }
   .toast--info {
     @apply bg-ink;
   }

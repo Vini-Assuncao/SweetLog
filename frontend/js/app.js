@@ -10,6 +10,7 @@ async function boot() {
   const page = getPageName();
 
   if (page === 'index.html') return;
+  initCommonControls();
   if (page === 'login.html') return initLoginPage();
   if (page === 'cadastro.html') return initSignupPage();
   if (page === 'recuperar-senha.html') return initRecoveryPage();
@@ -19,7 +20,6 @@ async function boot() {
   const session = requirePageAccess();
   if (!session) return;
   initGlobalNavigation(session);
-  initCommonControls();
 
   const pageInitializers = {
     'dashboard.html': initDashboardPage,
