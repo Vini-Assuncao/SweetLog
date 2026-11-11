@@ -26,20 +26,20 @@
 
     <form class="stack gap-16" data-codigo-form novalidate>
       <div class="otp-group">
-        <input class="otp-box" type="text" inputmode="numeric" maxlength="1" autocomplete="one-time-code" aria-label="Dígito 1 do código" autofocus>
-        <input class="otp-box" type="text" inputmode="numeric" maxlength="1" aria-label="Dígito 2 do código">
-        <input class="otp-box" type="text" inputmode="numeric" maxlength="1" aria-label="Dígito 3 do código">
-        <input class="otp-box" type="text" inputmode="numeric" maxlength="1" aria-label="Dígito 4 do código">
-        <input class="otp-box" type="text" inputmode="numeric" maxlength="1" aria-label="Dígito 5 do código">
-        <input class="otp-box" type="text" inputmode="numeric" maxlength="1" aria-label="Dígito 6 do código">
+        <input class="otp-box" type="text" inputmode="numeric" maxlength="1" autocomplete="one-time-code" aria-label="Dígito 1 do código" data-code-digit autofocus>
+        <input class="otp-box" type="text" inputmode="numeric" maxlength="1" aria-label="Dígito 2 do código" data-code-digit>
+        <input class="otp-box" type="text" inputmode="numeric" maxlength="1" aria-label="Dígito 3 do código" data-code-digit>
+        <input class="otp-box" type="text" inputmode="numeric" maxlength="1" aria-label="Dígito 4 do código" data-code-digit>
+        <input class="otp-box" type="text" inputmode="numeric" maxlength="1" aria-label="Dígito 5 do código" data-code-digit>
+        <input class="otp-box" type="text" inputmode="numeric" maxlength="1" aria-label="Dígito 6 do código" data-code-digit>
       </div>
 
       <button class="btn btn--primary btn--block btn--lg" type="submit">Verificar →</button>
-      <p class="auth__resend">Não recebeu? <a href="#">Reenviar código</a></p>
+      <p class="auth__resend">Não recebeu? <a href="#" data-resend-code>Reenviar código</a></p>
     </form>
   </div>
 </div>
 
-<script src="js/app.js"></script>
+<script type="module" src="js/app.js"></script>
 </body>
 </html>

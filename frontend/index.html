@@ -109,5 +109,11 @@
         >
   </div>
 </div>
+<script type="module">
+  import { applyRoleVisibility } from "./js/core/ui.js";
+  import { getSession } from "./js/core/session.js";
+
+  applyRoleVisibility(getSession()?.funcionario?.setor);
+</script>
 </body>
 </html>

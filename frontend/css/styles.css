@@ -4,6 +4,10 @@
 @tailwind components;
 @tailwind utilities;
 
+[hidden]:where(:not([hidden="until-found"])) {
+  display: none !important;
+}
+
 /* =========================================================
    Variáveis CSS de compatibilidade — mantidas para qualquer
    <style> inline ou script que ainda use var(--primary) etc.

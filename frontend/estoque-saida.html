@@ -132,6 +132,11 @@
           </div>
         </section>
 
+        <div class="grupo-campo" data-baixa-motivo-wrap hidden>
+          <label for="motivo-baixa">Motivo da baixa</label>
+          <input class="input" id="motivo-baixa" name="motivo_baixa" type="text" maxlength="255" placeholder="Ex.: consumo interno, perda ou ajuste" />
+        </div>
+
         <section class="stack gap-16" aria-labelledby="saida-itens-title">
           <div class="row gap-12" style="justify-content: space-between">
             <h2 id="saida-itens-title">Produtos da saída</h2>
@@ -140,7 +145,7 @@
             </button>
           </div>
           <p class="hint" data-saida-itens-hint>
-            Adicione cada lote do estoque vendido. Informe o ID do registro de estoque, não o ID do produto. Como a tela ainda não consulta o backend, preencha esse ID manualmente.
+            Adicione cada lote do estoque vendido. Informe o ID do registro de estoque, não o ID do produto. Selecione os lotes disponíveis na lista carregada do sistema.
           </p>
           <div class="stack gap-16" data-saida-items>
             <div class="card" data-saida-item>
@@ -209,6 +214,6 @@
       </form>
     </main>
 
-    <script src="js/app.js"></script>
+    <script type="module" src="js/app.js"></script>
   </body>
 </html>
