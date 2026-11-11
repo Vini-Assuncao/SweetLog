@@ -76,7 +76,7 @@
         <p>Registre uma venda com vários produtos ou uma baixa de estoque.</p>
       </div>
 
-      <form class="card form-card" data-saida-form enctype="multipart/form-data" novalidate>
+      <form class="card form-card stock-exit-form" data-saida-form enctype="multipart/form-data" novalidate>
         <p class="hint">O funcionário responsável é registrado automaticamente pelo sistema.</p>
         <div class="grupo-campo">
           <label for="tipo-saida">Tipo de saída *</label>
@@ -87,7 +87,7 @@
         </div>
 
         <section class="stack gap-16" data-saida-venda-fields>
-          <h2>Dados da venda</h2>
+          <h2 class="stock-exit-form__title">Dados da venda</h2>
           <div class="form-grid">
             <div class="grupo-campo">
               <label for="comprador">Comprador *</label>
@@ -123,19 +123,14 @@
           <input class="input" id="motivo-baixa" name="motivo_baixa" type="text" maxlength="255" placeholder="Ex.: consumo interno, perda ou ajuste" />
         </div>
 
-        <section class="stack gap-16" aria-labelledby="saida-itens-title">
-          <div class="row gap-12" style="justify-content: space-between">
+        <section class="stack stock-exit-items-section" aria-labelledby="saida-itens-title">
+          <div class="stock-exit-items__head">
             <h2 id="saida-itens-title">Produtos da saída</h2>
-            <button class="btn btn--outline" type="button" data-add-saida-item>
-              ＋ Adicionar produto
-            </button>
           </div>
-          <p class="hint" data-saida-itens-hint>
-            Adicione cada lote que deseja retirar. Selecione o estoque pelo produto, lote, quantidade e validade.
-          </p>
-          <div class="stack gap-16" data-saida-items>
+          <p class="hint" data-saida-itens-hint hidden></p>
+          <div class="stock-exit-items" data-saida-items>
             <div class="card" data-saida-item>
-              <div class="form-grid">
+              <div class="form-grid stock-exit-item-grid">
                 <div class="grupo-campo">
                   <label data-item-label="stock" for="item-0-stock">Estoque / lote *</label>
                   <input
@@ -149,6 +144,11 @@
                     data-item-field="id_estoque"
                     required
                   />
+                  <div class="selected-product-preview" data-stock-product-preview hidden>
+                    <img data-product-preview-image alt="" hidden />
+                    <span class="selected-product-preview__placeholder" data-product-preview-placeholder aria-hidden="true">📦</span>
+                    <span class="selected-product-preview__name" data-product-preview-name></span>
+                  </div>
                 </div>
                 <div class="grupo-campo">
                   <label data-item-label="quantity" for="item-0-quantity">Quantidade *</label>
@@ -184,7 +184,10 @@
               </button>
             </div>
           </div>
-          <p class="hint" data-saida-total>Valor total estimado: R$ 0,00</p>
+          <button class="btn btn--outline stock-exit-add-button" type="button" data-add-saida-item>
+            ＋ Adicionar produto
+          </button>
+          <p class="hint stock-exit-total" data-saida-total>Valor total estimado: R$ 0,00</p>
         </section>
 
         <div class="form-actions">

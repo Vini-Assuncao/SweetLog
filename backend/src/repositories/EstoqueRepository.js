@@ -36,6 +36,7 @@ class EstoqueRepository {
         const [rows] = await pool.query(`
             SELECT e.*,
                    p.nome AS nome_produto,
+                   p.imagem AS imagem_produto,
                    p.marca AS marca_produto,
                    p.tamanho AS tamanho_produto,
                    f.nome AS nome_responsavel,

@@ -87,6 +87,11 @@
               <option value="2">Ovos Brancos Grandes</option>
               <option value="3">Leite Integral</option>
             </select>
+            <div class="selected-product-preview" data-entry-product-preview hidden>
+              <img data-product-preview-image alt="" hidden />
+              <span class="selected-product-preview__placeholder" data-product-preview-placeholder aria-hidden="true">📦</span>
+              <span class="selected-product-preview__name" data-product-preview-name></span>
+            </div>
           </div>
 
           <div class="grupo-campo">
@@ -144,7 +149,7 @@
           </div>
         </div>
 
-        <div class="form-grid" style="margin-top: 18px">
+        <div class="form-grid">
           <div class="grupo-campo">
             <label for="nf">Nota Fiscal de Entrada (PDF) *</label>
             <label class="upload-box upload-box--sm" for="nf" data-upload-box>

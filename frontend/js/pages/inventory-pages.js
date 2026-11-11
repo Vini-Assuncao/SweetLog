@@ -4,6 +4,32 @@ import { toast, escapeHtml, formatDate, dateForInput, setButtonLoading, formatCu
 
 const roleCanWriteStock = () => hasPermission('write-stock', getSession()?.funcionario?.setor);
 
+function updateProductPreview(preview, product, imagePath = product?.imagem) {
+  if (!preview) return;
+  const image = preview.querySelector('[data-product-preview-image]');
+  const placeholder = preview.querySelector('[data-product-preview-placeholder]');
+  const name = preview.querySelector('[data-product-preview-name]');
+  preview.hidden = !product;
+  if (!product) {
+    if (image) image.removeAttribute('src');
+    if (name) name.textContent = '';
+    return;
+  }
+  if (name) name.textContent = product.nome || product.nome_produto || '';
+  if (image) {
+    image.alt = `Imagem de ${product.nome || product.nome_produto || 'produto selecionado'}`;
+    image.hidden = !imagePath;
+    const source = imagePath ? publicFileUrl(imagePath) : '';
+    image.onerror = () => {
+      if (image.getAttribute('src') !== source) return;
+      image.hidden = true;
+      if (placeholder) placeholder.hidden = false;
+    };
+    if (source) image.setAttribute('src', source);
+  }
+  if (placeholder) placeholder.hidden = Boolean(imagePath);
+}
+
 export async function initStockHomePage() {
   const main = document.querySelector('main.page--center');
   if (!main) return;
@@ -74,11 +100,18 @@ export async function initStockEntryPage() {
     return;
   }
   const productSelect = form.querySelector('#produto');
+  let products = [];
   try {
     const result = await api.get('/produtos');
+    products = result.produtos || [];
     productSelect.innerHTML = '<option value="" selected disabled>Selecione um produto...</option>' +
-      (result.produtos || []).map(product => `<option value="${product.id_produto}">${escapeHtml(product.nome)} (ID ${product.id_produto})</option>`).join('');
+      products.map(product => `<option value="${product.id_produto}">${escapeHtml(product.nome)} (ID ${product.id_produto})</option>`).join('');
   } catch (error) { toast(error.message || 'Não foi possível carregar os produtos.', 'error'); }
+  const entryPreview = form.querySelector('[data-entry-product-preview]');
+  productSelect.addEventListener('change', () => {
+    const product = products.find(item => String(item.id_produto) === productSelect.value);
+    updateProductPreview(entryPreview, product);
+  });
 
   form.addEventListener('submit', async event => {
     event.preventDefault();
@@ -132,6 +165,7 @@ export async function initStockExitPage() {
   const today = new Date().toISOString().slice(0, 10);
   if (orderDate && !orderDate.value) orderDate.value = today;
   let stocks = [];
+  let stockRequestSucceeded = false;
 
   try {
     const result = await api.get('/estoques');
@@ -140,6 +174,7 @@ export async function initStockExitPage() {
       stock.status_validade !== 'vencido' &&
       stock.status_validade !== 'zerado'
     );
+    stockRequestSucceeded = true;
   } catch (error) { toast(error.message || 'Não foi possível consultar os lotes disponíveis.', 'error'); }
 
   const stockOptions = selected => {
@@ -149,6 +184,13 @@ export async function initStockExitPage() {
       const label = `#${stock.id_estoque} · ${stock.nome_produto} · lote ${stock.lote_producao} · ${stock.quantidade} un.${validade}`;
       return `<option value="${stock.id_estoque}" ${String(selected) === String(stock.id_estoque) ? 'selected' : ''}>${escapeHtml(label)}</option>`;
     }).join('');
+  };
+
+  const updateStockPreview = row => {
+    const select = row.querySelector('[data-item-field="id_estoque"]');
+    const productPreview = row.querySelector('[data-stock-product-preview]');
+    const stock = stocks.find(item => String(item.id_estoque) === select?.value);
+    updateProductPreview(productPreview, stock, stock?.imagem_produto);
   };
 
   function enhanceRow(row, index) {
@@ -167,6 +209,8 @@ export async function initStockExitPage() {
       if (input.dataset.itemField === 'quantidade_venda_item') input.addEventListener('input', () => updateSaleTotal(itemsContainer));
       if (input.dataset.itemField === 'preco_unitario') input.addEventListener('input', () => updateSaleTotal(itemsContainer));
     });
+    row.querySelector('[data-item-field="id_estoque"]')?.addEventListener('change', () => updateStockPreview(row));
+    updateStockPreview(row);
     const remove = row.querySelector('[data-remove-saida-item]');
     remove?.addEventListener('click', () => { row.remove(); updateRemoveButtons(); updateSaleTotal(itemsContainer); });
   }
@@ -183,12 +227,9 @@ export async function initStockExitPage() {
     form.querySelectorAll('[data-item-price-field]').forEach(field => { field.hidden = !isSale; });
     form.querySelectorAll('[data-item-field="preco_unitario"]').forEach(field => { field.required = isSale; field.disabled = !isSale; });
     if (hint) {
-      if (!stocks.length) {
+      hint.hidden = stocks.length > 0 || !stockRequestSucceeded;
+      if (stockRequestSucceeded && !stocks.length) {
         hint.textContent = `Não há lotes com saldo e dentro da validade disponíveis para ${isSale ? 'venda' : 'saída'}.`;
-      } else {
-        hint.textContent = isSale
-          ? 'Selecione o produto e o lote corretos pela quantidade e validade; lotes válidos próximos do vencimento também aparecem.'
-          : 'Selecione os lotes que terão baixa. A quantidade será descontada de cada lote.';
       }
     }
     updateSaleTotal(itemsContainer);

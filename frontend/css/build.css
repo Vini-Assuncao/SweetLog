@@ -2524,6 +2524,16 @@ a{
   grid-template-columns: 1fr 1fr;
 }
 
+.op-grid--single{
+  grid-template-columns: minmax(0, 1fr);
+  justify-items: center;
+}
+
+.op-grid--single .op-card{
+  width: 100%;
+  max-width: 380px;
+}
+
 @media (max-width: 600px) {
   .op-grid{
     grid-template-columns: repeat(1, minmax(0, 1fr));
@@ -2645,6 +2655,129 @@ a{
   --tw-text-opacity: 1;
   color: rgb(30 27 46 / var(--tw-text-opacity, 1));
   padding: 10px 0;
+}
+
+.selected-product-preview{
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-height: 48px;
+  margin-top: 8px;
+}
+
+.selected-product-preview[hidden],
+.selected-product-preview img[hidden],
+.selected-product-preview__placeholder[hidden]{
+  display: none;
+}
+
+.selected-product-preview img,
+.selected-product-preview__placeholder{
+  height: 3rem;
+  width: 3rem;
+  flex-shrink: 0;
+  border-radius: 8px;
+}
+
+.selected-product-preview img{
+  border-width: 1px;
+  --tw-border-opacity: 1;
+  border-color: rgb(231 231 241 / var(--tw-border-opacity, 1));
+  -o-object-fit: cover;
+     object-fit: cover;
+}
+
+.selected-product-preview__placeholder{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  --tw-bg-opacity: 1;
+  background-color: rgb(243 244 250 / var(--tw-bg-opacity, 1));
+}
+
+.selected-product-preview__name{
+  font-size: 0.82rem;
+  --tw-text-opacity: 1;
+  color: rgb(113 113 127 / var(--tw-text-opacity, 1));
+}
+
+.stock-exit-form{
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.stock-exit-form > .hint{
+  margin: 0;
+}
+
+.stock-exit-form__title{
+  margin: 0;
+}
+
+.stock-exit-form [data-saida-venda-fields]{
+  gap: 20px;
+}
+
+.stock-exit-items-section{
+  gap: 12px;
+}
+
+.stock-exit-items__head{
+  display: flex;
+  align-items: center;
+}
+
+.stock-exit-items__head h2{
+  margin: 0;
+}
+
+.stock-exit-add-button{
+  align-self: flex-start;
+}
+
+.stock-exit-items{
+  display: grid;
+  gap: 0.875rem;
+}
+
+.stock-exit-items [data-saida-item]{
+  padding: 20px;
+}
+
+.stock-exit-item-grid{
+  align-items: start;
+  gap: 20px;
+  grid-template-columns: minmax(0, 1.5fr) repeat(2, minmax(0, 1fr));
+}
+
+.stock-exit-items [data-remove-saida-item]{
+  margin-top: 16px;
+}
+
+.stock-exit-total{
+  margin: 0;
+}
+
+.stock-exit-form .form-actions{
+  margin-top: 0;
+  padding-top: 20px;
+}
+
+@media (max-width: 760px) {
+  .stock-exit-item-grid{
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 520px) {
+  .stock-exit-item-grid{
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .stock-exit-items [data-saida-item]{
+    padding: 16px;
+  }
 }
 
 .upload-box--sm {

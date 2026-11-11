@@ -952,6 +952,14 @@
     @apply grid gap-5 max-w-[620px] w-full;
     grid-template-columns: 1fr 1fr;
   }
+  .op-grid--single {
+    grid-template-columns: minmax(0, 1fr);
+    justify-items: center;
+  }
+  .op-grid--single .op-card {
+    width: 100%;
+    max-width: 380px;
+  }
   @media (max-width: 600px) {
     .op-grid {
       @apply grid-cols-1;
@@ -1007,6 +1015,88 @@
   .stepper__value {
     @apply flex-1 text-center border-0 bg-transparent text-[0.92rem] font-semibold text-ink;
     padding: 10px 0;
+  }
+
+  .selected-product-preview {
+    @apply flex items-center gap-3;
+    min-height: 48px;
+    margin-top: 8px;
+  }
+  .selected-product-preview[hidden],
+  .selected-product-preview img[hidden],
+  .selected-product-preview__placeholder[hidden] {
+    display: none;
+  }
+  .selected-product-preview img,
+  .selected-product-preview__placeholder {
+    @apply w-12 h-12 rounded-sm flex-shrink-0;
+  }
+  .selected-product-preview img {
+    @apply object-cover border border-border;
+  }
+  .selected-product-preview__placeholder {
+    @apply flex items-center justify-center bg-bg;
+  }
+  .selected-product-preview__name {
+    @apply text-[0.82rem] text-ink-muted;
+  }
+  .stock-exit-form {
+    @apply flex flex-col gap-6;
+  }
+  .stock-exit-form > .hint {
+    margin: 0;
+  }
+  .stock-exit-form__title {
+    margin: 0;
+  }
+  .stock-exit-form [data-saida-venda-fields] {
+    gap: 20px;
+  }
+  .stock-exit-items-section {
+    gap: 12px;
+  }
+  .stock-exit-items__head {
+    @apply flex items-center;
+  }
+  .stock-exit-items__head h2 {
+    margin: 0;
+  }
+  .stock-exit-add-button {
+    align-self: flex-start;
+  }
+  .stock-exit-items {
+    @apply grid gap-3.5;
+  }
+  .stock-exit-items [data-saida-item] {
+    padding: 20px;
+  }
+  .stock-exit-item-grid {
+    align-items: start;
+    gap: 20px;
+    grid-template-columns: minmax(0, 1.5fr) repeat(2, minmax(0, 1fr));
+  }
+  .stock-exit-items [data-remove-saida-item] {
+    margin-top: 16px;
+  }
+  .stock-exit-total {
+    margin: 0;
+  }
+  .stock-exit-form .form-actions {
+    margin-top: 0;
+    padding-top: 20px;
+  }
+  @media (max-width: 760px) {
+    .stock-exit-item-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+  @media (max-width: 520px) {
+    .stock-exit-item-grid {
+      grid-template-columns: minmax(0, 1fr);
+    }
+    .stock-exit-items [data-saida-item] {
+      padding: 16px;
+    }
   }
 
   .upload-box--sm {

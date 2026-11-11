@@ -128,6 +128,10 @@ export function applyRoleVisibility(role) {
     if (!hasPermission(element.dataset.permission, role)) element.hidden = true;
   });
   hideUnauthorizedLinks(role);
+  document.querySelectorAll('.op-grid').forEach(grid => {
+    const visibleCards = [...grid.querySelectorAll('.op-card')].filter(card => !card.hidden);
+    grid.classList.toggle('op-grid--single', visibleCards.length === 1);
+  });
 }
 
 export function requirePageAccess() {
