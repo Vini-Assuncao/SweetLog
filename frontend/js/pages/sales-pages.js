@@ -75,7 +75,7 @@ export async function initSalesListPage() {
           <div class="order-card__row"><span>💰 Valor total</span><strong data-list-value="total">${formatCurrency(sale.valor_total)}</strong></div>
           <div class="order-card__foot">
             <span>📅 Data do pedido<br><strong>${formatDate(sale.data_pedido)}</strong></span>
-            <span>🚚 Data de entrega<br><strong>${deliveryDate ? formatDate(deliveryDate) : 'Ainda não entregue'}</strong></span>
+            ${deliveryDate ? `<span>🚚 Data de entrega<br><strong>${formatDate(deliveryDate)}</strong></span>` : ''}
           </div>
           <div class="sales-card-actions">
             <a class="btn btn--outline" href="venda-detalhe.html?id=${encodeURIComponent(sale.id_venda)}">Ver detalhes</a>
@@ -243,7 +243,9 @@ export async function initSaleDetailPage() {
     const orderText = card.querySelector('[data-sale-value="orderDate"]');
     if (orderText) orderText.textContent = formatDate(sale.data_pedido);
     const deliveryText = card.querySelector('[data-sale-value="deliveryDate"]');
-    if (deliveryText) deliveryText.textContent = sale.data_entrega ? formatDate(sale.data_entrega) : 'Ainda não entregue';
+    const deliveryInfo = card.querySelector('[data-sale-delivery]');
+    if (deliveryText && sale.data_entrega) deliveryText.textContent = formatDate(sale.data_entrega);
+    if (deliveryInfo) deliveryInfo.hidden = !sale.data_entrega;
     const invoiceLink = document.querySelector('[data-sale-download]');
     if (invoiceLink) {
       invoiceLink.href = publicFileUrl(sale.nota_fiscal);
