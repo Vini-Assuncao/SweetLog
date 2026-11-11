@@ -1058,6 +1058,29 @@
   .table-card__head h3 {
     @apply text-base;
   }
+  .lot-detail-controls {
+    @apply flex items-center justify-between gap-3.5 flex-wrap mb-3.5;
+  }
+  .lot-filter-chips {
+    @apply flex flex-wrap gap-2;
+    border: 0;
+    padding: 0;
+  }
+  .lot-search {
+    @apply flex-1;
+    max-width: 320px;
+  }
+  .table-card .lot-search input {
+    @apply w-full;
+  }
+  @media (max-width: 720px) {
+    .lot-detail-controls {
+      @apply items-stretch flex-col;
+    }
+    .lot-search {
+      max-width: none;
+    }
+  }
 
   .table-scroll {
     @apply overflow-x-auto;
@@ -1133,6 +1156,49 @@
      ======================================================= */
   .order-grid {
     @apply grid grid-cols-4 gap-[18px];
+  }
+  .sales-list-panel {
+    @apply mt-[22px];
+    padding: 20px 22px 8px;
+  }
+  .sales-list-panel .table-card__head {
+    @apply items-start;
+  }
+  .sales-list-panel .table-card__head h2 {
+    @apply text-base font-semibold;
+  }
+  .sales-list-panel__hint {
+    @apply text-[0.78rem] text-ink-muted mt-1.5;
+    max-width: 700px;
+  }
+  .sales-toolbar {
+    @apply flex items-center justify-between gap-3.5 mb-3.5;
+  }
+  .sales-search {
+    @apply flex-1;
+    max-width: 440px;
+  }
+  .sales-search input {
+    @apply w-full;
+  }
+  .sales-filter-chips {
+    @apply flex flex-wrap gap-2;
+    border: 0;
+    padding: 0;
+  }
+  .sales-card-actions {
+    @apply flex flex-wrap gap-2.5 mt-3;
+  }
+  .sales-card-actions .btn {
+    @apply flex-1 justify-center;
+  }
+  @media (max-width: 720px) {
+    .sales-toolbar {
+      @apply items-stretch flex-col;
+    }
+    .sales-search {
+      max-width: none;
+    }
   }
   @media (max-width: 980px) {
     .order-grid {

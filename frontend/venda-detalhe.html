@@ -41,7 +41,7 @@
         <a class="drawer__link" href="produtos-lista.html"><span class="ico">🥐</span> Produtos</a>
         <a class="drawer__link" href="lotes.html"><span class="ico">🗄️</span> Lotes</a>
         <a class="drawer__link" href="estoque.html"><span class="ico">📦</span> Controle de estoque</a>
-        <a class="drawer__link is-active" href="vendas.html" aria-current="page"><span class="ico">🧺</span> Vendas</a>
+        <a class="drawer__link is-active" href="vendas.html" aria-current="page"><span class="ico">🏷️</span> Vendas</a>
         <a class="drawer__link" href="saldo-diario.html"><span class="ico">💰</span> Saldo diário</a>
       </nav>
       <div class="drawer__footer">
@@ -89,7 +89,7 @@
           </div>
           <div class="order-card__foot">
             <span>📅 Data pedido<br /><strong data-sale-value="orderDate">24/10/2023</strong><input class="input" type="date" name="data_pedido" value="2023-10-24" data-sale-input="orderDate" disabled style="display: none" aria-label="Data do pedido" required /></span>
-            <span data-sale-delivery>🚚 Data entrega<br /><strong data-sale-value="deliveryDate">26/10/2023</strong><input class="input" type="date" name="data_entrega" value="2023-10-26" data-sale-input="deliveryDate" disabled style="display: none" aria-label="Data de entrega (opcional)" /></span>
+            <span data-sale-delivery>🚚 Data de entrega<br /><strong data-sale-value="deliveryDate">Ainda não entregue</strong></span>
           </div>
           <div class="form-actions" data-sale-actions data-permission="manage-sales" style="display: none">
             <button class="btn btn--outline" type="button" data-sale-cancel>Cancelar</button>
@@ -104,7 +104,7 @@
           <div class="stack" style="width: 100%; gap: 8px">
             <strong data-sale-item-heading>Produto 1</strong>
             <div class="order-card__row">
-              <span>🧺 ID do estoque</span>
+              <span>🏷️ ID do estoque</span>
               <strong data-sale-item-value="stockId">1</strong>
               <input class="input" type="number" min="1" step="1" data-sale-item-input="stockId" disabled style="display: none" aria-label="ID do estoque" required />
             </div>

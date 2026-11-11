@@ -28,7 +28,7 @@
         ['Unidades disponíveis', summary.quantidade_disponivel || 0, '🧺'],
         ['Vendas hoje', summary.vendas_hoje || 0, '🧾'],
         ['Faturamento de hoje', ui.formatMoney(summary.faturamento_hoje || 0), '💰'],
-        ['Lotes vencidos', summary.lotes_vencidos || 0, '⚠️']
+        ['Lotes vencidos', summary.lotes_vencidos || 0, '⚠️️']
       ];
       var grid = document.createElement('div');
       grid.className = 'kpi-grid';
@@ -39,7 +39,7 @@
 
       if (alertsCard) {
         var alerts = result.alertas_recentes || [];
-        alertsCard.innerHTML = '<div class="alert-card__head"><div class="row gap-8"><span class="alert-card__warn">⚠️</span><strong>Alertas ativos</strong></div><span class="badge badge--danger">' + alerts.length + ' alerta(s)</span></div>' +
+        alertsCard.innerHTML = '<div class="alert-card__head"><div class="row gap-8"><span class="alert-card__warn">⚠️️</span><strong>Alertas ativos</strong></div><span class="badge badge--danger">' + alerts.length + ' alerta(s)</span></div>' +
           (alerts.length ? alerts.map(function (alert) {
             var label = alertLabel(alert);
             return '<div class="alert-row"><div class="row gap-12"><span class="alert-row__icon">' + (alert.tipo === 'Validade próxima' ? '⏳' : alert.tipo === 'Estoque vencido' ? '⛔' : '📉') + '</span><div><p class="alert-row__title">' + ui.escape(label.detail) + '</p><p class="alert-row__sub">' + ui.escape(label.type) + ' • ' + ui.escape(ui.formatDate(alert.data_alerta)) + '</p></div></div><a href="lotes.html" class="alert-row__action">Revisar</a></div>';

@@ -28,7 +28,7 @@
         var result = await api.get('/vendas');
         var sales = result.vendas || [];
         grid.innerHTML = sales.map(saleCard).join('');
-        if (count) count.textContent = '🧺 ' + (result.total || sales.length) + ' venda(s)';
+        if (count) count.textContent = '🏷️ ' + (result.total || sales.length) + ' venda(s)';
         if (empty) empty.hidden = sales.length > 0;
       } catch (error) {
         grid.innerHTML = '<p class="muted">Não foi possível carregar as vendas.</p>';
@@ -48,8 +48,7 @@
     var itemsContainer = page.querySelector('[data-sale-items]');
     var fields = {
       comprador: page.querySelector('[data-sale-input="buyer"]'),
-      data_pedido: page.querySelector('[data-sale-input="orderDate"]'),
-      data_entrega: page.querySelector('[data-sale-input="deliveryDate"]')
+      data_pedido: page.querySelector('[data-sale-input="orderDate"]')
     };
     var sale = null;
     var editing = false;
@@ -94,7 +93,7 @@
         var field = fields[key];
         if (!field) return;
         var input = field;
-        var output = page.querySelector('[data-sale-value="' + (key === 'comprador' ? 'buyer' : key === 'data_pedido' ? 'orderDate' : 'deliveryDate') + '"]');
+        var output = page.querySelector('[data-sale-value="' + (key === 'comprador' ? 'buyer' : 'orderDate') + '"]');
         input.style.display = editing ? '' : 'none';
         input.disabled = !editing;
         if (output) output.style.display = editing ? 'none' : '';
@@ -145,12 +144,11 @@
       page.querySelector('[data-sale-heading]').textContent = 'Venda #' + values.id_venda;
       fields.comprador.value = values.comprador || '';
       fields.data_pedido.value = ui.dateOnly(values.data_pedido);
-      fields.data_entrega.value = ui.dateOnly(values.data_entrega);
       page.querySelector('[data-sale-value="buyer"]').textContent = values.comprador || 'Não informado';
       page.querySelector('[data-sale-value="orderDate"]').textContent = ui.formatDate(values.data_pedido);
-      page.querySelector('[data-sale-value="deliveryDate"]').textContent = values.data_entrega ? ui.formatDate(values.data_entrega) : 'Não informada';
+      page.querySelector('[data-sale-value="deliveryDate"]').textContent = values.data_entrega ? ui.formatDate(values.data_entrega) : 'Ainda não entregue';
       var delivery = page.querySelector('[data-sale-delivery]');
-      if (delivery) delivery.style.display = values.data_entrega ? '' : 'none';
+      if (delivery) delivery.style.display = '';
       var employee = page.querySelector('[data-sale-value="employeeRegistration"]');
       if (employee) employee.textContent = values.numero_matricula || 'Não informado';
 
@@ -210,14 +208,9 @@
         ui.toast('Confira comprador, data do pedido e os itens da venda.', 'error');
         return;
       }
-      if (fields.data_entrega.value && fields.data_entrega.value < fields.data_pedido.value) {
-        ui.toast('A data de entrega não pode ser anterior à data do pedido.', 'error');
-        return;
-      }
       var body = new FormData();
       body.set('comprador', fields.comprador.value.trim());
       body.set('data_pedido', fields.data_pedido.value);
-      body.set('data_entrega', fields.data_entrega.value);
       body.set('itens', JSON.stringify(items));
       if (invoiceInput && invoiceInput.files[0]) {
         var file = invoiceInput.files[0];

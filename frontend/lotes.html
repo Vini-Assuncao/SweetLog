@@ -59,7 +59,7 @@
           ><span class="ico">📦</span> Controle de estoque</a
         >
         <a class="drawer__link" href="vendas.html"
-          ><span class="ico">🧺</span> Vendas</a
+          ><span class="ico">🏷️</span> Vendas</a
         >
         <a class="drawer__link" href="saldo-diario.html"
           ><span class="ico">💰</span> Saldo diário</a
@@ -81,32 +81,10 @@
           </p>
         </div>
         <div class="row gap-12">
-          <button class="btn btn--outline" data-lote-filtros-toggle>
-            ▤ Filtros
-          </button>
           <a class="btn btn--primary" href="estoque-entrada.html"
             >+ Novo Lote</a
           >
         </div>
-      </div>
-
-      <div class="filter-chips" data-lote-filtros hidden>
-        <button
-          type="button"
-          class="filter-chip is-active"
-          data-lote-filter="todos"
-        >
-          Todos
-        </button>
-        <button type="button" class="filter-chip" data-lote-filter="valido">
-          ✓ Dentro da validade
-        </button>
-        <button type="button" class="filter-chip" data-lote-filter="proximo">
-          ⚠ Vencimento próximo
-        </button>
-        <button type="button" class="filter-chip" data-lote-filter="vencido">
-          ⛔ Vencidos
-        </button>
       </div>
 
       <div class="kpi-grid">
@@ -119,7 +97,7 @@
           </p>
         </div>
         <div class="card kpi-card">
-          <div class="kpi-card__icon kpi-card__icon--warning">⚠️</div>
+          <div class="kpi-card__icon kpi-card__icon--warning">⚠️️</div>
           <p class="kpi-card__label">Vencimento Próximo (7 dias)</p>
           <p class="kpi-card__value">8</p>
           <p class="kpi-card__note kpi-card__note--warning">
@@ -139,23 +117,18 @@
       <div class="card table-card">
         <div class="table-card__head">
           <h3>Detalhamento de Lotes</h3>
-          <div class="row gap-12">
-            <div class="table-search" data-lote-search-wrap hidden>
-              <input
-                class="input"
-                type="text"
-                placeholder="Buscar por produto ou insumo..."
-                data-lote-search
-              />
-            </div>
-            <button
-              class="botao-icone"
-              aria-label="Buscar"
-              data-lote-search-toggle
-            >
-              🔍
-            </button>
+        </div>
+        <div class="lot-detail-controls">
+          <div class="filter-chips lot-filter-chips" data-lote-filtros>
+            <button type="button" class="filter-chip is-active" data-lote-filter="todos">Todos</button>
+            <button type="button" class="filter-chip" data-lote-filter="valido">✔️ Dentro da validade</button>
+            <button type="button" class="filter-chip" data-lote-filter="proximo">⚠️ Vencimento próximo</button>
+            <button type="button" class="filter-chip" data-lote-filter="vencido">⛔ Vencidos</button>
           </div>
+          <label class="table-search lot-search">
+            <span class="visually-hidden">Buscar lotes</span>
+            <input class="input" type="search" placeholder="Buscar por produto ou lote..." data-lote-search />
+          </label>
         </div>
 
         <div class="table-scroll">
@@ -188,7 +161,7 @@
                 <td>10/10/2023</td>
                 <td>25/04/2024</td>
                 <td>
-                  <span class="badge badge--blue">✓ Dentro da Validade</span>
+                  <span class="badge badge--blue">✔️ Dentro da Validade</span>
                 </td>
                 <td>150 kg</td>
               </tr>
@@ -210,7 +183,7 @@
                 <td>01/11/2023</td>
                 <td class="text-warning">15/11/2023</td>
                 <td>
-                  <span class="badge badge--warning">⚠ Vence em 4 dias</span>
+                  <span class="badge badge--warning">⚠️ Vence em 4 dias</span>
                 </td>
                 <td>12 dúzias</td>
               </tr>
@@ -252,7 +225,7 @@
                 <td>10/09/2023</td>
                 <td>10/03/2024</td>
                 <td>
-                  <span class="badge badge--blue">✓ Dentro da Validade</span>
+                  <span class="badge badge--blue">✔️ Dentro da Validade</span>
                 </td>
                 <td>45 kg</td>
               </tr>

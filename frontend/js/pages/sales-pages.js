@@ -7,26 +7,152 @@ export async function initSalesListPage() {
   if (!grid) return;
   const empty = document.querySelector('[data-empty-state]');
   const count = document.querySelector('[data-sales-count]');
+  const search = document.querySelector('[data-sales-search]');
+  const filters = document.querySelector('[data-sales-filters]');
+  const todayCount = document.querySelector('[data-sales-today-count]');
+  const pendingCount = document.querySelector('[data-sales-pending-count]');
+  const todayTotal = document.querySelector('[data-sales-today-total]');
+  const canEdit = hasPermission('manage-sales', getSession()?.funcionario?.setor);
+  let sales = [];
+  let activeFilter = 'todas';
+  const deliveryDialog = canEdit ? document.createElement('dialog') : null;
+  const deliveryForm = canEdit ? document.createElement('form') : null;
+
+  if (deliveryDialog && deliveryForm) {
+    deliveryDialog.style.cssText = 'border:0;border-radius:16px;padding:24px;width:min(92vw,440px);box-shadow:0 20px 60px #0003';
+    deliveryForm.innerHTML = `
+      <h2 style="margin:0 0 8px">Registrar entrega</h2>
+      <p class="hint" data-delivery-order-label></p>
+      <div class="grupo-campo" style="margin-top:16px">
+        <label for="sale-delivered-date">Data em que foi entregue *</label>
+        <input class="input" id="sale-delivered-date" name="data_entrega" type="date" required />
+      </div>
+      <div class="form-actions" style="justify-content:flex-end;margin-top:20px">
+        <button class="btn btn--outline" type="button" data-delivery-cancel>Cancelar</button>
+        <button class="btn btn--primary" type="submit">Confirmar entrega</button>
+      </div>`;
+    deliveryDialog.append(deliveryForm);
+    document.body.append(deliveryDialog);
+    deliveryDialog.querySelector('[data-delivery-cancel]').addEventListener('click', () => deliveryDialog.close());
+  }
+
+  const today = () => {
+    const date = new Date();
+    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+  };
+  const isPending = sale => !dateForInput(sale.data_entrega);
+  const render = () => {
+    const referenceDate = today();
+    const todaySales = sales.filter(sale => dateForInput(sale.data_pedido) === referenceDate);
+    const pendingSales = sales.filter(isPending);
+    if (todayCount) todayCount.textContent = String(todaySales.length);
+    if (pendingCount) pendingCount.textContent = String(pendingSales.length);
+    if (todayTotal) todayTotal.textContent = formatCurrency(todaySales.reduce((sum, sale) => sum + Number(sale.valor_total || 0), 0));
+
+    const term = search?.value.trim().toLocaleLowerCase('pt-BR') || '';
+    const visibleSales = sales.filter(sale => {
+      const orderDate = dateForInput(sale.data_pedido);
+      if (activeFilter === 'hoje' && orderDate !== referenceDate) return false;
+      if (activeFilter === 'pendentes' && !isPending(sale)) return false;
+      if (activeFilter === 'entregues' && isPending(sale)) return false;
+      return !term || String(sale.id_venda).includes(term) ||
+        String(sale.comprador || '').toLocaleLowerCase('pt-BR').includes(term);
+    });
+
+    if (count) count.textContent = `🧺 ${visibleSales.length} de ${sales.length} venda(s)`;
+    grid.innerHTML = visibleSales.map(sale => {
+      const deliveryDate = dateForInput(sale.data_entrega);
+      const pending = isPending(sale);
+      const deliveryStatus = pending ? 'Pendente' : 'Entregue';
+      const badgeClass = pending ? 'badge--warning' : 'badge--blue';
+      return `
+        <article class="card order-card" data-numero="${sale.id_venda}" data-comprador="${escapeHtml(sale.comprador)}">
+          <div class="order-card__head">
+            <a data-sale-link href="venda-detalhe.html?id=${encodeURIComponent(sale.id_venda)}" style="color:inherit;text-decoration:none"><strong>Venda #${sale.id_venda}</strong></a>
+            <span class="badge ${badgeClass}">${deliveryStatus}</span>
+          </div>
+          <div class="order-card__row"><span>👤 Comprador</span><strong data-list-value="buyer">${escapeHtml(sale.comprador)}</strong></div>
+          <div class="order-card__row"><span>💰 Valor total</span><strong data-list-value="total">${formatCurrency(sale.valor_total)}</strong></div>
+          <div class="order-card__foot">
+            <span>📅 Data do pedido<br><strong>${formatDate(sale.data_pedido)}</strong></span>
+            <span>🚚 Data de entrega<br><strong>${deliveryDate ? formatDate(deliveryDate) : 'Ainda não entregue'}</strong></span>
+          </div>
+          <div class="sales-card-actions">
+            <a class="btn btn--outline" href="venda-detalhe.html?id=${encodeURIComponent(sale.id_venda)}">Ver detalhes</a>
+            ${canEdit ? `<a class="btn btn--primary" href="venda-detalhe.html?id=${encodeURIComponent(sale.id_venda)}#editar">Editar</a>` : ''}
+            ${canEdit && pending ? `<button class="btn btn--outline" type="button" data-register-delivery="${sale.id_venda}">Registrar entrega</button>` : ''}
+          </div>
+        </article>`;
+    }).join('');
+    if (empty) empty.hidden = visibleSales.length > 0;
+  };
 
   const load = async () => {
     try {
       const result = await api.get('/vendas');
-      const sales = result.vendas || [];
-      if (count) count.textContent = `🧺 ${Number(result.total || sales.length)} venda(s)`;
-      grid.innerHTML = sales.map(sale => `
-        <article class="card order-card" data-numero="${sale.id_venda}" data-comprador="${escapeHtml(sale.comprador)}">
-          <div class="order-card__head"><a data-sale-link href="venda-detalhe.html?id=${encodeURIComponent(sale.id_venda)}" style="color:inherit;text-decoration:none"><strong>Venda #${sale.id_venda}</strong></a></div>
-          <div class="order-card__row"><span>👤 Comprador</span><strong data-list-value="buyer">${escapeHtml(sale.comprador)}</strong></div>
-          <div class="order-card__row"><span>💰 Valor total</span><strong data-list-value="total">${formatCurrency(sale.valor_total)}</strong></div>
-          <div class="order-card__foot"><span>📅 Data do pedido<br><strong>${formatDate(sale.data_pedido)}</strong></span><span><span>🚚 Data de entrega</span><br><strong>${formatDate(sale.data_entrega)}</strong></span></div>
-        </article>`).join('');
-      if (empty) empty.hidden = sales.length > 0;
+      sales = result.vendas || [];
+      render();
     } catch (error) {
       toast(error.message || 'Não foi possível carregar as vendas.', 'error');
       grid.innerHTML = '';
+      if (todayCount) todayCount.textContent = '—';
+      if (pendingCount) pendingCount.textContent = '—';
+      if (todayTotal) todayTotal.textContent = '—';
       if (empty) { empty.hidden = false; empty.textContent = 'Não foi possível carregar as vendas.'; }
     }
   };
+
+  filters?.querySelectorAll('[data-sales-filter]').forEach(button => {
+    button.addEventListener('click', () => {
+      activeFilter = button.dataset.salesFilter || 'todas';
+      filters.querySelectorAll('[data-sales-filter]').forEach(item => item.classList.toggle('is-active', item === button));
+      render();
+    });
+  });
+  if (deliveryForm && deliveryDialog) {
+    grid.addEventListener('click', event => {
+      const button = event.target.closest('[data-register-delivery]');
+      if (!button) return;
+      const sale = sales.find(item => String(item.id_venda) === button.dataset.registerDelivery);
+      if (!sale) return;
+      const orderDate = dateForInput(sale.data_pedido);
+      const referenceDate = today();
+      if (orderDate > referenceDate) {
+        toast('A entrega só pode ser registrada a partir da data do pedido.', 'error');
+        return;
+      }
+      deliveryForm.dataset.saleId = String(sale.id_venda);
+      deliveryForm.querySelector('[data-delivery-order-label]').textContent = `Venda #${sale.id_venda} · ${sale.comprador}`;
+      const dateInput = deliveryForm.elements.namedItem('data_entrega');
+      dateInput.min = orderDate;
+      dateInput.max = referenceDate;
+      dateInput.value = referenceDate;
+      deliveryDialog.showModal();
+    });
+    deliveryForm.addEventListener('submit', async event => {
+      event.preventDefault();
+      const dateInput = deliveryForm.elements.namedItem('data_entrega');
+      if (!dateInput.value || dateInput.value > today() || dateInput.value < dateInput.min) {
+        toast('Informe uma data válida entre a data do pedido e hoje.', 'error');
+        return;
+      }
+      const button = deliveryForm.querySelector('[type="submit"]');
+      setButtonLoading(button, true, 'Salvando...');
+      try {
+        const result = await api.put(`/vendas/${encodeURIComponent(deliveryForm.dataset.saleId)}`, {
+          data_entrega: dateInput.value
+        });
+        toast(result.mensagem || 'Entrega registrada.', 'success');
+        deliveryDialog.close();
+        await load();
+      } catch (error) {
+        toast(error.message || 'Não foi possível registrar a entrega.', 'error');
+      } finally {
+        setButtonLoading(button, false);
+      }
+    });
+  }
+  search?.addEventListener('input', render);
   await load();
 }
 
@@ -114,11 +240,10 @@ export async function initSaleDetailPage() {
     set('total', `Total: ${formatCurrency(sale.valor_total)}`);
     set('employeeRegistration', sale.numero_matricula || '—');
     set('orderDate', dateForInput(sale.data_pedido));
-    set('deliveryDate', dateForInput(sale.data_entrega));
     const orderText = card.querySelector('[data-sale-value="orderDate"]');
     if (orderText) orderText.textContent = formatDate(sale.data_pedido);
     const deliveryText = card.querySelector('[data-sale-value="deliveryDate"]');
-    if (deliveryText) deliveryText.textContent = formatDate(sale.data_entrega);
+    if (deliveryText) deliveryText.textContent = sale.data_entrega ? formatDate(sale.data_entrega) : 'Ainda não entregue';
     const invoiceLink = document.querySelector('[data-sale-download]');
     if (invoiceLink) {
       invoiceLink.href = publicFileUrl(sale.nota_fiscal);
@@ -138,10 +263,15 @@ export async function initSaleDetailPage() {
   editButton?.addEventListener('click', () => { editing = true; updateEditState(); });
   document.querySelector('[data-sale-cancel]')?.addEventListener('click', async () => {
     editing = false;
+    if (location.hash === '#editar') history.replaceState(null, '', `${location.pathname}${location.search}`);
     invoiceInput.value = '';
     await fill();
     updateEditState();
   });
+  if (canEdit && location.hash === '#editar') {
+    editing = true;
+    updateEditState();
+  }
   document.querySelector('[data-sale-add-item]')?.addEventListener('click', () => {
     const fragment = template.content.cloneNode(true);
     const row = fragment.querySelector('[data-sale-item]');
@@ -162,7 +292,6 @@ export async function initSaleDetailPage() {
   document.querySelector('[data-sale-save]')?.addEventListener('click', async event => {
     const buyer = card.querySelector('[data-sale-input="buyer"]')?.value.trim();
     const orderDate = card.querySelector('[data-sale-input="orderDate"]')?.value;
-    const deliveryDate = card.querySelector('[data-sale-input="deliveryDate"]')?.value;
     const rows = [...itemsContainer.querySelectorAll('[data-sale-item]')];
     const items = rows.map(row => ({
       id_estoque: Number(row.querySelector('[data-sale-item-input="stockId"]')?.value),
@@ -179,7 +308,6 @@ export async function initSaleDetailPage() {
       const data = new FormData();
       data.append('comprador', buyer);
       data.append('data_pedido', orderDate);
-      data.append('data_entrega', deliveryDate || '');
       data.append('itens', JSON.stringify(items));
       if (invoiceInput?.files?.[0]) data.append('nota_fiscal', invoiceInput.files[0]);
       const result = await api.put(`/vendas/${encodeURIComponent(id)}`, data);

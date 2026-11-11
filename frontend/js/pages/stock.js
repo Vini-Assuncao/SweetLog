@@ -188,15 +188,12 @@
         if (isSale) {
           var buyer = form.querySelector('[name="comprador"]').value.trim();
           var orderDate = form.querySelector('[name="data_pedido"]').value;
-          var deliveryDate = form.querySelector('[name="data_entrega"]').value;
           var invoice = form.querySelector('[name="nota_fiscal"]').files[0];
           if (!buyer || !orderDate || !invoice) throw new Error('Para registrar uma venda, informe comprador, data do pedido e nota fiscal em PDF.');
-          if (deliveryDate && deliveryDate < orderDate) throw new Error('A data de entrega não pode ser anterior à data do pedido.');
           if (invoice.size > 5 * 1024 * 1024 || (invoice.type !== 'application/pdf' && !/\.pdf$/i.test(invoice.name))) throw new Error('A nota fiscal deve ser PDF de até 5 MB.');
           var body = new FormData();
           body.set('comprador', buyer);
           body.set('data_pedido', orderDate);
-          if (deliveryDate) body.set('data_entrega', deliveryDate);
           body.set('itens', JSON.stringify(items));
           body.set('nota_fiscal', invoice);
           var response = await api.post('/vendas', body);
@@ -256,10 +253,6 @@
     var tbody = table.querySelector('tbody');
     var empty = document.querySelector('[data-lote-empty]');
     var search = document.querySelector('[data-lote-search]');
-    var toggleSearch = document.querySelector('[data-lote-search-toggle]');
-    var searchWrap = document.querySelector('[data-lote-search-wrap]');
-    var toggleFilters = document.querySelector('[data-lote-filtros-toggle]');
-    var filterPanel = document.querySelector('[data-lote-filtros]');
     var activeFilter = 'todos';
     var page = 1;
     var pageSize = 25;
@@ -271,7 +264,7 @@
     function renderRows(lots) {
       tbody.innerHTML = lots.length ? lots.map(function (lot) {
         var status = lot.status_validade || 'valido';
-        var statusText = status === 'vencido' ? '⛔ Vencido' : status === 'proximo' ? '⚠ Vencimento próximo' : status === 'zerado' ? 'Sem saldo' : '✓ Dentro da validade';
+        var statusText = status === 'vencido' ? '⛔ Vencido' : status === 'proximo' ? '⚠️ Vencimento próximo' : status === 'zerado' ? 'Sem saldo' : '✔️ Dentro da validade';
         var badge = status === 'vencido' ? 'badge--danger' : status === 'proximo' ? 'badge--warning' : status === 'zerado' ? 'badge--purple' : 'badge--blue';
         var rowClass = status === 'vencido' ? 'is-danger' : status === 'proximo' ? 'is-warning' : '';
         return '<tr class="' + rowClass + '">' +
@@ -314,8 +307,6 @@
       ui.toast(error.message, 'error');
     }
 
-    if (toggleFilters && filterPanel) toggleFilters.addEventListener('click', function () { filterPanel.hidden = !filterPanel.hidden; });
-    if (toggleSearch && searchWrap) toggleSearch.addEventListener('click', function () { searchWrap.hidden = !searchWrap.hidden; if (!searchWrap.hidden && search) search.focus(); });
     document.querySelectorAll('[data-lote-filter]').forEach(function (button) {
       button.addEventListener('click', function () {
         activeFilter = button.dataset.loteFilter;

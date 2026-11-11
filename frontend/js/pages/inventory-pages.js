@@ -98,7 +98,6 @@ export async function initStockExitPage() {
   const invoice = form.querySelector('[name="nota_fiscal"]');
   const buyer = form.querySelector('[name="comprador"]');
   const orderDate = form.querySelector('[name="data_pedido"]');
-  const dateField = form.querySelector('#data-entrega');
   const addItem = form.querySelector('[data-add-saida-item]');
   const hint = form.querySelector('[data-saida-itens-hint]');
   const today = new Date().toISOString().slice(0, 10);
@@ -152,7 +151,6 @@ export async function initStockExitPage() {
     if (invoice) { invoice.required = isSale; invoice.disabled = !isSale; }
     if (buyer) { buyer.required = isSale; buyer.disabled = !isSale; }
     if (orderDate) { orderDate.required = isSale; orderDate.disabled = !isSale; }
-    if (dateField) dateField.disabled = !isSale;
     form.querySelectorAll('[data-item-price-field]').forEach(field => { field.hidden = !isSale; });
     form.querySelectorAll('[data-item-field="preco_unitario"]').forEach(field => { field.required = isSale; field.disabled = !isSale; });
     if (hint) {
@@ -206,7 +204,6 @@ export async function initStockExitPage() {
         const data = new FormData();
         data.append('comprador', buyer.value.trim());
         data.append('data_pedido', orderDate.value);
-        if (dateField?.value) data.append('data_entrega', dateField.value);
         data.append('itens', JSON.stringify(rows.map(row => ({
           id_estoque: Number(row.querySelector('[data-item-field="id_estoque"]').value),
           quantidade_venda_item: Number(row.querySelector('[data-item-field="quantidade_venda_item"]').value),
@@ -243,7 +240,6 @@ export async function initLotsPage() {
   if (actionsHeading) actionsHeading.hidden = !canEdit;
   const empty = document.querySelector('[data-lote-empty]');
   const search = document.querySelector('[data-lote-search]');
-  const searchWrap = document.querySelector('[data-lote-search-wrap]');
   const pagination = document.querySelector('[data-pagination]');
   let status = 'todos';
   let offset = 0;
@@ -308,7 +304,7 @@ export async function initLotsPage() {
       currentTotal = Number(result.total || 0);
       tbody.innerHTML = lots.map(lot => {
         const state = lot.status_validade;
-        const statusText = state === 'vencido' ? '⛔ Vencido' : state === 'proximo' ? `⚠ Vence em ${lot.dias_para_validade} dia(s)` : state === 'zerado' ? 'Sem saldo' : '✓ Dentro da validade';
+        const statusText = state === 'vencido' ? '⛔ Vencido' : state === 'proximo' ? `⚠️ Vence em ${lot.dias_para_validade} dia(s)` : state === 'zerado' ? 'Sem saldo' : '✔️ Dentro da validade';
         const badge = state === 'vencido' ? 'badge--danger' : state === 'proximo' ? 'badge--warning' : 'badge--blue';
         const rowClass = state === 'vencido' ? 'is-danger' : state === 'proximo' ? 'is-warning' : '';
         return `<tr class="${rowClass}" data-id="${lot.id_estoque}">
@@ -381,14 +377,6 @@ export async function initLotsPage() {
     pagination.querySelector('[data-page-next]')?.addEventListener('click', () => { if (offset + count < currentTotal) { offset += limit; load(); } });
   };
 
-  document.querySelector('[data-lote-filtros-toggle]')?.addEventListener('click', () => {
-    const filters = document.querySelector('[data-lote-filtros]');
-    if (filters) filters.hidden = !filters.hidden;
-  });
-  document.querySelector('[data-lote-search-toggle]')?.addEventListener('click', () => {
-    if (searchWrap) searchWrap.hidden = !searchWrap.hidden;
-    if (!searchWrap?.hidden) search?.focus();
-  });
   document.querySelectorAll('[data-lote-filter]').forEach(button => {
     button.addEventListener('click', () => {
       status = button.dataset.loteFilter || 'todos';
