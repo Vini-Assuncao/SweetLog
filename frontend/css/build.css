@@ -969,7 +969,7 @@ a{
 /* ---------- profile popover ---------- */
 
 .profile-pop{
-  position: absolute;
+  position: fixed;
   z-index: 70;
   display: none;
   width: min(300px, calc(100vw - 32px));
@@ -985,6 +985,13 @@ a{
   box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow);
   top: 62px;
   right: 32px;
+}
+
+@media (max-width: 720px) {
+  .profile-pop{
+    top: 61px;
+    right: 16px;
+  }
 }
 
 .profile-pop.is-open{

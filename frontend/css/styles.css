@@ -192,10 +192,16 @@
 
   /* ---------- profile popover ---------- */
   .profile-pop {
-    @apply absolute bg-card border border-border rounded shadow-lg p-[18px] z-[70] hidden;
+    @apply fixed bg-card border border-border rounded shadow-lg p-[18px] z-[70] hidden;
     width: min(300px, calc(100vw - 32px));
     top: 62px;
     right: 32px;
+  }
+  @media (max-width: 720px) {
+    .profile-pop {
+      top: 61px;
+      right: 16px;
+    }
   }
   .profile-pop.is-open {
     @apply block;
