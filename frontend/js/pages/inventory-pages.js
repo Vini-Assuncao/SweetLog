@@ -8,10 +8,7 @@ export async function initStockHomePage() {
   const main = document.querySelector('main.page--center');
   if (!main) return;
   try {
-    const [summaryResult, movementResult] = await Promise.all([
-      api.get('/estoques/resumo'),
-      api.get('/estoques/movimentacoes', { limit: 8, offset: 0 })
-    ]);
+    const summaryResult = await api.get('/estoques/resumo');
     const summary = summaryResult.resumo || {};
     const section = document.createElement('section');
     section.style.width = '100%';
@@ -24,12 +21,45 @@ export async function initStockHomePage() {
       </div>
       <div class="card table-card" style="margin-top:24px">
         <div class="table-card__head"><h3>Movimentações recentes</h3><a href="lotes.html">Ver lotes</a></div>
+        <div class="filter-chips movement-filters" data-movement-filters aria-label="Filtrar movimentações">
+          <button type="button" class="filter-chip is-active" data-movement-filter="">Todas</button>
+          <button type="button" class="filter-chip" data-movement-filter="Entrada">Entrada</button>
+          <button type="button" class="filter-chip" data-movement-filter="Venda">Venda</button>
+          <button type="button" class="filter-chip" data-movement-filter="Estorno">Estorno</button>
+          <button type="button" class="filter-chip" data-movement-filter="Ajuste">Ajuste</button>
+          <button type="button" class="filter-chip" data-movement-filter="Baixa">Baixa</button>
+        </div>
         <div class="table-scroll"><table class="lotes-table"><thead><tr><th>Data</th><th>Movimentação</th><th>Produto</th><th>Quantidade</th><th>Responsável</th></tr></thead><tbody data-recent-movements></tbody></table></div>
       </div>`;
     main.append(section);
     const tbody = section.querySelector('[data-recent-movements]');
-    const movements = movementResult.movimentacoes || [];
-    tbody.innerHTML = movements.length ? movements.map(item => `<tr><td>${formatDate(item.criado_em)}</td><td>${escapeHtml(item.tipo)}</td><td>${escapeHtml(item.nome_produto || `Produto #${item.id_produto || '—'}`)}</td><td>${Number(item.quantidade || 0)}</td><td>${escapeHtml(item.nome_responsavel || '—')}</td></tr>`).join('') : '<tr><td colspan="5">Nenhuma movimentação registrada.</td></tr>';
+    const filters = section.querySelector('[data-movement-filters]');
+    const badgeClasses = { Entrada: 'badge--success', Venda: 'badge--blue', Estorno: 'badge--purple', Ajuste: 'badge--warning', Baixa: 'badge--danger' };
+    const loadMovements = async tipo => {
+      try {
+        const result = await api.get('/estoques/movimentacoes', { tipo: tipo || undefined, limit: 8, offset: 0 });
+        const movements = result.movimentacoes || [];
+        tbody.innerHTML = movements.length ? movements.map(item => {
+          const type = String(item.tipo || '');
+          const badgeClass = badgeClasses[type] || 'badge--purple';
+          return `<tr><td>${formatDate(item.criado_em)}</td><td><span class="badge ${badgeClass}">${escapeHtml(type)}</span></td><td>${escapeHtml(item.nome_produto || `Produto #${item.id_produto || '—'}`)}</td><td>${Number(item.quantidade || 0)}</td><td>${escapeHtml(item.nome_responsavel || '—')}</td></tr>`;
+        }).join('') : '<tr><td colspan="5">Nenhuma movimentação encontrada para este filtro.</td></tr>';
+      } catch (error) {
+        toast(error.message || 'Não foi possível carregar as movimentações.', 'error');
+        tbody.innerHTML = '<tr><td colspan="5">Não foi possível carregar as movimentações.</td></tr>';
+      }
+    };
+    filters.addEventListener('click', event => {
+      const button = event.target.closest('[data-movement-filter]');
+      if (!button) return;
+      filters.querySelectorAll('[data-movement-filter]').forEach(item => {
+        const selected = item === button;
+        item.classList.toggle('is-active', selected);
+        item.setAttribute('aria-pressed', String(selected));
+      });
+      loadMovements(button.dataset.movementFilter);
+    });
+    loadMovements('');
   } catch (error) {
     toast(error.message || 'Não foi possível carregar o resumo do estoque.', 'error');
   }

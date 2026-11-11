@@ -513,6 +513,10 @@
   .filter-chip.is-active {
     @apply bg-primary-soft border-primary-light text-primary-dark;
   }
+  .movement-filters {
+    @apply border-0;
+    padding: 0 0 14px;
+  }
 
   .pagination__btn:disabled {
     @apply opacity-40 cursor-not-allowed;

@@ -1734,6 +1734,11 @@ a{
   color: rgb(109 40 217 / var(--tw-text-opacity, 1));
 }
 
+.movement-filters{
+  border-width: 0px;
+  padding: 0 0 14px;
+}
+
 .pagination__btn:disabled{
   cursor: not-allowed;
   opacity: 0.4;
