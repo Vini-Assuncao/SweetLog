@@ -1,6 +1,6 @@
 import { api } from '../core/api.js';
 import { getSession } from '../core/session.js';
-import { toast, escapeHtml, initials, setButtonLoading, hasPermission } from '../core/ui.js';
+import { toast, escapeHtml, initials, formatPhone, setButtonLoading, hasPermission } from '../core/ui.js';
 
 const SECTORS = ['Administrador', 'RH', 'Administrativo', 'Logística', 'Compras', 'Almoxarifado'];
 
@@ -22,7 +22,37 @@ function ensureEmployeeModal() {
       <div class="form-actions" style="justify-content:flex-end;margin-top:20px"><button class="btn btn--outline" type="button" data-dialog-close>Cancelar</button><button class="btn btn--primary" type="submit">Salvar</button></div>
     </form>`;
   document.body.append(dialog);
+  const phoneInput = dialog.querySelector('[name="telefone"]');
+  phoneInput.addEventListener('blur', () => {
+    phoneInput.value = formatPhone(phoneInput.value);
+  });
   dialog.querySelector('[data-dialog-close]').addEventListener('click', () => dialog.close());
+  return dialog;
+}
+
+function ensureRegistrationSectorDialog() {
+  let dialog = document.querySelector('[data-registration-sector-dialog]');
+  if (dialog) return dialog;
+  dialog = document.createElement('dialog');
+  dialog.dataset.registrationSectorDialog = '';
+  dialog.style.cssText = 'border:0;border-radius:16px;padding:24px;width:min(92vw,440px);box-shadow:0 20px 60px #0003';
+  dialog.innerHTML = `
+    <form data-registration-sector-form>
+      <h2 style="margin:0 0 16px">Alterar setor da matrícula</h2>
+      <p class="hint" data-registration-sector-number></p>
+      <div class="grupo-campo" style="margin-top:16px">
+        <label for="registration-sector">Setor</label>
+        <select class="input" id="registration-sector" name="setor" required>
+          ${SECTORS.map(sector => `<option value="${escapeHtml(sector)}">${escapeHtml(sector)}</option>`).join('')}
+        </select>
+      </div>
+      <div class="form-actions" style="justify-content:flex-end;margin-top:20px">
+        <button class="btn btn--outline" type="button" data-registration-sector-cancel>Cancelar</button>
+        <button class="btn btn--primary" type="submit">Salvar setor</button>
+      </div>
+    </form>`;
+  document.body.append(dialog);
+  dialog.querySelector('[data-registration-sector-cancel]').addEventListener('click', () => dialog.close());
   return dialog;
 }
 
@@ -62,7 +92,7 @@ export async function initEmployeesPage() {
       <td class="cell-nowrap">${item.numero_matricula}</td>
       <td><div class="person"><span class="mini-avatar" aria-hidden="true">${initials(item.nome)}</span>${escapeHtml(item.nome)}</div></td>
       <td>${escapeHtml(item.setor || '—')}</td>
-      <td class="cell-nowrap">${escapeHtml(item.telefone || '—')}</td>
+      <td class="cell-nowrap">${escapeHtml(item.telefone ? formatPhone(item.telefone) : '—')}</td>
       <td><div class="row-actions"><button type="button" class="icon-btn" aria-label="Editar funcionário" data-action="editar" data-tipo="funcionario">✏️</button><button type="button" class="icon-btn icon-btn--danger" aria-label="Excluir funcionário" data-action="excluir" data-tipo="funcionario">🗑️</button></div></td>
     </tr>`).join('');
     const empty = document.querySelector('#panel-funcionarios [data-empty]');
@@ -75,8 +105,16 @@ export async function initEmployeesPage() {
 
   const renderRegistrations = () => {
     const term = (registrationSearch?.value || '').toLocaleLowerCase('pt-BR');
-    const rows = registrations.filter(item => `${item.numero_matricula} ${item.setor}`.toLocaleLowerCase('pt-BR').includes(term));
-    registrationsBody.innerHTML = rows.map(item => `<tr data-id="${item.numero_matricula}"><td class="cell-nowrap">${item.numero_matricula}</td><td>${escapeHtml(item.setor)}</td><td><div class="row-actions"><button type="button" class="icon-btn" aria-label="Editar matrícula" data-action="editar" data-tipo="matricula">✏️</button><button type="button" class="icon-btn icon-btn--danger" aria-label="Excluir matrícula" data-action="excluir" data-tipo="matricula">🗑️</button></div></td></tr>`).join('');
+    const rows = registrations.filter(item => `${item.numero_matricula} ${item.setor} ${item.nome_funcionario || ''}`.toLocaleLowerCase('pt-BR').includes(term));
+    registrationsBody.innerHTML = rows.map(item => {
+      const employeeName = String(item.nome_funcionario || '').trim();
+      const inUse = Boolean(employeeName);
+      const isOwnRegistration = Number(item.numero_matricula) === Number(session?.funcionario?.numero_matricula);
+      const actions = canManageRegistrations && !isOwnRegistration
+        ? '<button type="button" class="icon-btn" aria-label="Editar matrícula" data-action="editar" data-tipo="matricula">✏️</button><button type="button" class="icon-btn icon-btn--danger" aria-label="Excluir matrícula" data-action="excluir" data-tipo="matricula">🗑️</button>'
+        : '—';
+      return `<tr data-id="${item.numero_matricula}"><td class="cell-nowrap">${item.numero_matricula}</td><td>${escapeHtml(item.setor)}</td><td><span class="badge ${inUse ? 'badge--success' : 'badge--blue'}">${inUse ? 'Em uso' : 'Não está em uso'}</span>${inUse ? `<small class="muted" style="display:block;margin-top:4px">${escapeHtml(employeeName)}</small>` : ''}</td><td><div class="row-actions">${actions}</div></td></tr>`;
+    }).join('');
     const empty = document.querySelector('#panel-matriculas [data-empty]');
     if (empty) empty.hidden = rows.length > 0;
     const count = document.querySelector('[data-count="matriculas"]');
@@ -113,6 +151,8 @@ export async function initEmployeesPage() {
 
   const dialog = ensureEmployeeModal();
   const dialogForm = dialog.querySelector('[data-employee-form]');
+  const registrationSectorDialog = ensureRegistrationSectorDialog();
+  const registrationSectorForm = registrationSectorDialog.querySelector('[data-registration-sector-form]');
   const openDialog = async employee => {
     const editing = Boolean(employee);
     dialog.querySelector('[data-employee-dialog-title]').textContent = editing ? 'Editar funcionário' : 'Cadastrar funcionário';
@@ -126,6 +166,8 @@ export async function initEmployeesPage() {
     }
     registrationWrap.hidden = editing;
     passwordWrap.hidden = editing;
+    registrationSelect.required = !editing;
+    registrationSelect.disabled = editing;
     registrationSelect.innerHTML = unassigned.map(item => `<option value="${item.numero_matricula}">${item.numero_matricula} · ${escapeHtml(item.setor)}</option>`).join('');
     if (!editing && unassigned.length === 0) {
       toast('Não há matrículas sem funcionário vinculado. Cadastre uma matrícula primeiro.', 'error');
@@ -134,7 +176,7 @@ export async function initEmployeesPage() {
     dialogForm.dataset.mode = editing ? 'edit' : 'create';
     dialogForm.dataset.id = employee?.numero_matricula || '';
     dialogForm.elements.namedItem('nome').value = employee?.nome || '';
-    dialogForm.elements.namedItem('telefone').value = employee?.telefone || '';
+    dialogForm.elements.namedItem('telefone').value = employee?.telefone ? formatPhone(employee.telefone) : '';
     dialogForm.elements.namedItem('senha').value = '';
     dialogForm.elements.namedItem('senha').required = !editing;
     dialog.showModal();
@@ -153,6 +195,10 @@ export async function initEmployeesPage() {
       payload.senha = dialogForm.elements.namedItem('senha').value;
     } else if (dialogForm.elements.namedItem('senha').value) {
       payload.senha = dialogForm.elements.namedItem('senha').value;
+    }
+    if (payload.telefone && !/^[1-9]{2}\d{9}$/.test(payload.telefone)) {
+      toast('Informe um telefone celular válido com DDD e 11 dígitos.', 'error');
+      return;
     }
     const button = dialogForm.querySelector('button[type="submit"]');
     setButtonLoading(button, true, 'Salvando...');
@@ -183,16 +229,11 @@ export async function initEmployeesPage() {
     if (type === 'matricula' && button.dataset.action === 'editar') {
       if (!canManageRegistrations) return;
       const registration = registrations.find(item => String(item.numero_matricula) === String(id));
-      const options = SECTORS.map((sector, index) => `${index + 1}. ${sector}`).join('\n');
-      const choice = prompt(`Novo setor para a matrícula ${id}:\n${options}`, String(SECTORS.indexOf(registration?.setor) + 1));
-      if (choice === null) return;
-      const sector = SECTORS[Number(choice) - 1];
-      if (!sector) { toast('Opção de setor inválida.', 'error'); return; }
-      try {
-        await api.put(`/matriculas/${encodeURIComponent(id)}`, { setor: sector });
-        toast('Matrícula atualizada.', 'success');
-        await loadRegistrations();
-      } catch (error) { toast(error.message || 'Não foi possível atualizar a matrícula.', 'error'); }
+      if (!registration) return;
+      registrationSectorDialog.dataset.registrationId = String(id);
+      registrationSectorDialog.querySelector('[data-registration-sector-number]').textContent = `Matrícula ${id}`;
+      registrationSectorForm.elements.namedItem('setor').value = registration.setor;
+      registrationSectorDialog.showModal();
       return;
     }
     if (button.dataset.action === 'excluir') {
@@ -206,6 +247,22 @@ export async function initEmployeesPage() {
       } catch (error) { toast(error.message || `Não foi possível excluir o(a) ${label}.`, 'error'); }
     }
   };
+  registrationSectorForm.addEventListener('submit', async event => {
+    event.preventDefault();
+    const sector = registrationSectorForm.elements.namedItem('setor').value;
+    const button = registrationSectorForm.querySelector('button[type="submit"]');
+    setButtonLoading(button, true, 'Salvando...');
+    try {
+      const result = await api.put(`/matriculas/${encodeURIComponent(registrationSectorDialog.dataset.registrationId)}`, { setor: sector });
+      toast(result.mensagem || 'Matrícula atualizada.', 'success');
+      registrationSectorDialog.close();
+      await loadRegistrations();
+    } catch (error) {
+      toast(error.message || 'Não foi possível atualizar a matrícula.', 'error');
+    } finally {
+      setButtonLoading(button, false);
+    }
+  });
   employeesBody.addEventListener('click', handleRowAction);
   registrationsBody.addEventListener('click', handleRowAction);
 

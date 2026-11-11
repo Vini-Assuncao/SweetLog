@@ -31,8 +31,11 @@ class MatriculaService {
         }
     }
 
-    async atualizar(id, dados) {
+    async atualizar(id, dados, requisitanteMatricula) {
         const numero = validarId(id, 'Número de matrícula')
+        if (Number(requisitanteMatricula) === numero) {
+            throw { status: 403, mensagem: 'Não é permitido alterar a própria matrícula' }
+        }
         const existente = await MatriculaRepository.selectById(numero)
         if (!existente) throw { status: 404, mensagem: 'Matrícula não encontrada' }
         if (dados.setor === undefined) throw { status: 400, mensagem: 'Nenhum dado a atualizar' }
@@ -46,8 +49,11 @@ class MatriculaService {
         }
     }
 
-    async deletar(id) {
+    async deletar(id, requisitanteMatricula) {
         const numero = validarId(id, 'Número de matrícula')
+        if (Number(requisitanteMatricula) === numero) {
+            throw { status: 403, mensagem: 'Não é permitido excluir a própria matrícula' }
+        }
         const matricula = await MatriculaRepository.selectById(numero)
         if (!matricula) throw { status: 404, mensagem: 'Matrícula não encontrada' }
         if (await FuncionarioRepository.selectById(numero)) {

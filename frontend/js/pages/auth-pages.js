@@ -68,8 +68,8 @@ export function initSignupPage() {
       toast('As senhas não coincidem.', 'error');
       return;
     }
-    if (!/^[1-9]{2}\d{8,9}$/.test(phoneDigits) || /^([0-9])\1+$/.test(phoneDigits)) {
-      toast('Informe um telefone válido com DDD e 10 ou 11 dígitos.', 'error');
+    if (!/^[1-9]{2}\d{9}$/.test(phoneDigits) || /^([0-9])\1+$/.test(phoneDigits)) {
+      toast('Informe um telefone celular válido com DDD e 11 dígitos.', 'error');
       return;
     }
 
@@ -111,8 +111,8 @@ export function initRecoveryPage() {
   form.addEventListener('submit', async event => {
     event.preventDefault();
     const digits = phone?.value.replace(/\D/g, '') || '';
-    if (!/^\d{10,11}$/.test(digits)) {
-      toast('Informe um telefone com DDD.', 'error');
+    if (!/^[1-9]{2}\d{9}$/.test(digits) || /^([0-9])\1+$/.test(digits)) {
+      toast('Informe um telefone celular válido com DDD e 11 dígitos.', 'error');
       return;
     }
     const button = form.querySelector('button[type="submit"]');

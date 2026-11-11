@@ -23,8 +23,8 @@ function validarCnpj(valor) {
 function normalizarTelefone(valor) {
     if (valor === undefined || valor === null || valor === '') return null
     const numeros = String(valor).replace(/\D/g, '')
-    if (!/^[1-9]{2}\d{8,9}$/.test(numeros) || /^([0-9])\1+$/.test(numeros)) {
-        throw { status: 400, mensagem: 'Telefone inválido. Informe DDD e número com 10 ou 11 dígitos' }
+    if (!/^[1-9]{2}\d{9}$/.test(numeros) || /^([0-9])\1+$/.test(numeros)) {
+        throw { status: 400, mensagem: 'Telefone inválido. Informe DDD e número de celular com 11 dígitos' }
     }
     return numeros
 }

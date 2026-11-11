@@ -43,6 +43,16 @@ export function formatDate(value) {
   return `${day}/${month}/${year}`;
 }
 
+export function formatPhone(value) {
+  const raw = String(value ?? '');
+  const digits = raw.replace(/\D/g, '');
+  if (!digits || digits.length > 11) return raw;
+  if (digits.length <= 2) return `(${digits}`;
+  if (digits.length <= 6) return `(${digits.slice(0, 2)}) ${digits.slice(2)}`;
+  if (digits.length <= 10) return `(${digits.slice(0, 2)}) ${digits.slice(2, 6)}-${digits.slice(6)}`;
+  return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7)}`;
+}
+
 export function initials(name) {
   const parts = String(name || '').trim().split(/\s+/).filter(Boolean);
   if (!parts.length) return 'SL';
@@ -143,7 +153,7 @@ export function updateProfile(session = getSession()) {
   const name = employee.nome || 'Funcionário';
   const registration = employee.numero_matricula || '—';
   const role = employee.setor || '—';
-  const phone = employee.telefone || 'Não informado';
+  const phone = employee.telefone ? formatPhone(employee.telefone) : 'Não informado';
   document.querySelectorAll('[data-open-profile]').forEach(button => {
     button.textContent = initials(name);
     button.setAttribute('aria-label', `Abrir perfil de ${name}`);

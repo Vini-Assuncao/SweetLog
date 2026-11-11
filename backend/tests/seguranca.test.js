@@ -40,8 +40,9 @@ test('CNPJ passa pela validação dos dígitos verificadores', () => {
     assert.throws(() => validarCnpj('00000000000000'), error => error.status === 400)
 })
 
-test('telefone segue o formato aceito pelo formulário (10 ou 11 dígitos)', () => {
+test('telefone exige DDD e 11 dígitos de celular', () => {
     assert.equal(normalizarTelefone('(11) 95389-8096'), '11953898096')
-    assert.equal(normalizarTelefone('(11) 3234-5678'), '1132345678')
+    assert.throws(() => normalizarTelefone('(11) 3234-5678'), error => error.status === 400)
+    assert.throws(() => normalizarTelefone('1195388096'), error => error.status === 400)
     assert.throws(() => normalizarTelefone('123456789'), error => error.status === 400)
 })
