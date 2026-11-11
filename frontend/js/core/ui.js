@@ -71,22 +71,24 @@ const ROLE_ACCESS = {
   'dashboard.html': ['Administrador', 'Administrativo', 'Almoxarifado', 'Logística'],
   'produtos-lista.html': ALL_ROLES,
   'produto-detalhe.html': ALL_ROLES,
-  'produto-cadastrar.html': ['Administrador', 'Almoxarifado'],
+  'produto-cadastrar.html': ['Administrador', 'Almoxarifado', 'Compras'],
   'estoque.html': ['Administrador', 'Almoxarifado', 'Logística', 'Compras'],
   'saldo-diario.html': ['Administrador', 'Administrativo'],
   'lotes.html': ['Administrador', 'Almoxarifado', 'Logística', 'Compras'],
-  'estoque-entrada.html': ['Administrador', 'Almoxarifado', 'Logística'],
+  'estoque-entrada.html': ['Administrador', 'Almoxarifado', 'Logística', 'Compras'],
   'estoque-saida.html': ['Administrador', 'Almoxarifado', 'Logística'],
   'vendas.html': ['Administrador', 'Administrativo', 'Almoxarifado', 'Logística'],
   'venda-detalhe.html': ['Administrador', 'Administrativo', 'Almoxarifado', 'Logística'],
-  'funcionariosMatricula.html': ALL_ROLES,
+  'funcionariosMatricula.html': ['Administrador', 'RH'],
   'novaMatricula.html': ['Administrador', 'RH']
 };
 
 const ROLE_PERMISSIONS = {
+  'create-products': ['Administrador', 'Almoxarifado', 'Compras'],
   'manage-products': ['Administrador', 'Almoxarifado'],
   'manage-sales': ['Administrador', 'Administrativo', 'Almoxarifado', 'Logística'],
   'write-stock': ['Administrador', 'Almoxarifado', 'Logística'],
+  'enter-stock': ['Administrador', 'Almoxarifado', 'Logística', 'Compras'],
   'manage-registrations': ['Administrador', 'RH']
 };
 

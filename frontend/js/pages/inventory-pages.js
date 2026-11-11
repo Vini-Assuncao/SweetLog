@@ -39,7 +39,7 @@ export async function initStockHomePage() {
 export async function initStockEntryPage() {
   const form = document.querySelector('[data-entrada-form]');
   if (!form) return;
-  if (!roleCanWriteStock()) {
+  if (!hasPermission('enter-stock', getSession()?.funcionario?.setor)) {
     toast('Seu cargo não pode registrar entradas de estoque.', 'error');
     location.replace('estoque.html');
     return;

@@ -76,7 +76,7 @@ export async function initProductListPage() {
 export function initProductCreatePage() {
   const form = document.querySelector('[data-produto-form]');
   if (!form) return;
-  if (!hasPermission('manage-products', getSession()?.funcionario?.setor)) {
+  if (!hasPermission('create-products', getSession()?.funcionario?.setor)) {
     toast('Seu cargo não pode cadastrar produtos.', 'error');
     location.replace('produtos-lista.html');
     return;
