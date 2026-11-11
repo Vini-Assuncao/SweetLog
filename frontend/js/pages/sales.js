@@ -19,15 +19,13 @@
   async function initSalesList() {
     var grid = document.querySelector('[data-order-grid]');
     if (!grid) return;
-    var search = document.querySelector('[data-pedido-search]');
     var count = document.querySelector('[data-sales-count]');
     var empty = document.querySelector('[data-empty-state]');
 
     async function load() {
       grid.innerHTML = '<p class="muted">Carregando vendas...</p>';
       try {
-        var query = search && search.value.trim() ? '?buscar=' + encodeURIComponent(search.value.trim()) : '';
-        var result = await api.get('/vendas' + query);
+        var result = await api.get('/vendas');
         var sales = result.vendas || [];
         grid.innerHTML = sales.map(saleCard).join('');
         if (count) count.textContent = '🧺 ' + (result.total || sales.length) + ' venda(s)';
@@ -38,11 +36,6 @@
       }
     }
 
-    var timer;
-    if (search) search.addEventListener('input', function () {
-      window.clearTimeout(timer);
-      timer = window.setTimeout(load, 250);
-    });
     await load();
   }
 

@@ -712,9 +712,6 @@ a{
     padding-bottom: 0.75rem;
   }
 
-  .topbar__search{
-    display: none;
-  }
 }
 
 .topbar__brand{
@@ -743,12 +740,20 @@ a{
   line-height: 1.5rem;
   --tw-text-opacity: 1;
   color: rgb(124 58 237 / var(--tw-text-opacity, 1));
+  object-fit: contain;
+  padding: 3px;
 }
 
 .auth__brand .logo-dot{
   height: 26px;
   width: 26px;
   font-size: .85rem;
+}
+
+.login-card__icon img{
+  width: 44px;
+  height: 44px;
+  object-fit: contain;
 }
 
 .menu-btn{
@@ -769,42 +774,6 @@ a{
 .menu-btn:hover{
   --tw-bg-opacity: 1;
   background-color: rgb(243 244 250 / var(--tw-bg-opacity, 1));
-}
-
-.topbar__search{
-  position: relative;
-  max-width: 360px;
-  flex: 1 1 0%;
-}
-
-.topbar__search input{
-  width: 100%;
-  border-radius: 10px;
-  border-width: 1px;
-  --tw-border-opacity: 1;
-  border-color: rgb(231 231 241 / var(--tw-border-opacity, 1));
-  --tw-bg-opacity: 1;
-  background-color: rgb(243 244 250 / var(--tw-bg-opacity, 1));
-  font-size: 0.88rem;
-  --tw-text-opacity: 1;
-  color: rgb(30 27 46 / var(--tw-text-opacity, 1));
-  padding: 9px 14px 9px 36px;
-}
-
-.topbar__search input:focus{
-  --tw-bg-opacity: 1;
-  background-color: rgb(255 255 255 / var(--tw-bg-opacity, 1));
-}
-
-.topbar__search .icon{
-  position: absolute;
-  left: 0.75rem;
-  top: 50%;
-  --tw-translate-y: -50%;
-  transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
-  font-size: 0.9rem;
-  --tw-text-opacity: 1;
-  color: rgb(160 160 172 / var(--tw-text-opacity, 1));
 }
 
 .topbar__spacer{

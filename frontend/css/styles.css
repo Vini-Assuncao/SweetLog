@@ -99,9 +99,6 @@
     .topbar {
       @apply px-4 py-3;
     }
-    .topbar__search {
-      @apply hidden;
-    }
   }
   .topbar__brand {
     @apply flex items-center gap-2 font-heading font-bold text-[1.15rem] text-ink whitespace-nowrap;
@@ -109,6 +106,8 @@
   .topbar__brand .logo-dot,
   .auth__brand .logo-dot {
     @apply w-[30px] h-[30px] rounded-full bg-primary-soft text-primary flex items-center justify-center text-base;
+    object-fit: contain;
+    padding: 3px;
   }
   .auth__brand .logo-dot {
     @apply w-[26px] h-[26px] text-[.85rem];
@@ -119,20 +118,6 @@
   }
   .menu-btn:hover {
     @apply bg-bg;
-  }
-
-  .topbar__search {
-    @apply flex-1 max-w-[360px] relative;
-  }
-  .topbar__search input {
-    @apply w-full rounded-[10px] border border-border bg-bg text-[0.88rem] text-ink;
-    padding: 9px 14px 9px 36px;
-  }
-  .topbar__search input:focus {
-    @apply bg-card;
-  }
-  .topbar__search .icon {
-    @apply absolute left-3 top-1/2 -translate-y-1/2 text-ink-faint text-[0.9rem];
   }
 
   .topbar__spacer {
@@ -605,6 +590,11 @@
   }
   .login-card__icon {
     @apply w-16 h-16 mx-auto mb-[18px] rounded-full bg-primary-soft flex items-center justify-center text-[1.7rem];
+  }
+  .login-card__icon img {
+    width: 44px;
+    height: 44px;
+    object-fit: contain;
   }
   .login-card h1 {
     @apply text-[1.5rem] mb-1.5;

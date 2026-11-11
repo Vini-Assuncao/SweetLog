@@ -5,14 +5,12 @@ import { toast, escapeHtml, formatCurrency, formatDate, dateForInput, setButtonL
 export async function initSalesListPage() {
   const grid = document.querySelector('[data-order-grid]');
   if (!grid) return;
-  const search = document.querySelector('[data-pedido-search]');
   const empty = document.querySelector('[data-empty-state]');
   const count = document.querySelector('[data-sales-count]');
-  let delay;
 
   const load = async () => {
     try {
-      const result = await api.get('/vendas', { buscar: search?.value.trim() });
+      const result = await api.get('/vendas');
       const sales = result.vendas || [];
       if (count) count.textContent = `🧺 ${Number(result.total || sales.length)} venda(s)`;
       grid.innerHTML = sales.map(sale => `
@@ -29,7 +27,6 @@ export async function initSalesListPage() {
       if (empty) { empty.hidden = false; empty.textContent = 'Não foi possível carregar as vendas.'; }
     }
   };
-  search?.addEventListener('input', () => { clearTimeout(delay); delay = setTimeout(load, 250); });
   await load();
 }
 
