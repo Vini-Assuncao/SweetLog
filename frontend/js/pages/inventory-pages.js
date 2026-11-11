@@ -21,7 +21,6 @@ export async function initStockHomePage() {
         <div class="card kpi-card"><p class="kpi-card__label">Lotes cadastrados</p><p class="kpi-card__value">${Number(summary.total_lotes || 0)}</p></div>
         <div class="card kpi-card"><p class="kpi-card__label">Unidades disponíveis</p><p class="kpi-card__value">${Number(summary.quantidade_disponivel || 0)}</p></div>
         <div class="card kpi-card"><p class="kpi-card__label">Vencendo em 7 dias</p><p class="kpi-card__value">${Number(summary.vencimento_em_7_dias || 0)}</p></div>
-        <div class="card kpi-card"><p class="kpi-card__label">Lotes vencidos</p><p class="kpi-card__value">${Number(summary.lotes_vencidos || 0)}</p></div>
       </div>
       <div class="card table-card" style="margin-top:24px">
         <div class="table-card__head"><h3>Movimentações recentes</h3><a href="lotes.html">Ver lotes</a></div>

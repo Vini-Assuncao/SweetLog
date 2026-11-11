@@ -1302,6 +1302,12 @@
   .sale-row:first-of-type {
     @apply border-t-0;
   }
+  .sale-row__image {
+    @apply w-[38px] h-[38px] rounded-[10px] flex-shrink-0 object-cover;
+  }
+  .sale-row__image--placeholder {
+    @apply flex items-center justify-center bg-primary-soft text-ink-faint;
+  }
   .sale-row__icon {
     @apply w-[38px] h-[38px] rounded-[10px] flex items-center justify-center text-base flex-shrink-0;
   }

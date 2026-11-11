@@ -18,7 +18,7 @@ class SaldoDiarioRepository {
         `, [data])
 
         const [vendasPorProduto] = await pool.query(`
-            SELECT p.id_produto, p.nome AS nome_produto,
+            SELECT p.id_produto, p.nome AS nome_produto, p.imagem,
                    SUM(vi.quantidade_venda_item) AS quantidade_vendida,
                    SUM(vi.quantidade_venda_item * vi.preco_unitario) AS valor_total
             FROM tbl_vendas v
@@ -26,7 +26,7 @@ class SaldoDiarioRepository {
             INNER JOIN tbl_estoques e ON e.id_estoque = vi.id_estoque
             INNER JOIN tbl_produtos p ON p.id_produto = e.id_produto
             WHERE v.data_pedido = ?
-            GROUP BY p.id_produto, p.nome
+            GROUP BY p.id_produto, p.nome, p.imagem
             ORDER BY valor_total DESC, quantidade_vendida DESC
             LIMIT 10
         `, [data])

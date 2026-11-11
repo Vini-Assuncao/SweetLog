@@ -3154,6 +3154,25 @@ a{
   border-top-width: 0px;
 }
 
+.sale-row__image{
+  height: 38px;
+  width: 38px;
+  flex-shrink: 0;
+  border-radius: 10px;
+  -o-object-fit: cover;
+     object-fit: cover;
+}
+
+.sale-row__image--placeholder{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  --tw-bg-opacity: 1;
+  background-color: rgb(245 243 255 / var(--tw-bg-opacity, 1));
+  --tw-text-opacity: 1;
+  color: rgb(160 160 172 / var(--tw-text-opacity, 1));
+}
+
 .sale-row__icon{
   display: flex;
   height: 38px;

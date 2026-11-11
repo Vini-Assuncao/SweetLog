@@ -117,6 +117,7 @@ export async function initProductDetailPage() {
   const canEdit = hasPermission('manage-products', getSession()?.funcionario?.setor);
   if (!canEdit && editButton) editButton.hidden = true;
   let product;
+  let imagePreviewUrl = null;
 
   const ensureFields = () => {
     const card = form.querySelector('.info-card');
@@ -125,10 +126,36 @@ export async function initProductDetailPage() {
     block.innerHTML = `
       <h4>📝 Dados do produto</h4>
       <div class="info-row"><span>Nome</span><strong data-detail-value="nome"></strong><input class="input" name="nome" data-detail-input="nome" aria-label="Nome do produto" style="display:none;flex:1;min-width:0;width:auto"></div>
-      <div class="info-row" style="align-items:flex-start"><span>Descrição</span><strong data-detail-value="descricao"></strong><textarea class="input" name="descricao" data-detail-input="descricao" aria-label="Descrição do produto" rows="3" style="display:none;flex:1;min-width:0;width:auto"></textarea></div>`;
+      <div class="info-row" style="align-items:flex-start"><span>Descrição</span><strong data-detail-value="descricao"></strong><textarea class="input" name="descricao" data-detail-input="descricao" aria-label="Descrição do produto" rows="3" style="display:none;flex:1;min-width:0;width:auto"></textarea></div>
+      <div class="grupo-campo" data-product-image-edit style="display:none">
+        <label class="upload-box upload-box--sm" for="detail-product-image">
+          <span class="upload-box__icon">📷</span>
+          <span class="upload-box__text">Foto do produto · clique para trocar</span>
+          <span class="upload-box__hint">JPG ou PNG. Máx. 5 MB.</span>
+          <input id="detail-product-image" class="visually-hidden" type="file" name="imagem" accept="image/jpeg,image/png" aria-label="Selecionar nova foto do produto" disabled />
+        </label>
+      </div>`;
     form.querySelector('.stack')?.insertBefore(block, card);
   };
   ensureFields();
+  const imageInput = form.querySelector('[name="imagem"]');
+  const imageEdit = form.querySelector('[data-product-image-edit]');
+
+  const clearImagePreview = () => {
+    if (imagePreviewUrl) URL.revokeObjectURL(imagePreviewUrl);
+    imagePreviewUrl = null;
+  };
+  const renderProductImage = (imagePath, name) => {
+    const imageContainer = document.querySelector('.detail-photo__img');
+    if (!imageContainer) return;
+    imageContainer.querySelectorAll('img').forEach(image => image.remove());
+    if (!imagePath) return;
+    const image = document.createElement('img');
+    image.src = /^blob:/i.test(imagePath) ? imagePath : publicFileUrl(imagePath);
+    image.alt = name;
+    image.style.cssText = 'width:100%;height:100%;object-fit:cover;border-radius:inherit';
+    imageContainer.prepend(image);
+  };
 
   const fill = async () => {
     const result = await api.get(`/produtos/${encodeURIComponent(id)}`);
@@ -141,17 +168,8 @@ export async function initProductDetailPage() {
     document.title = `SweetLog — ${product.nome}`;
     const description = document.querySelector('.detail-photo__desc p');
     if (description) description.textContent = product.descricao || 'Nenhuma descrição cadastrada.';
-    const imageContainer = document.querySelector('.detail-photo__img');
-    if (imageContainer) {
-      imageContainer.querySelectorAll('img').forEach(image => image.remove());
-      if (product.imagem) {
-        const image = document.createElement('img');
-        image.src = publicFileUrl(product.imagem);
-        image.alt = product.nome;
-        image.style.cssText = 'width:100%;height:100%;object-fit:cover;border-radius:inherit';
-        imageContainer.prepend(image);
-      }
-    }
+    clearImagePreview();
+    renderProductImage(product.imagem, product.nome);
 
     const values = {
       nome: product.nome,
@@ -205,10 +223,29 @@ export async function initProductDetailPage() {
     });
     form.querySelectorAll('[data-detail-value]').forEach(value => { value.style.display = editing ? 'none' : ''; });
     if (actions) actions.style.display = editing ? 'flex' : 'none';
+    if (imageEdit) imageEdit.style.display = editing ? 'block' : 'none';
+    if (imageInput) imageInput.disabled = !editing;
     if (editButton) editButton.hidden = editing;
   };
+  imageInput?.addEventListener('change', () => {
+    const file = imageInput.files?.[0];
+    if (!file) return;
+    if (!['image/jpeg', 'image/png'].includes(file.type) || file.size > 5 * 1024 * 1024) {
+      toast('Selecione uma imagem JPG ou PNG de até 5 MB.', 'error');
+      imageInput.value = '';
+      clearImagePreview();
+      renderProductImage(product.imagem, product.nome);
+      return;
+    }
+    clearImagePreview();
+    imagePreviewUrl = URL.createObjectURL(file);
+    renderProductImage(imagePreviewUrl, product.nome);
+  });
   editButton?.addEventListener('click', () => setEditing(true));
   document.querySelector('[data-cancel-detail]')?.addEventListener('click', () => {
+    if (imageInput) imageInput.value = '';
+    clearImagePreview();
+    renderProductImage(product.imagem, product.nome);
     form.querySelectorAll('[data-detail-input]').forEach(input => {
       const key = input.dataset.detailInput;
       if (key === 'refrigeracao') input.value = String(Boolean(product.necessidade_refrigeracao));
@@ -219,12 +256,16 @@ export async function initProductDetailPage() {
 
   form.addEventListener('submit', async event => {
     event.preventDefault();
-    const values = Object.fromEntries(new FormData(form).entries());
-    values.necessidade_refrigeracao = values.necessidade_refrigeracao ?? values.refrigeracao;
-    delete values.refrigeracao;
+    const values = new FormData(form);
+    values.set('necessidade_refrigeracao', values.get('necessidade_refrigeracao') ?? values.get('refrigeracao') ?? '');
+    values.delete('refrigeracao');
+    values.delete('imagem');
+    if (imageInput?.files?.[0]) values.append('imagem', imageInput.files[0]);
     try {
       const result = await api.put(`/produtos/${id}`, values);
       toast(result.mensagem || 'Produto atualizado.', 'success');
+      if (imageInput) imageInput.value = '';
+      clearImagePreview();
       await fill();
       setEditing(false);
     } catch (error) { toast(error.message || 'Não foi possível atualizar o produto.', 'error'); }

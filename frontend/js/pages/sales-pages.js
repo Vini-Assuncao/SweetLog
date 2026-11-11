@@ -349,7 +349,7 @@ export async function initDailyBalancePage() {
     const bestSales = main.querySelector('.saldo-panel');
     if (bestSales) {
       const items = summary.maiores_vendas || [];
-      bestSales.innerHTML = `<h3 class="saldo-panel__title">⭐ Produtos com maior faturamento hoje</h3>${items.length ? items.map(item => `<div class="sale-row"><span class="sale-row__icon">🥐</span><div class="sale-row__info"><p class="sale-row__title">${escapeHtml(item.nome_produto)}</p><small>${Number(item.quantidade_vendida || 0)} unidade(s)</small></div><strong>${formatCurrency(item.valor_total)}</strong></div>`).join('') : '<p class="empty-state">Nenhuma venda registrada hoje.</p>'}`;
+      bestSales.innerHTML = `<h3 class="saldo-panel__title">⭐ Produtos com maior faturamento hoje</h3>${items.length ? items.map(item => `<div class="sale-row">${item.imagem ? `<img class="sale-row__image" src="${escapeHtml(publicFileUrl(item.imagem))}" alt="${escapeHtml(item.nome_produto)}" loading="lazy">` : '<span class="sale-row__image sale-row__image--placeholder" aria-hidden="true">—</span>'}<div class="sale-row__info"><p class="sale-row__title">${escapeHtml(item.nome_produto)}</p><small>${Number(item.quantidade_vendida || 0)} unidade(s)</small></div><strong>${formatCurrency(item.valor_total)}</strong></div>`).join('') : '<p class="empty-state">Nenhuma venda registrada hoje.</p>'}`;
     }
     const panels = main.querySelectorAll('.saldo-panel');
     const moneyPanel = [...panels].find(panel => panel.querySelector('.saldo-value'));
