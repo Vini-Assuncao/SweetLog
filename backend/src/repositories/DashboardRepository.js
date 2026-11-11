@@ -15,6 +15,7 @@ class DashboardRepository {
                     WHERE quantidade > 0 AND data_validade < CURDATE()) AS lotes_vencidos,
                 (SELECT COUNT(*) FROM tbl_estoques
                     WHERE quantidade > 0 AND DATEDIFF(data_validade, CURDATE()) BETWEEN 0 AND 7) AS lotes_vencendo_em_7_dias,
+                (SELECT COUNT(*) FROM tbl_vendas WHERE data_entrega IS NULL) AS vendas_nao_entregues,
                 (SELECT COUNT(*) FROM tbl_vendas WHERE data_pedido = CURDATE()) AS vendas_hoje,
                 (SELECT COALESCE(SUM(vi.quantidade_venda_item * vi.preco_unitario), 0)
                     FROM tbl_vendas v
