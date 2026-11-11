@@ -71,13 +71,15 @@ Todas as rotas são montadas na raiz. `GET /` informa a versão e os recursos di
 | Dashboard | `GET /dashboard`, `GET /dashboard/resumo` |
 | Saldo diário | `GET /saldo-diario`, `GET /saldo-diario/resumo`, `GET /saldo-diario/historico`, `GET /saldo-diario/exportar` |
 | Matrículas | `GET/POST /matriculas`, `GET/PUT/DELETE /matriculas/:id` |
-| Funcionários | `GET/POST /funcionarios`, `GET/PUT/DELETE /funcionarios/:id`, `POST /funcionarios/login` |
+| Funcionários | `POST /funcionarios/cadastro` (matrícula pré-cadastrada, sem autenticação), `GET/POST /funcionarios`, `GET/PUT/DELETE /funcionarios/:id`, `POST /funcionarios/login` |
 | Recuperação de senha | `POST /funcionarios/recuperar-senha`, `POST /funcionarios/verificar-codigo`, `POST /funcionarios/redefinir-senha` |
 | Produtos | `GET/POST /produtos`, `GET/PUT/DELETE /produtos/:id` |
 | Estoques | `GET/POST /estoques`, `GET/PUT/DELETE /estoques/:id`, `POST /estoques/:id/saida`, `GET /estoques/resumo`, `GET /estoques/produto/:idProduto` |
 | Lotes | `GET /lotes`, `GET /lotes/resumo`, `GET /lotes/:id`, `GET /lotes/produto/:idProduto` |
 | Vendas | `GET/POST /vendas`, `GET/PUT/DELETE /vendas/:id` |
 | Alertas | `GET /alertas`, `GET /alertas/:id` |
+
+`POST /funcionarios/cadastro` é público e só vincula um funcionário a uma matrícula previamente criada e ainda não utilizada. O setor é obtido da matrícula; o cadastro é limitado a 10 tentativas por IP a cada 15 minutos. A criação e administração de matrículas continuam protegidas.
 
 Os detalhes de cada rota, filtros, exemplos de payload e regras de negócio estão em [`API-CHANGES.md`](./API-CHANGES.md).
 

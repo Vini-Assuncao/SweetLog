@@ -2,10 +2,11 @@ const express = require('express')
 const router = express.Router()
 const FuncionarioController = require('../controllers/FuncionarioController')
 const { autenticar, autorizar, TODOS_OS_CARGOS } = require('../middlewares/auth')
-const { limitarTentativasLogin } = require('../middlewares/loginRateLimit')
+const { limitarTentativasLogin, limitarTentativasCadastro } = require('../middlewares/loginRateLimit')
 
 // Login e recuperação precisam continuar acessíveis sem uma sessão ativa.
 router.post('/login', limitarTentativasLogin, FuncionarioController.login)
+router.post('/cadastro', limitarTentativasCadastro, FuncionarioController.cadastrar)
 router.post('/recuperar-senha', FuncionarioController.recuperarSenha)
 router.post('/verificar-codigo', FuncionarioController.verificarCodigo)
 router.post('/redefinir-senha', FuncionarioController.redefinirSenha)

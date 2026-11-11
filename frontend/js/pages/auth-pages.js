@@ -31,6 +31,72 @@ export function initLoginPage() {
   });
 }
 
+export function initSignupPage() {
+  const form = document.querySelector('[data-signup-form]');
+  if (!form) return;
+
+  const phone = form.querySelector('#telefone');
+  phone?.addEventListener('input', () => {
+    const digits = phone.value.replace(/\D/g, '').slice(0, 11);
+    if (digits.length <= 2) phone.value = digits ? `(${digits}` : '';
+    else if (digits.length <= 6) phone.value = `(${digits.slice(0, 2)}) ${digits.slice(2)}`;
+    else if (digits.length <= 10) phone.value = `(${digits.slice(0, 2)}) ${digits.slice(2, 6)}-${digits.slice(6)}`;
+    else phone.value = `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7)}`;
+  });
+
+  form.addEventListener('submit', async event => {
+    event.preventDefault();
+    const registration = form.querySelector('#matricula')?.value.trim() || '';
+    const name = form.querySelector('#nome')?.value.trim() || '';
+    const password = form.querySelector('#senha')?.value || '';
+    const confirmation = form.querySelector('#confirma-senha')?.value || '';
+    const phoneDigits = phone?.value.replace(/\D/g, '') || '';
+
+    if (!/^[1-9]\d*$/.test(registration)) {
+      toast('Informe uma matrícula válida.', 'error');
+      return;
+    }
+    if (!name || name.length > 100) {
+      toast('Informe seu nome (máximo de 100 caracteres).', 'error');
+      return;
+    }
+    if (password.trim().length < 8 || new TextEncoder().encode(password.trim()).length > 72) {
+      toast('A senha deve ter pelo menos 8 caracteres e no máximo 72 bytes.', 'error');
+      return;
+    }
+    if (password !== confirmation) {
+      toast('As senhas não coincidem.', 'error');
+      return;
+    }
+    if (!/^[1-9]{2}\d{8,9}$/.test(phoneDigits) || /^([0-9])\1+$/.test(phoneDigits)) {
+      toast('Informe um telefone válido com DDD e 10 ou 11 dígitos.', 'error');
+      return;
+    }
+
+    const button = form.querySelector('button[type="submit"]');
+    setButtonLoading(button, true, 'Cadastrando...');
+    try {
+      const result = await api.post('/funcionarios/cadastro', {
+        numero_matricula: registration,
+        nome: name,
+        senha: password,
+        telefone: phoneDigits
+      }, { auth: false, redirectOnUnauthorized: false });
+      form.hidden = true;
+      const success = document.querySelector('[data-signup-success]');
+      if (success) {
+        success.hidden = false;
+        const message = success.querySelector('[data-signup-message]');
+        if (message) message.textContent = result.mensagem || 'Cadastro concluído. Você já pode entrar.';
+      }
+    } catch (error) {
+      toast(error.message || 'Não foi possível concluir o cadastro.', 'error');
+    } finally {
+      setButtonLoading(button, false);
+    }
+  });
+}
+
 export function initRecoveryPage() {
   const form = document.querySelector('[data-recovery-form]');
   if (!form) return;

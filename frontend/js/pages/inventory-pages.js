@@ -106,14 +106,22 @@ export async function initStockExitPage() {
   let stocks = [];
 
   try {
-    const result = await api.get('/estoques', { status: 'valido' });
-    stocks = result.estoques || [];
+    const result = await api.get('/estoques');
+    stocks = (result.estoques || []).filter(stock =>
+      Number(stock.quantidade) > 0 &&
+      stock.status_validade !== 'vencido' &&
+      stock.status_validade !== 'zerado'
+    );
   } catch (error) { toast(error.message || 'Não foi possível consultar os lotes disponíveis.', 'error'); }
 
-  const stockOptions = selected => `<option value="">Selecione um lote de estoque...</option>` + stocks.map(stock => {
-    const label = `#${stock.id_estoque} · ${stock.nome_produto} · ${stock.lote_producao} · ${stock.quantidade} un.`;
-    return `<option value="${stock.id_estoque}" ${String(selected) === String(stock.id_estoque) ? 'selected' : ''}>${escapeHtml(label)}</option>`;
-  }).join('');
+  const stockOptions = selected => {
+    if (!stocks.length) return '<option value="" selected>Nenhum lote disponível para saída</option>';
+    return '<option value="">Selecione um estoque/lote...</option>' + stocks.map(stock => {
+      const validade = stock.data_validade ? ` · validade ${formatDate(stock.data_validade)}` : '';
+      const label = `#${stock.id_estoque} · ${stock.nome_produto} · lote ${stock.lote_producao} · ${stock.quantidade} un.${validade}`;
+      return `<option value="${stock.id_estoque}" ${String(selected) === String(stock.id_estoque) ? 'selected' : ''}>${escapeHtml(label)}</option>`;
+    }).join('');
+  };
 
   function enhanceRow(row, index) {
     const oldStockInput = row.querySelector('[data-item-field="id_estoque"]');
@@ -124,6 +132,7 @@ export async function initStockExitPage() {
       select.dataset.itemField = 'id_estoque';
       select.required = true;
       select.innerHTML = stockOptions(oldStockInput.value);
+      select.disabled = stocks.length === 0;
       oldStockInput.replaceWith(select);
     }
     row.querySelectorAll('[data-item-field]').forEach(input => {
@@ -146,14 +155,21 @@ export async function initStockExitPage() {
     if (dateField) dateField.disabled = !isSale;
     form.querySelectorAll('[data-item-price-field]').forEach(field => { field.hidden = !isSale; });
     form.querySelectorAll('[data-item-field="preco_unitario"]').forEach(field => { field.required = isSale; field.disabled = !isSale; });
-    if (hint) hint.textContent = isSale
-      ? 'Selecione os lotes disponíveis e informe quantidade e preço de cada item da venda.'
-      : 'Selecione os lotes que terão baixa. A quantidade será descontada de cada lote.';
+    if (hint) {
+      if (!stocks.length) {
+        hint.textContent = `Não há lotes com saldo e dentro da validade disponíveis para ${isSale ? 'venda' : 'saída'}.`;
+      } else {
+        hint.textContent = isSale
+          ? 'Selecione o produto e o lote corretos pela quantidade e validade; lotes válidos próximos do vencimento também aparecem.'
+          : 'Selecione os lotes que terão baixa. A quantidade será descontada de cada lote.';
+      }
+    }
     updateSaleTotal(itemsContainer);
   }
 
   const firstRow = itemsContainer?.querySelector('[data-saida-item]');
   if (firstRow) enhanceRow(firstRow, 0);
+  if (addItem) addItem.disabled = stocks.length === 0;
   addItem?.addEventListener('click', () => {
     const currentRows = [...itemsContainer.querySelectorAll('[data-saida-item]')];
     const row = currentRows[0]?.cloneNode(true);

@@ -1,5 +1,5 @@
 import { getPageName, requirePageAccess, initGlobalNavigation, initCommonControls } from './core/ui.js';
-import { initLoginPage, initRecoveryPage, initVerifyCodePage, initResetPasswordPage } from './pages/auth-pages.js';
+import { initLoginPage, initSignupPage, initRecoveryPage, initVerifyCodePage, initResetPasswordPage } from './pages/auth-pages.js';
 import { initProductListPage, initProductCreatePage, initProductDetailPage } from './pages/product-pages.js';
 import { initDashboardPage } from './pages/dashboard-page.js';
 import { initStockHomePage, initStockEntryPage, initStockExitPage, initLotsPage } from './pages/inventory-pages.js';
@@ -11,6 +11,7 @@ async function boot() {
 
   if (page === 'index.html') return;
   if (page === 'login.html') return initLoginPage();
+  if (page === 'cadastro.html') return initSignupPage();
   if (page === 'recuperar-senha.html') return initRecoveryPage();
   if (page === 'verificar-codigo.html') return initVerifyCodePage();
   if (page === 'nova-senha.html') return initResetPasswordPage();

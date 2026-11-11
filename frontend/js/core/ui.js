@@ -116,7 +116,7 @@ export function applyRoleVisibility(role) {
 export function requirePageAccess() {
   const session = getSession();
   const page = getPageName();
-  const publicPages = ['login.html', 'recuperar-senha.html', 'verificar-codigo.html', 'nova-senha.html'];
+  const publicPages = ['login.html', 'cadastro.html', 'recuperar-senha.html', 'verificar-codigo.html', 'nova-senha.html'];
   if (publicPages.includes(page)) return session;
   if (!session?.token) {
     location.replace('login.html');

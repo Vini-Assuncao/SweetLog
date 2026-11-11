@@ -1,4 +1,5 @@
 const tentativasPorIp = new Map()
+const cadastrosPorIp = new Map()
 const JANELA_MS = 15 * 60 * 1000
 const MAX_TENTATIVAS = 10
 
@@ -33,4 +34,31 @@ function limitarTentativasLogin(req, res, next) {
     return next()
 }
 
-module.exports = { limitarTentativasLogin }
+function limitarTentativasCadastro(req, res, next) {
+    const agora = Date.now()
+    const ip = req.ip || req.socket.remoteAddress || 'desconhecido'
+
+    for (const [chave, registro] of cadastrosPorIp.entries()) {
+        if (registro.inicio + JANELA_MS <= agora) cadastrosPorIp.delete(chave)
+    }
+
+    const registro = cadastrosPorIp.get(ip)
+    if (!registro || registro.inicio + JANELA_MS <= agora) {
+        cadastrosPorIp.set(ip, { inicio: agora, quantidade: 1 })
+        return next()
+    }
+
+    if (registro.quantidade >= MAX_TENTATIVAS) {
+        const segundos = Math.ceil((registro.inicio + JANELA_MS - agora) / 1000)
+        res.setHeader('Retry-After', String(segundos))
+        return res.status(429).json({
+            sucesso: false,
+            mensagem: 'Muitas tentativas de cadastro. Aguarde antes de tentar novamente.'
+        })
+    }
+
+    registro.quantidade += 1
+    return next()
+}
+
+module.exports = { limitarTentativasLogin, limitarTentativasCadastro }
