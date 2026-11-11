@@ -10,10 +10,6 @@ function obterSegredo() {
     if (typeof segredo !== 'string' || segredo.length < 12) {
         throw new Error('JWT_SECRET não configurado ou muito curto. Configure uma chave com pelo menos 12 caracteres (recomenda-se 32 ou mais).')
     }
-    if (Buffer.byteLength(segredo, 'utf8') < 32 && !avisoChaveFracaExibido) {
-        console.warn('Aviso de segurança: JWT_SECRET tem menos de 32 bytes. Use uma chave aleatória de pelo menos 32 bytes fora do ambiente de testes.')
-        avisoChaveFracaExibido = true
-    }
     return segredo
 }
 

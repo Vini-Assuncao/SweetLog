@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" href="css/build.css" />
     <link rel="icon" type="image/png" href="icon.png?v=20261111-2" sizes="50x50" />
-    <title>SweetLog — Controle de Lotes e Validade</title>
+    <title>SweetLog — Lotes</title>
   </head>
   <body class="app">
     <header class="topbar">
@@ -52,6 +52,9 @@
         <a class="drawer__link" href="produtos-lista.html"
           ><span class="ico">🥐</span> Produtos</a
         >
+        <a class="drawer__link is-active" href="lotes.html"
+          ><span class="ico">🗄️</span> Lotes</a
+        >
         <a class="drawer__link" href="estoque.html"
           ><span class="ico">📦</span> Controle de estoque</a
         >
@@ -60,9 +63,6 @@
         >
         <a class="drawer__link" href="saldo-diario.html"
           ><span class="ico">💰</span> Saldo diário</a
-        >
-        <a class="drawer__link is-active" href="lotes.html"
-          ><span class="ico">📅</span> Lotes e validade</a
         >
       </nav>
       <div class="drawer__footer">
@@ -73,7 +73,7 @@
     <main class="page">
       <div class="list-head">
         <div class="page-head" style="margin-bottom: 0">
-          <h1>Controle de Lotes e Validade</h1>
+          <h1>Lotes</h1>
           <p>
             Monitoramento detalhado do ciclo de vida dos insumos e produtos.
             Evite desperdícios acompanhando as datas de vencimento em tempo
@@ -155,9 +155,6 @@
             >
               🔍
             </button>
-            <button class="botao-icone" aria-label="Mais opções" data-lote-more>
-              ⋮
-            </button>
           </div>
         </div>
 
@@ -171,6 +168,7 @@
                 <th>Validade</th>
                 <th>Status</th>
                 <th>Qtd. Restante</th>
+                <th data-lote-actions-heading hidden>Ações</th>
               </tr>
             </thead>
             <tbody data-lotes-rows>

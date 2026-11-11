@@ -1,6 +1,6 @@
 import { api, publicFileUrl } from '../core/api.js';
 import { getSession } from '../core/session.js';
-import { toast, escapeHtml, formatDate, setButtonLoading, formatCurrency, hasPermission } from '../core/ui.js';
+import { toast, escapeHtml, formatDate, dateForInput, setButtonLoading, formatCurrency, hasPermission } from '../core/ui.js';
 
 const roleCanWriteStock = () => hasPermission('write-stock', getSession()?.funcionario?.setor);
 
@@ -238,6 +238,9 @@ export async function initLotsPage() {
   const table = document.querySelector('[data-lotes-table]');
   if (!table) return;
   const tbody = table.querySelector('tbody');
+  const canEdit = roleCanWriteStock();
+  const actionsHeading = document.querySelector('[data-lote-actions-heading]');
+  if (actionsHeading) actionsHeading.hidden = !canEdit;
   const empty = document.querySelector('[data-lote-empty]');
   const search = document.querySelector('[data-lote-search]');
   const searchWrap = document.querySelector('[data-lote-search-wrap]');
@@ -246,6 +249,43 @@ export async function initLotsPage() {
   let offset = 0;
   const limit = 50;
   let currentTotal = 0;
+  let loadedLots = [];
+
+  const dialog = canEdit ? document.createElement('dialog') : null;
+  const dialogForm = canEdit ? document.createElement('form') : null;
+  if (dialog && dialogForm) {
+    dialog.style.cssText = 'border:0;border-radius:16px;padding:24px;width:min(92vw,560px);box-shadow:0 20px 60px #0003';
+    dialogForm.innerHTML = `
+      <h2 style="margin:0 0 16px">Editar lote</h2>
+      <div class="stack gap-16">
+        <div class="grupo-campo"><label for="lot-edit-code">Número do lote</label><input class="input" id="lot-edit-code" name="lote_producao" maxlength="100" required></div>
+        <div class="form-grid">
+          <div class="grupo-campo"><label for="lot-edit-entry">Data de entrada</label><input class="input" id="lot-edit-entry" name="data_entrada" type="date"></div>
+          <div class="grupo-campo"><label for="lot-edit-expiry">Data de validade</label><input class="input" id="lot-edit-expiry" name="data_validade" type="date" required></div>
+        </div>
+        <div class="form-grid">
+          <div class="grupo-campo"><label for="lot-edit-quantity">Quantidade disponível</label><input class="input" id="lot-edit-quantity" name="quantidade" type="number" min="0" step="1" required></div>
+          <div class="grupo-campo"><label for="lot-edit-inspected">Inspeção de qualidade</label><select class="input" id="lot-edit-inspected" name="inspecionado"><option value="true">Inspecionado</option><option value="false">Não inspecionado</option></select></div>
+        </div>
+      </div>
+      <div class="form-actions" style="justify-content:flex-end;margin-top:20px"><button class="btn btn--outline" type="button" data-lot-dialog-close>Cancelar</button><button class="btn btn--primary" type="submit">Salvar alterações</button></div>`;
+    dialog.append(dialogForm);
+    document.body.append(dialog);
+    dialog.querySelector('[data-lot-dialog-close]').addEventListener('click', () => dialog.close());
+  }
+
+  const openLotEditor = lot => {
+    if (!dialogForm) return;
+    dialogForm.dataset.id = String(lot.id_estoque);
+    dialogForm.elements.namedItem('lote_producao').value = lot.lote_producao || '';
+    dialogForm.elements.namedItem('data_entrada').value = dateForInput(lot.data_entrada);
+    dialogForm.elements.namedItem('data_validade').value = dateForInput(lot.data_validade);
+    dialogForm.elements.namedItem('quantidade').value = Number(lot.quantidade || 0);
+    const inspected = lot.inspecionado === true || lot.inspecionado === 1 ||
+      lot.inspecionado === '1' || lot.inspecionado === 'true';
+    dialogForm.elements.namedItem('inspecionado').value = String(inspected);
+    dialog.showModal();
+  };
 
   const renderSummary = async () => {
     const response = await api.get('/lotes/resumo');
@@ -264,6 +304,7 @@ export async function initLotsPage() {
     try {
       const result = await api.get('/lotes', { status, buscar: search?.value.trim(), limit, offset });
       const lots = result.lotes || [];
+      loadedLots = lots;
       currentTotal = Number(result.total || 0);
       tbody.innerHTML = lots.map(lot => {
         const state = lot.status_validade;
@@ -277,6 +318,7 @@ export async function initLotsPage() {
           <td>${formatDate(lot.data_validade)}</td>
           <td><span class="badge ${badge}">${statusText}</span></td>
           <td>${Number(lot.quantidade || 0)}</td>
+          ${canEdit ? `<td><button class="btn btn--outline" type="button" data-edit-lot="${lot.id_estoque}">Editar</button></td>` : ''}
         </tr>`;
       }).join('');
       if (empty) empty.hidden = lots.length > 0;
@@ -289,6 +331,43 @@ export async function initLotsPage() {
       if (empty) empty.hidden = false;
     }
   };
+
+  if (dialogForm) {
+    tbody.addEventListener('click', event => {
+      const button = event.target.closest('[data-edit-lot]');
+      if (!button) return;
+      const lot = loadedLots.find(item => String(item.id_estoque) === button.dataset.editLot);
+      if (lot) openLotEditor(lot);
+    });
+    dialogForm.addEventListener('submit', async event => {
+      event.preventDefault();
+      const formData = new FormData(dialogForm);
+      const quantity = Number(formData.get('quantidade'));
+      if (!Number.isInteger(quantity) || quantity < 0) {
+        toast('A quantidade deve ser um número inteiro igual ou maior que zero.', 'error');
+        return;
+      }
+      const button = dialogForm.querySelector('button[type="submit"]');
+      setButtonLoading(button, true, 'Salvando...');
+      try {
+        const result = await api.put(`/estoques/${encodeURIComponent(dialogForm.dataset.id)}`, {
+          lote_producao: String(formData.get('lote_producao')).trim(),
+          data_entrada: formData.get('data_entrada') || undefined,
+          data_validade: formData.get('data_validade'),
+          quantidade: quantity,
+          inspecionado: formData.get('inspecionado')
+        });
+        toast(result.mensagem || 'Lote atualizado com sucesso.', 'success');
+        dialog.close();
+        await load();
+        await renderSummary().catch(error => toast(error.message || 'Não foi possível atualizar o resumo dos lotes.', 'error'));
+      } catch (error) {
+        toast(error.message || 'Não foi possível atualizar o lote.', 'error');
+      } finally {
+        setButtonLoading(button, false);
+      }
+    });
+  }
 
   const updatePagination = count => {
     if (!pagination) return;
